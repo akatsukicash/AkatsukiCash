@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKATSUKICASH | PREMIUM SYSTEM</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23000'/><ellipse cx='50' cy='66' rx='40' ry='18' fill='%23e8192c'/><circle cx='24' cy='54' r='14' fill='%23e8192c'/><circle cx='42' cy='46' r='16' fill='%23e8192c'/><circle cx='62' cy='44' r='18' fill='%23e8192c'/><circle cx='80' cy='52' r='14' fill='%23e8192c'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        :root {
+            --red:#e8192c; --red-dim:rgba(232,25,44,.15); --red-glow:rgba(232,25,44,.55);
+            --green:#00e676; --green-dim:rgba(0,230,118,.08);
+            --gold:#fbbf24; --bg:#060608; --surface:#0d0d10; --surface2:#111116;
+            --border:rgba(255,255,255,.06); --border-red:rgba(232,25,44,.25);
+            --text:#f0f0f5; --muted:#55556a;
+            --display:'Bebas Neue',sans-serif; --mono:'Space Mono',monospace; --body:'DM Sans',sans-serif;
+        }
+        html { scroll-behavior:smooth; }
+        body { background:var(--bg); color:var(--text); font-family:var(--body); min-height:100vh; overflow-x:hidden; position:relative; }
+
+        /* BG */
+        .bg-layer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .bg-layer::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse 80% 40% at 50% -5%, rgba(232,25,44,.13) 0%,transparent 70%),
+                        radial-gradient(ellipse 50% 30% at 92% 55%,  rgba(232,25,44,.06) 0%,transparent 60%),
+                        radial-gradient(ellipse 40% 25% at  5% 72%,  rgba(232,25,44,.05) 0%,transparent 55%); }
+        .bg-layer::after { content:''; position:absolute; inset:0;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px); }
+        .cloud-svg { position:absolute; fill:#e8192c; }
+        .cloud-svg.c1{width:220px;top:4%;left:-50px;opacity:.045;animation:fc 18s ease-in-out infinite;}
+        .cloud-svg.c2{width:170px;top:32%;right:-40px;opacity:.03;animation:fc 23s ease-in-out infinite reverse;}
+        .cloud-svg.c3{width:195px;top:62%;left:8%;opacity:.028;animation:fc 27s ease-in-out infinite 5s;}
+        .cloud-svg.c4{width:145px;top:82%;right:4%;opacity:.032;animation:fc 21s ease-in-out infinite 9s;}
+        @keyframes fc{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-13px) translateX(5px)}66%{transform:translateY(7px) translateX(-4px)}}
+        .sharingan{position:absolute;opacity:.038;animation:spinSlow 42s linear infinite;}
+        .sharingan.s1{width:280px;top:10%;right:-90px;}
+        .sharingan.s2{width:200px;bottom:6%;left:-65px;animation-direction:reverse;opacity:.026;}
+        @keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        .page-wrapper { position:relative; z-index:2; max-width:480px; margin:0 auto; padding:0 16px 52px; }
+
+        /* TOPBAR */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 0 10px; border-bottom:1px solid var(--border); }
+        .topbar-brand { font-family:var(--display); font-size:1.3rem; letter-spacing:3px; color:#fff; }
+        .topbar-brand span { color:var(--red); }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(0,230,118,.07); border:1px solid rgba(0,230,118,.18); padding:5px 11px; border-radius:20px; font-family:var(--mono); font-size:.52rem; color:var(--green); letter-spacing:1px; }
+        .pulse-dot { width:6px; height:6px; background:var(--green); border-radius:50%; box-shadow:0 0 8px var(--green); animation:pulse 1.8s ease-in-out infinite; }
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+
+        /* TICKER */
+        .ticker-strip { background:rgba(232,25,44,.05); border-bottom:1px solid var(--border-red); padding:7px 0; margin-bottom:24px; overflow:hidden; }
+        .ticker-inner { display:flex; gap:48px; white-space:nowrap; animation:ticker 28s linear infinite; }
+        @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        .ticker-item { font-family:var(--mono); font-size:.54rem; letter-spacing:2px; color:var(--muted); text-transform:uppercase; flex-shrink:0; }
+        .ticker-item .hi{color:var(--red);} .ticker-item .lo{color:var(--green);}
+
+        /* HERO */
+        .hero { text-align:center; padding:4px 0 22px; }
+        .hero-title { font-family:var(--display); font-size:clamp(2.6rem,13vw,3.8rem); letter-spacing:6px; line-height:1; color:#fff; text-shadow:0 0 40px rgba(232,25,44,.4),0 0 80px rgba(232,25,44,.12); animation:titleIn .7s cubic-bezier(.16,1,.3,1) both; }
+        .hero-title .acc{color:var(--red);}
+        @keyframes titleIn{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+        .hero-sub { font-family:var(--mono); font-size:.58rem; color:var(--muted); letter-spacing:3px; margin-top:8px; }
+        .hero-line { width:56px; height:2px; background:linear-gradient(90deg,transparent,var(--red),transparent); margin:12px auto 0; }
+
+        /* RATE */
+        .rate-card { background:var(--surface); border:1px solid var(--border-red); border-radius:12px; padding:16px 20px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:12px; margin-bottom:14px; position:relative; overflow:hidden; animation:slideUp .5s .15s cubic-bezier(.16,1,.3,1) both; }
+        .rate-card::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:linear-gradient(180deg,var(--red),transparent); }
+        @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        .rate-label { font-family:var(--mono); font-size:.54rem; color:var(--muted); letter-spacing:2px; margin-bottom:4px; }
+        .rate-value { font-family:var(--display); font-size:2rem; color:var(--red); letter-spacing:2px; line-height:1; text-shadow:0 0 20px var(--red-glow); }
+        .rate-value .unit{font-size:1rem;color:var(--muted);margin-left:4px;}
+        .rate-meta{text-align:right;}
+        .rate-meta-label{font-size:.54rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;}
+        .rate-meta-time{font-family:var(--mono);font-size:.68rem;color:var(--green);margin-top:3px;}
+
+        /* PROMO */
+        .promo-banner { background:linear-gradient(135deg,rgba(232,25,44,.1) 0%,rgba(232,25,44,.03) 100%); border:1px solid var(--border-red); border-radius:10px; padding:12px 16px; margin-bottom:22px; display:flex; align-items:center; gap:12px; animation:slideUp .5s .25s cubic-bezier(.16,1,.3,1) both; }
+        .promo-icon{font-size:1.35rem;flex-shrink:0;}
+        .promo-text-main{font-family:var(--display);font-size:1.05rem;letter-spacing:1px;color:var(--gold);}
+        .promo-text-sub{font-size:.65rem;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+        .promo-badge{margin-left:auto;background:var(--gold);color:#000;font-family:var(--display);font-size:.8rem;padding:4px 10px;border-radius:6px;flex-shrink:0;letter-spacing:1px;}
+
+        /* SECTION */
+        .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+        .section-title{font-family:var(--display);font-size:1.25rem;letter-spacing:3px;color:#fff;}
+        .section-action{background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:.52rem;letter-spacing:1px;cursor:pointer;padding:0;transition:color .2s;}
+        .section-action:hover{color:var(--red);}
+
+        /* TABS */
+        .tabs{display:flex;gap:5px;margin-bottom:10px;}
+        .tab-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 4px;font-family:var(--mono);font-size:.5rem;letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all .22s;text-transform:uppercase;}
+        .tab-btn.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 14px var(--red-dim);}
+        .tab-btn:hover:not(.active){border-color:var(--border-red);color:#ddd;}
+
+        /* BOARD */
+        .board-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+        .tab-content{display:none;}
+        .tab-content.active{display:block;animation:fadeTab .3s ease;}
+        @keyframes fadeTab{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        .prize-ribbon{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:linear-gradient(90deg,transparent,rgba(251,191,36,.07),transparent);border-bottom:1px solid rgba(251,191,36,.12);font-family:var(--mono);font-size:.56rem;color:var(--gold);letter-spacing:1px;text-align:center;}
+        .prize-ribbon.green-rib{color:var(--green);border-bottom-color:rgba(0,230,118,.1);background:linear-gradient(90deg,transparent,rgba(0,230,118,.05),transparent);}
+
+        .table-scroll-wrap{max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1e1e26 transparent;}
+        .table-scroll-wrap::-webkit-scrollbar{width:3px;}
+        .table-scroll-wrap::-webkit-scrollbar-thumb{background:#1e1e26;border-radius:2px;}
+
+        .board-table{width:100%;border-collapse:collapse;}
+        .board-table thead tr{border-bottom:1px solid var(--border);}
+        .board-table th{padding:9px 12px;text-align:left;font-family:var(--mono);font-size:.48rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:400;}
+        .board-table th:last-child,.board-table td:last-child{text-align:right;}
+        .board-table tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .18s;}
+        .board-table tbody tr:last-child{border-bottom:none;}
+        .board-table tbody tr:hover{background:rgba(255,255,255,.02);}
+        .board-table td{padding:12px 12px;font-size:.86rem;vertical-align:middle;}
+        .pos-cell{font-family:var(--display);font-size:1.05rem;color:var(--muted);width:32px;}
+        .pos-cell.gp{color:var(--gold);text-shadow:0 0 10px rgba(251,191,36,.45);}
+        .pos-cell.sp{color:#9ca3af;} .pos-cell.bp{color:#cd7c5e;}
+        .user-cell{font-weight:500;font-size:.82rem;font-family:var(--mono);}
+        .pts-cell{font-family:var(--mono);font-size:.78rem;color:var(--text);}
+        .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-family:var(--mono);font-size:.46rem;letter-spacing:1px;font-weight:700;}
+        .badge-legend{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
+        .badge-maestro{background:linear-gradient(135deg,#9ca3af,#4b5563);color:#000;}
+        .badge-elite{background:transparent;border:1px solid #6b7280;color:#9ca3af;}
+        .badge-rookie{background:transparent;border:1px solid var(--border-red);color:var(--red);}
+
+        .divider{height:1px;background:var(--border);margin:8px 0 20px;}
+
+        /* CALCULATOR */
+        .calc-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;animation:slideUp .5s .55s cubic-bezier(.16,1,.3,1) both;}
+        .calc-label{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px;}
+        .calc-label span{color:var(--red);}
+        .calc-row{display:flex;gap:10px;align-items:stretch;}
+        .calc-input-wrap{flex:1;position:relative;}
+        .calc-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.68rem;color:var(--muted);}
+        #calcInput{width:100%;background:var(--surface2);border:1px solid var(--border);padding:13px 12px 13px 30px;border-radius:8px;color:#fff;font-family:var(--mono);font-size:.88rem;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
+        #calcInput::-webkit-outer-spin-button,#calcInput::-webkit-inner-spin-button{-webkit-appearance:none;}
+        #calcInput:focus{border-color:var(--border-red);}
+        #calcInput::placeholder{color:var(--muted);font-size:.7rem;}
+        #calcResult{flex:1;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:var(--green-dim);border:1px solid rgba(0,230,118,.14);border-radius:8px;padding:10px 14px;}
+        .result-value{font-family:var(--display);font-size:1.2rem;color:var(--green);letter-spacing:1px;text-shadow:0 0 14px rgba(0,230,118,.28);line-height:1;}
+        .result-label{font-family:var(--mono);font-size:.48rem;color:rgba(0,230,118,.45);margin-top:3px;letter-spacing:1px;}
+
+        /* ACTIONS */
+        .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;animation:slideUp .5s .65s cubic-bezier(.16,1,.3,1) both;}
+        .btn-action{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:17px 12px;border-radius:12px;text-decoration:none;font-family:var(--display);font-size:1.05rem;letter-spacing:2px;transition:all .28s cubic-bezier(.16,1,.3,1);}
+        .btn-action i{font-size:1rem;} .btn-action .btn-sub{font-family:var(--mono);font-size:.42rem;letter-spacing:1px;opacity:.55;}
+        .btn-action:active{transform:scale(.97);}
+        .btn-deposit{background:var(--green-dim);border:1.5px solid rgba(0,230,118,.28);color:var(--green);}
+        .btn-deposit:hover{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 28px rgba(0,230,118,.22);}
+        .btn-withdraw{background:var(--red-dim);border:1.5px solid var(--border-red);color:var(--red);}
+        .btn-withdraw:hover{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 28px var(--red-dim);}
+
+        /* INFO CARDS */
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;animation:slideUp .5s .7s cubic-bezier(.16,1,.3,1) both;}
+        .info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px;text-decoration:none;color:var(--text);transition:border-color .2s,transform .2s;}
+        .info-card:hover{border-color:var(--border-red);transform:translateY(-2px);}
+        .info-card-icon{font-size:1.15rem;margin-bottom:7px;}
+        .info-card-title{font-family:var(--display);font-size:.9rem;letter-spacing:1px;color:#fff;}
+        .info-card-sub{font-size:.62rem;color:var(--muted);margin-top:3px;font-family:var(--mono);}
+
+        /* FOOTER */
+        footer{text-align:center;padding-top:22px;border-top:1px solid var(--border);animation:slideUp .5s .78s cubic-bezier(.16,1,.3,1) both;}
+        .footer-brand{font-family:var(--display);font-size:1rem;letter-spacing:4px;color:#fff;margin-bottom:6px;}
+        .footer-brand span{color:var(--red);}
+        .footer-links{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;}
+        .footer-link{color:var(--muted);font-family:var(--mono);font-size:.52rem;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color .2s;}
+        .footer-link:hover{color:var(--red);}
+        .footer-copy{font-family:var(--mono);font-size:.48rem;color:#2a2a35;margin-top:12px;letter-spacing:1px;}
+
+        /* WA FLOAT */
+        .wa-float{position:fixed;bottom:24px;right:18px;z-index:100;width:52px;height:52px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.35rem;text-decoration:none;box-shadow:0 4px 22px rgba(37,211,102,.38);transition:transform .28s,box-shadow .28s;animation:waIn .5s 1.1s cubic-bezier(.16,1,.3,1) both;}
+        @keyframes waIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+        .wa-float:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(37,211,102,.55);}
+
+        /* ══════════════════════════════════════════
+           MODAL RANGOS
+        ══════════════════════════════════════════ */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;}
+        .modal-overlay.open{opacity:1;pointer-events:all;}
+        .modal{background:var(--surface);border:1px solid var(--border-red);border-radius:20px 20px 0 0;padding:26px 22px 38px;width:100%;max-width:480px;transform:translateY(100%);transition:transform .38s cubic-bezier(.16,1,.3,1);position:relative;}
+        .modal-overlay.open .modal{transform:translateY(0);}
+        .modal-handle{width:34px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+        .modal-title{font-family:var(--display);font-size:1.3rem;letter-spacing:3px;margin-bottom:8px;}
+        .modal-desc{font-family:var(--mono);font-size:.55rem;color:var(--muted);margin-bottom:14px;letter-spacing:1px;line-height:1.7;}
+        .modal-desc span{color:#fff;}
+        .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;}
+        .rank-list{display:flex;flex-direction:column;gap:8px;}
+        .rank-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
+        .rank-icon{font-size:1.15rem;width:26px;text-align:center;}
+        .rank-info{flex:1;}
+        .rank-name{font-family:var(--display);font-size:.95rem;letter-spacing:1px;}
+        .rank-req{font-family:var(--mono);font-size:.52rem;color:var(--muted);margin-top:2px;}
+        .rank-prize{font-family:var(--mono);font-size:.54rem;color:var(--gold);margin-top:2px;}
+
+        /* ══════════════════════════════════════════
+           PANEL ADMIN
+        ══════════════════════════════════════════ */
+        .admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;}
+        .admin-overlay.open{opacity:1;pointer-events:all;}
+
+        .admin-panel{
+            background:#0a0a0e;
+            border:1px solid var(--border-red);
+            border-radius:22px 22px 0 0;
+            padding:28px 20px 44px;
+            width:100%; max-width:480px;
+            max-height:90vh; overflow-y:auto;
+            transform:translateY(100%);
+            transition:transform .4s cubic-bezier(.16,1,.3,1);
+            position:relative;
+            scrollbar-width:thin; scrollbar-color:#1e1e26 transparent;
+        }
+        .admin-overlay.open .admin-panel{transform:translateY(0);}
+        .admin-panel::-webkit-scrollbar{width:3px;}
+        .admin-panel::-webkit-scrollbar-thumb{background:#1e1e26;}
+
+        .admin-handle{width:34px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+        .admin-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;}
+
+        .admin-header{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+        .admin-title{font-family:var(--display);font-size:1.4rem;letter-spacing:3px;color:#fff;}
+        .admin-sub{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:1px;margin-bottom:20px;}
+
+        /* Selector de tabla */
+        .admin-select-group{margin-bottom:18px;}
+        .admin-label{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;display:block;}
+        .admin-select{
+            width:100%;
+            background:var(--surface2); border:1px solid var(--border);
+            color:#fff; padding:11px 14px; border-radius:8px;
+            font-family:var(--mono); font-size:.7rem; outline:none;
+            cursor:pointer; transition:border-color .2s;
+            -webkit-appearance:none; appearance:none;
+        }
+        .admin-select:focus{border-color:var(--border-red);}
+
+        /* Fila de entrada */
+        .admin-input-row{display:flex;gap:8px;margin-bottom:10px;align-items:flex-end;}
+        .admin-field{flex:1;}
+        .admin-input{
+            width:100%;
+            background:var(--surface2); border:1px solid var(--border);
+            color:#fff; padding:11px 12px; border-radius:8px;
+            font-family:var(--mono); font-size:.75rem; outline:none;
+            transition:border-color .2s;
+            -moz-appearance:textfield;
+        }
+        .admin-input::-webkit-outer-spin-button,
+        .admin-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+        .admin-input:focus{border-color:var(--border-red);}
+        .admin-input::placeholder{color:var(--muted);font-size:.65rem;}
+
+        .btn-add{
+            background:var(--red); border:none; color:#fff;
+            padding:11px 16px; border-radius:8px;
+            font-family:var(--display); font-size:.9rem; letter-spacing:1px;
+            cursor:pointer; transition:all .2s; white-space:nowrap; flex-shrink:0;
+        }
+        .btn-add:hover{background:#ff2d3f;box-shadow:0 0 20px var(--red-glow);}
+        .btn-add:active{transform:scale(.97);}
+
+        /* Mini tabla admin */
+        .admin-table-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+        .admin-table-title{font-family:var(--mono);font-size:.5rem;color:var(--muted);letter-spacing:2px;padding:8px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;}
+        .admin-list{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1e1e26 transparent;}
+        .admin-list::-webkit-scrollbar{width:3px;}
+        .admin-list::-webkit-scrollbar-thumb{background:#1e1e26;}
+        .admin-row{
+            display:flex; align-items:center; gap:10px;
+            padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.03);
+            font-family:var(--mono); font-size:.7rem;
+            transition:background .15s;
+        }
+        .admin-row:last-child{border-bottom:none;}
+        .admin-row:hover{background:rgba(255,255,255,.02);}
+        .admin-row-pos{width:24px;font-family:var(--display);font-size:1rem;color:var(--muted);flex-shrink:0;}
+        .admin-row-pos.gp{color:var(--gold);}
+        .admin-row-pos.sp{color:#9ca3af;}
+        .admin-row-pos.bp{color:#cd7c5e;}
+        .admin-row-id{flex:1;color:#fff;}
+        .admin-row-pts{color:var(--green);width:70px;text-align:right;}
+        .btn-del{background:none;border:none;color:#333;cursor:pointer;font-size:.75rem;padding:2px 6px;transition:color .2s;flex-shrink:0;}
+        .btn-del:hover{color:var(--red);}
+
+        /* Tasa admin */
+        .admin-divider{height:1px;background:var(--border);margin:20px 0;}
+        .admin-tasa-row{display:flex;gap:8px;align-items:flex-end;}
+        .btn-save-tasa{background:var(--green);border:none;color:#000;padding:11px 16px;border-radius:8px;font-family:var(--display);font-size:.9rem;letter-spacing:1px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+        .btn-save-tasa:hover{background:#00ff88;box-shadow:0 0 20px rgba(0,230,118,.3);}
+
+        /* Trigger admin btn (esquina) */
+        .admin-trigger{
+            position:fixed; bottom:86px; right:18px; z-index:100;
+            width:42px; height:42px;
+            background:rgba(232,25,44,.12); border:1px solid var(--border-red);
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            color:var(--red); font-size:.85rem; cursor:pointer;
+            transition:all .25s; animation:waIn .5s 1.3s cubic-bezier(.16,1,.3,1) both;
+        }
+        .admin-trigger:hover{background:var(--red);color:#fff;box-shadow:0 0 18px var(--red-glow);}
+
+        /* Toast */
+        .toast{
+            position:fixed; bottom:160px; left:50%; transform:translateX(-50%) translateY(10px);
+            background:#1a1a22; border:1px solid var(--border-red);
+            color:#fff; font-family:var(--mono); font-size:.6rem; letter-spacing:1px;
+            padding:10px 18px; border-radius:30px; z-index:400;
+            opacity:0; transition:opacity .3s,transform .3s; pointer-events:none;
+            white-space:nowrap;
+        }
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    </style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-layer">
+    <svg class="cloud-svg c1" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+    <svg class="cloud-svg c2" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+    <svg class="cloud-svg c3" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+    <svg class="cloud-svg c4" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+    <svg class="sharingan s1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#e8192c" stroke-width="3"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="60" r="9" fill="#e8192c" stroke="none"/><circle cx="133" cy="122" r="9" fill="#e8192c" stroke="none"/><circle cx="67" cy="122" r="9" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="29" y1="29" x2="171" y2="171"/><line x1="171" y1="29" x2="29" y2="171"/></svg>
+    <svg class="sharingan s2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#e8192c" stroke-width="3"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="60" r="9" fill="#e8192c" stroke="none"/><circle cx="133" cy="122" r="9" fill="#e8192c" stroke="none"/><circle cx="67" cy="122" r="9" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="29" y1="29" x2="171" y2="171"/><line x1="171" y1="29" x2="29" y2="171"/></svg>
+</div>
+
+<a href="https://wa.me/5350677110?text=Hola,%20necesito%20soporte" class="wa-float"><i class="fab fa-whatsapp"></i></a>
+
+<!-- ADMIN TRIGGER -->
+<button class="admin-trigger" onclick="openAdmin()" title="Panel Admin"><i class="fas fa-sliders-h"></i></button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════ MODAL RANGOS ══════ -->
+<div class="modal-overlay" id="rankModal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <div class="modal-handle"></div>
+        <div class="modal-title">SISTEMA DE RANGOS</div>
+        <p class="modal-desc">Rangos por <span>posición en el podio</span> al cierre de cada período.<br>Ranking general: se renueva cada <span style="color:var(--red)">4 meses</span>.</p>
+        <div class="rank-list">
+            <div class="rank-item"><div class="rank-icon">👑</div><div class="rank-info"><div class="rank-name" style="color:var(--gold)">LEYENDA</div><div class="rank-req">1er lugar</div><div class="rank-prize">Premio máximo</div></div><span class="badge badge-legend">LEYENDA</span></div>
+            <div class="rank-item"><div class="rank-icon">⚔️</div><div class="rank-info"><div class="rank-name" style="color:#c0c0c0">MAESTRO</div><div class="rank-req">2do lugar</div><div class="rank-prize">Premio intermedio</div></div><span class="badge badge-maestro">MAESTRO</span></div>
+            <div class="rank-item"><div class="rank-icon">🔥</div><div class="rank-info"><div class="rank-name" style="color:#cd7c5e">ELITE</div><div class="rank-req">3er lugar</div><div class="rank-prize">Premio de entrada</div></div><span class="badge badge-elite">ELITE</span></div>
+            <div class="rank-item"><div class="rank-icon">🌀</div><div class="rank-info"><div class="rank-name" style="color:var(--muted)">ROOKIE</div><div class="rank-req">Fuera del podio</div><div class="rank-prize">Sigue acumulando</div></div><span class="badge badge-rookie">ROOKIE</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ PANEL ADMIN ══════ -->
+<div class="admin-overlay" id="adminOverlay" onclick="closeAdmin()">
+    <div class="admin-panel" onclick="event.stopPropagation()">
+        <button class="admin-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
+        <div class="admin-handle"></div>
+        <div class="admin-header">
+            <div class="admin-title">⚙ PANEL ADMIN</div>
+        </div>
+        <div class="admin-sub">Solo tú ves esto · Los cambios se reflejan al instante en la página</div>
+
+        <!-- Selector de tabla -->
+        <div class="admin-select-group">
+            <label class="admin-label">SELECCIONA LA TABLA</label>
+            <select class="admin-select" id="adminTableSelect" onchange="renderAdminList()">
+                <option value="dep-sem">📥 DEPÓSITOS — SEMANAL</option>
+                <option value="dep-men">📥 DEPÓSITOS — MENSUAL</option>
+                <option value="ret-sem">📤 RETIROS — SEMANAL</option>
+                <option value="ret-men">📤 RETIROS — MENSUAL</option>
+            </select>
+        </div>
+
+        <!-- Entrada de nuevo usuario -->
+        <label class="admin-label">AGREGAR / ACTUALIZAR USUARIO</label>
+        <div class="admin-input-row">
+            <div class="admin-field">
+                <input class="admin-input" id="adminId" type="text" placeholder="ID del usuario (ej: 1565593149)" maxlength="20">
+            </div>
+            <div class="admin-field" style="max-width:110px;">
+                <input class="admin-input" id="adminPts" type="number" placeholder="Puntos" min="0">
+            </div>
+            <button class="btn-add" onclick="addUser()">+ ADD</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:.5rem;color:var(--muted);margin-bottom:14px;letter-spacing:1px;">
+            Si el ID ya existe, sus puntos se actualizan y la tabla se reordena sola.
+        </div>
+
+        <!-- Lista actual -->
+        <div class="admin-table-wrap">
+            <div class="admin-table-title" id="adminTableTitle">RANKING ACTUAL</div>
+            <div class="admin-list" id="adminList"></div>
+        </div>
+
+        <!-- Cambiar tasa -->
+        <div class="admin-divider"></div>
+        <label class="admin-label">TASA DE CAMBIO (CUP)</label>
+        <div class="admin-tasa-row">
+            <div class="admin-field">
+                <input class="admin-input" id="adminTasa" type="number" placeholder="Ej: 620" min="1">
+            </div>
+            <button class="btn-save-tasa" onclick="saveTasa()">GUARDAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ PÁGINA PÚBLICA ════════════ -->
+<div class="page-wrapper">
+    <div class="topbar">
+        <div class="topbar-brand">AKATSU<span>KI</span>CASH</div>
+        <div class="live-pill"><div class="pulse-dot"></div> SYSTEM LIVE</div>
+    </div>
+
+    <div class="ticker-strip">
+        <div class="ticker-inner">
+            <span class="ticker-item">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="hi" id="tickerTasa">$620 CUP</span></span>
+            <span class="ticker-item">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="lo">INMEDIATOS</span></span>
+            <span class="ticker-item">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="lo">¡PARTICIPA!</span></span>
+            <span class="ticker-item">SOPORTE VÍA WHATSAPP &nbsp;·&nbsp; <span class="hi">RESPUESTA RÁPIDA</span></span>
+            <span class="ticker-item">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="hi" id="tickerTasa2">$620 CUP</span></span>
+            <span class="ticker-item">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="lo">INMEDIATOS</span></span>
+            <span class="ticker-item">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="lo">¡PARTICIPA!</span></span>
+            <span class="ticker-item">SOPORTE VÍA WHATSAPP &nbsp;·&nbsp; <span class="hi">RESPUESTA RÁPIDA</span></span>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1 class="hero-title">AKATSU<span class="acc">KI</span>CASH</h1>
+        <p class="hero-sub">PREMIUM BETTING SYSTEM &nbsp;|&nbsp; CAJERO OFICIAL 1XBET</p>
+        <div class="hero-line"></div>
+    </div>
+
+    <div class="rate-card">
+        <div>
+            <div class="rate-label">TASA DE CAMBIO USDT / USD</div>
+            <div class="rate-value" id="rateDisplay">620 <span class="unit">CUP</span></div>
+        </div>
+        <div class="rate-meta">
+            <div class="rate-meta-label">ACTUALIZADO</div>
+            <div class="rate-meta-time" id="updateTime">—</div>
+        </div>
+    </div>
+
+    <div class="promo-banner">
+        <div class="promo-icon">🎁</div>
+        <div>
+            <div class="promo-text-main">BONO DE BIENVENIDA</div>
+            <div class="promo-text-sub">Primer depósito · Consulta condiciones por WA</div>
+        </div>
+        <div class="promo-badge">+10%</div>
+    </div>
+
+    <!-- RANKING DEPÓSITOS -->
+    <div class="section-header" style="animation:slideUp .5s .35s cubic-bezier(.16,1,.3,1) both">
+        <div class="section-title">RANKING DEPÓSITOS</div>
+        <button class="section-action" onclick="openModal()">VER RANGOS <i class="fas fa-chevron-right" style="font-size:.44rem;margin-left:3px;"></i></button>
+    </div>
+    <div class="tabs" style="animation:slideUp .5s .38s cubic-bezier(.16,1,.3,1) both" id="tabsDep">
+        <button class="tab-btn active" onclick="openTab(event,'dep-sem','dep')">SEMANAL</button>
+        <button class="tab-btn"        onclick="openTab(event,'dep-men','dep')">MENSUAL</button>
+    </div>
+    <div class="board-card" id="boardDep" style="animation:slideUp .5s .42s cubic-bezier(.16,1,.3,1) both">
+        <div id="dep-sem" class="tab-content active">
+            <div class="prize-ribbon">🏆 TOP 1: <strong style="color:#fff;margin:0 5px">CONSULTAR POR WA</strong> · TOP 2: <strong style="color:#fff;margin:0 5px">CONSULTAR POR WA</strong> · TOP 3: <strong style="color:#fff;margin-left:5px">CONSULTAR POR WA</strong></div>
+            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-dep-sem"></tbody></table></div>
+        </div>
+        <div id="dep-men" class="tab-content">
+            <div class="prize-ribbon">💎 TOP 1: <strong style="color:#fff;margin:0 5px">CONSULTAR POR WA</strong> + <strong style="color:var(--gold);margin-left:5px">REGALO VIP</strong></div>
+            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-dep-men"></tbody></table></div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RANKING RETIROS -->
+    <div class="section-header" style="animation:slideUp .5s .5s cubic-bezier(.16,1,.3,1) both">
+        <div class="section-title">RANKING RETIROS</div>
+    </div>
+    <div class="tabs" style="animation:slideUp .5s .52s cubic-bezier(.16,1,.3,1) both" id="tabsRet">
+        <button class="tab-btn active" onclick="openTab(event,'ret-sem','ret')">SEMANAL</button>
+        <button class="tab-btn"        onclick="openTab(event,'ret-men','ret')">MENSUAL</button>
+    </div>
+    <div class="board-card" id="boardRet" style="animation:slideUp .5s .55s cubic-bezier(.16,1,.3,1) both">
+        <div id="ret-sem" class="tab-content active">
+            <div class="prize-ribbon green-rib">💸 TOP 1 RETIRO: <strong style="color:#fff;margin-left:5px">CONSULTAR POR WA</strong></div>
+            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-ret-sem"></tbody></table></div>
+        </div>
+        <div id="ret-men" class="tab-content">
+            <div class="prize-ribbon green-rib">💎 TOP 1 RETIRO MES: <strong style="color:#fff;margin-left:5px">CONSULTAR POR WA</strong></div>
+            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-ret-men"></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- CALCULATOR -->
+    <div class="calc-section">
+        <div class="calc-label">CALCULADORA DE CAMBIO &nbsp;<span>USDT → CUP</span></div>
+        <div class="calc-row">
+            <div class="calc-input-wrap">
+                <span class="calc-prefix">$</span>
+                <input type="number" id="calcInput" placeholder="0.00 USDT / USD" min="0">
+                                                                   </div>
+                    <div id="calcResult">
+                <div class="result-value" id="resultVal">0.00</div>
+                <div class="result-label">CUP</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="https://wa.me/5350677110?text=Hola,%20quiero%20hacer%20un%20depósito" class="btn-action btn-deposit">
+            <i class="fas fa-arrow-down"></i>DEPOSITAR<span class="btn-sub">VÍA WHATSAPP</span>
+        </a>
+        <a href="https://wa.me/5350677110?text=Hola,%20quiero%20consultar%20un%20retiro" class="btn-action btn-withdraw">
+            <i class="fas fa-arrow-up"></i>RETIRAR<span class="btn-sub">VÍA WHATSAPP</span>
+        </a>
+    </div>
+
+    <div class="info-grid">
+        <a href="https://wa.me/5350677110?text=Quiero%20saber%20sobre%20promociones" class="info-card">
+            <div class="info-card-icon">🎁</div><div class="info-card-title">PROMOS</div><div class="info-card-sub">Ver todas las ofertas</div>
+        </a>
+        <a href="https://wa.me/5350677110?text=Consulta%20sobre%20mi%20cuenta" class="info-card">
+            <div class="info-card-icon">💬</div><div class="info-card-title">SOPORTE</div><div class="info-card-sub">Atención 24/7</div>
+        </a>
+    </div>
+
+    <footer>
+        <div class="footer-brand">AKATSU<span>KI</span>CASH</div>
+        <div class="footer-links">
+            <a href="https://wa.me/5350677110" class="footer-link"><i class="fab fa-whatsapp"></i> CONTACTO</a>
+            <span style="color:#1e1e26">|</span>
+            <a href="https://wa.me/5350677110?text=Reglas%20y%20condiciones" class="footer-link">TÉRMINOS</a>
+            <span style="color:#1e1e26">|</span>
+            <a href="https://wa.me/5350677110?text=Quiero%20unirme" class="footer-link">REGISTRARSE</a>
+        </div>
+        <div class="footer-copy">© 2026 AKATSUKICASH GLOBAL · CAJERO OFICIAL 1XBET · SOPORTE 24/7</div>
+    </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  DATOS — Estado inicial con 10 usuarios de muestra por tabla
+//  (cuando subas a GitHub, estos son los datos de arranque)
+// ══════════════════════════════════════════════════════════
+const DEFAULT_DATA = {
+    "dep-sem": [
+        {id:"1565593149", pts:4800}, {id:"2234109876", pts:3950},
+        {id:"3312847651", pts:3200}, {id:"4478291034", pts:2750},
+        {id:"5590128374", pts:2300}, {id:"6601837492", pts:1870},
+        {id:"7712093845", pts:1540}, {id:"8823740192", pts:1120},
+        {id:"9934021847", pts: 780}, {id:"1045938271", pts: 430}
+    ],
+    "dep-men": [
+        {id:"2234109876", pts:18500}, {id:"1565593149", pts:16200},
+        {id:"5590128374", pts:13800}, {id:"3312847651", pts:11400},
+        {id:"7712093845", pts: 9600}, {id:"4478291034", pts: 7800},
+        {id:"9934021847", pts: 6100}, {id:"6601837492", pts: 4400},
+        {id:"8823740192", pts: 2900}, {id:"1045938271", pts: 1500}
+    ],
+    "ret-sem": [
+        {id:"3312847651", pts:5200}, {id:"6601837492", pts:4300},
+        {id:"1565593149", pts:3700}, {id:"9934021847", pts:2900},
+        {id:"2234109876", pts:2400}, {id:"8823740192", pts:1900},
+        {id:"4478291034", pts:1500}, {id:"7712093845", pts:1100},
+        {id:"5590128374", pts: 700}, {id:"1045938271", pts: 300}
+    ],
+    "ret-men": [
+        {id:"6601837492", pts:22000}, {id:"3312847651", pts:19500},
+        {id:"9934021847", pts:16000}, {id:"1565593149", pts:13200},
+        {id:"8823740192", pts:10500}, {id:"2234109876", pts: 8100},
+        {id:"7712093845", pts: 6200}, {id:"4478291034", pts: 4400},
+        {id:"5590128374", pts: 2700}, {id:"1045938271", pts: 1000}
+    ]
+};
+
+// ── Cargar desde localStorage o usar defaults ──
+let TASA = parseInt(localStorage.getItem('ak_tasa') || '620');
+let data = {};
+try {
+    const saved = localStorage.getItem('ak_data');
+    data = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+} catch(e) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function save() {
+    localStorage.setItem('ak_data', JSON.stringify(data));
+    localStorage.setItem('ak_tasa', TASA);
+}
+
+// ── Render tabla pública ──
+function getBadge(pos) {
+    if(pos===1) return '<span class="badge badge-legend">LEYENDA</span>';
+    if(pos===2) return '<span class="badge badge-maestro">MAESTRO</span>';
+    if(pos===3) return '<span class="badge badge-elite">ELITE</span>';
+    return '<span class="badge badge-rookie">ROOKIE</span>';
+}
+function getPosClass(pos) {
+    if(pos===1) return 'gp'; if(pos===2) return 'sp'; if(pos===3) return 'bp'; return '';
+}
+
+function renderTable(tableKey) {
+    const tbody = document.getElementById('tbody-' + tableKey);
+    if(!tbody) return;
+    const sorted = [...(data[tableKey] || [])].sort((a,b) => b.pts - a.pts);
+    tbody.innerHTML = sorted.map((u, i) => {
+        const pos = i+1;
+        return `<tr>
+            <td class="pos-cell ${getPosClass(pos)}">${String(pos).padStart(2,'0')}</td>
+            <td class="user-cell">${u.id}</td>
+            <td class="pts-cell">${u.pts.toLocaleString()}</td>
+            <td>${getBadge(pos)}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderAllTables() {
+    ['dep-sem','dep-men','ret-sem','ret-men'].forEach(k => renderTable(k));
+}
+
+// ── Render lista en admin ──
+function renderAdminList() {
+    const key = document.getElementById('adminTableSelect').value;
+    const names = {'dep-sem':'DEPÓSITOS SEMANAL','dep-men':'DEPÓSITOS MENSUAL','ret-sem':'RETIROS SEMANAL','ret-men':'RETIROS MENSUAL'};
+    document.getElementById('adminTableTitle').textContent = names[key];
+    const sorted = [...(data[key] || [])].sort((a,b) => b.pts - a.pts);
+    const list = document.getElementById('adminList');
+    if(sorted.length === 0) {
+        list.innerHTML = '<div style="padding:14px 12px;font-family:var(--mono);font-size:.58rem;color:var(--muted);text-align:center;letter-spacing:1px;">SIN USUARIOS AÚN</div>';
+        return;
+    }
+    list.innerHTML = sorted.map((u, i) => {
+        const pos = i+1;
+        return `<div class="admin-row">
+            <div class="admin-row-pos ${getPosClass(pos)}">${pos}</div>
+            <div class="admin-row-id">${u.id}</div>
+            <div class="admin-row-pts">${u.pts.toLocaleString()}</div>
+            <button class="btn-del" onclick="deleteUser('${key}','${u.id}')" title="Eliminar"><i class="fas fa-times"></i></button>
+        </div>`;
+    }).join('');
+}
+
+// ── Agregar / actualizar usuario ──
+function addUser() {
+    const key  = document.getElementById('adminTableSelect').value;
+    const id   = document.getElementById('adminId').value.trim();
+    const pts  = parseInt(document.getElementById('adminPts').value);
+
+    if(!id)         { showToast('⚠ Escribe el ID del usuario'); return; }
+    if(isNaN(pts))  { showToast('⚠ Escribe los puntos'); return; }
+    if(pts < 0)     { showToast('⚠ Los puntos no pueden ser negativos'); return; }
+
+    const arr = data[key];
+    const existing = arr.findIndex(u => u.id === id);
+    if(existing >= 0) {
+        arr[existing].pts = pts;
+        showToast('✓ Puntos de ' + id + ' actualizados');
+    } else {
+        arr.push({id, pts});
+        showToast('✓ Usuario ' + id + ' agregado');
+    }
+
+    save();
+    renderTable(key);
+    renderAdminList();
+
+    // limpiar inputs
+    document.getElementById('adminId').value = '';
+    document.getElementById('adminPts').value = '';
+}
+
+// ── Eliminar usuario ──
+function deleteUser(key, id) {
+    data[key] = data[key].filter(u => u.id !== id);
+    save();
+    renderTable(key);
+    renderAdminList();
+    showToast('🗑 Usuario ' + id + ' eliminado');
+}
+
+// ── Guardar tasa ──
+function saveTasa() {
+    const val = parseInt(document.getElementById('adminTasa').value);
+    if(isNaN(val) || val < 1) { showToast('⚠ Tasa inválida'); return; }
+    TASA = val;
+    save();
+    // actualizar en pantalla
+    document.getElementById('rateDisplay').innerHTML = val + ' <span class="unit">CUP</span>';
+    document.getElementById('tickerTasa').textContent  = '$' + val + ' CUP';
+    document.getElementById('tickerTasa2').textContent = '$' + val + ' CUP';
+    // reset calc
+    document.getElementById('calcInput').value = '';
+    document.getElementById('resultVal').textContent = '0.00';
+    showToast('✓ Tasa actualizada a ' + val + ' CUP');
+    document.getElementById('adminTasa').value = '';
+}
+
+// ── TABS ──
+function openTab(evt, tabId, group) {
+    const boardId = group === 'dep' ? 'boardDep' : 'boardRet';
+    const tabsId  = group === 'dep' ? 'tabsDep'  : 'tabsRet';
+    document.getElementById(boardId).querySelectorAll('.tab-content').forEach(el => {
+        el.style.display='none'; el.classList.remove('active');
+    });
+    document.getElementById(tabsId).querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const tab = document.getElementById(tabId);
+    tab.style.display='block'; tab.classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+// ── CALCULATOR ──
+document.getElementById('calcInput').addEventListener('input', function() {
+    const val = parseFloat(this.value) || 0;
+    document.getElementById('resultVal').textContent =
+        (val * TASA).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+});
+
+// ── HORA ──
+function setTime() {
+    const n = new Date();
+    document.getElementById('updateTime').textContent =
+        String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0') + ' hrs';
+}
+setTime(); setInterval(setTime, 60000);
+
+// ── MODALES ──
+function openModal()   { document.getElementById('rankModal').classList.add('open');    document.body.style.overflow='hidden'; }
+function closeModal()  { document.getElementById('rankModal').classList.remove('open'); document.body.style.overflow=''; }
+function openAdmin()   {
+    document.getElementById('adminOverlay').classList.add('open');
+    document.body.style.overflow='hidden';
+    document.getElementById('adminTasa').value = '';
+    renderAdminList();
+}
+function closeAdmin()  { document.getElementById('adminOverlay').classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); closeAdmin(); } });
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+renderAllTables();
+// mostrar tasa correcta al cargar
+document.getElementById('rateDisplay').innerHTML = TASA + ' <span class="unit">CUP</span>';
+document.getElementById('tickerTasa').textContent  = '$' + TASA + ' CUP';
+document.getElementById('tickerTasa2').textContent = '$' + TASA + ' CUP';
+</script>
+</body>
+</html>
