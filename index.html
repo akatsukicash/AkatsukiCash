@@ -1,550 +1,953 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AKATSUKICASH | PREMIUM SYSTEM</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23000'/><ellipse cx='50' cy='66' rx='40' ry='18' fill='%23e8192c'/><circle cx='24' cy='54' r='14' fill='%23e8192c'/><circle cx='42' cy='46' r='16' fill='%23e8192c'/><circle cx='62' cy='44' r='18' fill='%23e8192c'/><circle cx='80' cy='52' r='14' fill='%23e8192c'/></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-        :root {
-            --red:#e8192c; --red-dim:rgba(232,25,44,.15); --red-glow:rgba(232,25,44,.55);
-            --green:#00e676; --green-dim:rgba(0,230,118,.08);
-            --gold:#fbbf24; --bg:#060608; --surface:#0d0d10; --surface2:#111116;
-            --border:rgba(255,255,255,.06); --border-red:rgba(232,25,44,.25);
-            --text:#f0f0f5; --muted:#55556a;
-            --display:'Bebas Neue',sans-serif; --mono:'Space Mono',monospace; --body:'DM Sans',sans-serif;
-        }
-        html{scroll-behavior:smooth;}
-        body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;position:relative;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AKATSUKICASH | PREMIUM SYSTEM</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23000'/><ellipse cx='50' cy='66' rx='40' ry='18' fill='%23e8192c'/><circle cx='24' cy='54' r='14' fill='%23e8192c'/><circle cx='42' cy='46' r='16' fill='%23e8192c'/><circle cx='62' cy='44' r='18' fill='%23e8192c'/><circle cx='80' cy='52' r='14' fill='%23e8192c'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --red:#e8192c;--red-dim:rgba(232,25,44,.18);--red-glow:rgba(232,25,44,.6);
+  --green:#00e676;--green-dim:rgba(0,230,118,.09);
+  --gold:#fbbf24;--gold-dim:rgba(251,191,36,.1);
+  --bg:#040406;--surface:#0a0a0e;--surface2:#0f0f14;--surface3:#141419;
+  --border:rgba(255,255,255,.055);--border-red:rgba(232,25,44,.28);
+  --text:#eeeef5;--muted:#4a4a62;--muted2:#6a6a88;
+  --D:'Bebas Neue',sans-serif;--M:'Space Mono',monospace;--B:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--B);min-height:100vh;overflow-x:hidden;cursor:default;}
 
-        /* BG AKATSUKI */
-        .bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-        .bg-layer::before{content:'';position:absolute;inset:0;
-            background:radial-gradient(ellipse 80% 40% at 50% -5%,rgba(232,25,44,.13) 0%,transparent 70%),
-                       radial-gradient(ellipse 50% 30% at 92% 55%,rgba(232,25,44,.06) 0%,transparent 60%),
-                       radial-gradient(ellipse 40% 25% at  5% 72%,rgba(232,25,44,.05) 0%,transparent 55%);}
-        .bg-layer::after{content:'';position:absolute;inset:0;
-            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);}
-        .cloud-svg{position:absolute;fill:#e8192c;}
-        .cloud-svg.c1{width:220px;top:4%;left:-50px;opacity:.045;animation:fc 18s ease-in-out infinite;}
-        .cloud-svg.c2{width:170px;top:32%;right:-40px;opacity:.03;animation:fc 23s ease-in-out infinite reverse;}
-        .cloud-svg.c3{width:195px;top:62%;left:8%;opacity:.028;animation:fc 27s ease-in-out infinite 5s;}
-        .cloud-svg.c4{width:145px;top:82%;right:4%;opacity:.032;animation:fc 21s ease-in-out infinite 9s;}
-        @keyframes fc{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-13px) translateX(5px)}66%{transform:translateY(7px) translateX(-4px)}}
-        .sharingan{position:absolute;animation:spinSlow 42s linear infinite;}
-        .sharingan.s1{width:280px;top:10%;right:-90px;opacity:.038;}
-        .sharingan.s2{width:200px;bottom:6%;left:-65px;opacity:.026;animation-direction:reverse;}
-        @keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* ══ BACKGROUND ══ */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.bg-glow{position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -8%, rgba(232,25,44,.22) 0%,transparent 65%),
+    radial-gradient(ellipse 60% 40% at 95% 50%, rgba(232,25,44,.1)  0%,transparent 55%),
+    radial-gradient(ellipse 50% 35% at  3% 75%, rgba(232,25,44,.08) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 100%,rgba(232,25,44,.06) 0%,transparent 60%);
+}
+.bg-scan{position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);
+}
+.bg-grain{position:absolute;inset:0;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;
+}
 
-        .page-wrapper{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:0 16px 52px;}
+/* Nubes Akatsuki */
+.cloud{position:absolute;fill:#e8192c;filter:drop-shadow(0 0 12px rgba(232,25,44,.5));}
+.cloud.k1{width:340px;top:2%;left:-80px;opacity:.12;animation:fc 20s ease-in-out infinite;}
+.cloud.k2{width:260px;top:28%;right:-60px;opacity:.09;animation:fc 25s ease-in-out infinite reverse 3s;}
+.cloud.k3{width:300px;top:58%;left:5%;opacity:.08;animation:fc 30s ease-in-out infinite 6s;}
+.cloud.k4{width:220px;top:80%;right:2%;opacity:.1;animation:fc 22s ease-in-out infinite 10s;}
+.cloud.k5{width:380px;top:42%;left:50%;transform:translateX(-50%);opacity:.05;animation:fc 35s ease-in-out infinite 2s;}
+@keyframes fc{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-18px) translateX(8px)}66%{transform:translateY(10px) translateX(-6px)}}
 
-        /* TOPBAR */
-        .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 10px;border-bottom:1px solid var(--border);}
-        .topbar-brand{font-family:var(--display);font-size:1.3rem;letter-spacing:3px;color:#fff;}
-        .topbar-brand span{color:var(--red);}
-        .live-pill{display:flex;align-items:center;gap:6px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.18);padding:5px 11px;border-radius:20px;font-family:var(--mono);font-size:.52rem;color:var(--green);letter-spacing:1px;}
-        .pulse-dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease-in-out infinite;}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+/* Sharingan */
+.shari{position:absolute;animation:spin 50s linear infinite;}
+.shari.sh1{width:420px;top:5%;right:-130px;opacity:.08;}
+.shari.sh2{width:300px;bottom:3%;left:-90px;opacity:.06;animation-direction:reverse;animation-duration:38s;}
+.shari.sh3{width:180px;top:45%;left:38%;opacity:.04;animation-duration:28s;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-        /* TICKER */
-        .ticker-strip{background:rgba(232,25,44,.05);border-bottom:1px solid var(--border-red);padding:7px 0;margin-bottom:24px;overflow:hidden;}
-        .ticker-inner{display:flex;gap:48px;white-space:nowrap;animation:ticker 28s linear infinite;}
-        @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        .ticker-item{font-family:var(--mono);font-size:.54rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
-        .ticker-item .hi{color:var(--red);} .ticker-item .lo{color:var(--green);}
+/* Partículas kunai */
+.kunai{position:absolute;width:1px;height:18px;background:linear-gradient(180deg,transparent,rgba(232,25,44,.4),transparent);animation:kunaifall linear infinite;opacity:0;}
+@keyframes kunaifall{0%{transform:translateY(-30px) rotate(45deg);opacity:0}10%{opacity:1}90%{opacity:.6}100%{transform:translateY(110vh) rotate(45deg);opacity:0}}
 
-        /* HERO */
-        .hero{text-align:center;padding:4px 0 22px;}
-        .hero-title{font-family:var(--display);font-size:clamp(2.6rem,13vw,3.8rem);letter-spacing:6px;line-height:1;color:#fff;text-shadow:0 0 40px rgba(232,25,44,.4),0 0 80px rgba(232,25,44,.12);animation:titleIn .7s cubic-bezier(.16,1,.3,1) both;}
-        .hero-title .acc{color:var(--red);}
-        @keyframes titleIn{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
-        .hero-sub{font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:3px;margin-top:8px;}
-        .hero-line{width:56px;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);margin:12px auto 0;}
+/* ══ WRAPPER ══ */
+.wrap{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:0 16px 60px;}
 
-        /* RATE */
-        .rate-card{background:var(--surface);border:1px solid var(--border-red);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;animation:slideUp .5s .15s cubic-bezier(.16,1,.3,1) both;}
-        .rate-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),transparent);}
-        @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-        .rate-label{font-family:var(--mono);font-size:.54rem;color:var(--muted);letter-spacing:2px;margin-bottom:4px;}
-        .rate-value{font-family:var(--display);font-size:2rem;color:var(--red);letter-spacing:2px;line-height:1;text-shadow:0 0 20px var(--red-glow);}
-        .rate-value .unit{font-size:1rem;color:var(--muted);margin-left:4px;}
-        .rate-meta{text-align:right;}
-        .rate-meta-label{font-size:.54rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;}
-        .rate-meta-time{font-family:var(--mono);font-size:.68rem;color:var(--green);margin-top:3px;}
+/* ══ TOPBAR ══ */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;border-bottom:1px solid var(--border);}
+.topbar-brand{font-family:var(--D);font-size:1.25rem;letter-spacing:3px;color:#fff;}
+.topbar-brand em{color:var(--red);font-style:normal;}
+.live-pill{display:flex;align-items:center;gap:6px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);padding:5px 12px;border-radius:20px;font-family:var(--M);font-size:.5rem;color:var(--green);letter-spacing:1px;}
+.pdot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* PROMO */
-        .promo-banner{background:linear-gradient(135deg,rgba(232,25,44,.1) 0%,rgba(232,25,44,.03) 100%);border:1px solid var(--border-red);border-radius:10px;padding:12px 16px;margin-bottom:22px;display:flex;align-items:center;gap:12px;animation:slideUp .5s .25s cubic-bezier(.16,1,.3,1) both;}
-        .promo-icon{font-size:1.35rem;flex-shrink:0;}
-        .promo-text-main{font-family:var(--display);font-size:1.05rem;letter-spacing:1px;color:var(--gold);}
-        .promo-text-sub{font-size:.65rem;color:var(--muted);margin-top:2px;font-family:var(--mono);}
-        .promo-badge{margin-left:auto;background:var(--gold);color:#000;font-family:var(--display);font-size:.8rem;padding:4px 10px;border-radius:6px;flex-shrink:0;letter-spacing:1px;}
+/* ══ TICKER ══ */
+.ticker{background:rgba(232,25,44,.06);border-top:1px solid var(--border-red);border-bottom:1px solid var(--border-red);padding:7px 0;margin-bottom:0;overflow:hidden;}
+.ticker-track{display:flex;gap:56px;white-space:nowrap;animation:tick 30s linear infinite;}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{font-family:var(--M);font-size:.52rem;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;flex-shrink:0;}
+.ti .r{color:var(--red);} .ti .g{color:var(--green);}
 
-        /* SECTION */
-        .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-        .section-title{font-family:var(--display);font-size:1.25rem;letter-spacing:3px;color:#fff;}
-        .section-action{background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:.52rem;letter-spacing:1px;cursor:pointer;padding:0;transition:color .2s;}
-        .section-action:hover{color:var(--red);}
+/* ══ HERO ══ */
+.hero{text-align:center;padding:32px 0 28px;position:relative;}
+.hero-eyebrow{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:4px;margin-bottom:10px;text-transform:uppercase;}
+.hero-title{font-family:var(--D);font-size:clamp(3rem,15vw,4.4rem);letter-spacing:8px;line-height:.95;color:#fff;
+  text-shadow:0 0 60px rgba(232,25,44,.5),0 0 120px rgba(232,25,44,.2),0 2px 0 rgba(0,0,0,.8);
+  animation:heroIn .8s cubic-bezier(.16,1,.3,1) both;}
+.hero-title em{color:var(--red);font-style:normal;position:relative;}
+.hero-title em::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--red);box-shadow:0 0 12px var(--red);}
+@keyframes heroIn{from{opacity:0;transform:translateY(-24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.hero-sub{font-family:var(--M);font-size:.54rem;color:var(--muted2);letter-spacing:3px;margin-top:14px;text-transform:uppercase;}
+.hero-divider{display:flex;align-items:center;gap:12px;margin:18px auto 0;width:180px;}
+.hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--red));}
+.hero-divider::after{background:linear-gradient(270deg,transparent,var(--red));}
+.hero-divider-icon{color:var(--red);font-size:.7rem;}
 
-        /* TABS */
-        .tabs{display:flex;gap:5px;margin-bottom:10px;}
-        .tab-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 4px;font-family:var(--mono);font-size:.5rem;letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all .22s;text-transform:uppercase;}
-        .tab-btn.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 14px var(--red-dim);}
-        .tab-btn:hover:not(.active){border-color:var(--border-red);color:#ddd;}
+/* ══ SEARCH BAR ══ */
+.search-wrap{margin-bottom:20px;position:relative;animation:up .5s .2s cubic-bezier(.16,1,.3,1) both;}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);padding:13px 44px 13px 16px;border-radius:10px;color:#fff;font-family:var(--M);font-size:.72rem;outline:none;transition:border-color .25s,box-shadow .25s;letter-spacing:1px;}
+.search-input:focus{border-color:var(--border-red);box-shadow:0 0 0 3px rgba(232,25,44,.08);}
+.search-input::placeholder{color:var(--muted);font-size:.62rem;}
+.search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none;}
+.search-result{background:var(--surface2);border:1px solid var(--border-red);border-radius:10px;padding:14px 16px;margin-top:8px;display:none;animation:up .3s cubic-bezier(.16,1,.3,1) both;}
+.search-result.show{display:block;}
+.sr-label{font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:2px;margin-bottom:10px;}
+.sr-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.sr-row:last-child{border-bottom:none;padding-bottom:0;}
+.sr-pos{font-family:var(--D);font-size:1.3rem;width:36px;flex-shrink:0;}
+.sr-pos.gp{color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,.5);}
+.sr-pos.sp{color:#9ca3af;} .sr-pos.bp{color:#cd7c5e;} .sr-pos.rk{color:var(--muted2);}
+.sr-info{flex:1;}
+.sr-table{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;}
+.sr-pts{font-family:var(--M);font-size:.7rem;color:var(--green);}
+.sr-ref{margin-top:12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:8px;padding:10px 12px;}
+.sr-ref-label{font-family:var(--M);font-size:.48rem;color:var(--gold);letter-spacing:1px;margin-bottom:6px;}
+.sr-ref-code{font-family:var(--D);font-size:1.1rem;letter-spacing:3px;color:#fff;}
+.sr-ref-count{font-family:var(--M);font-size:.52rem;color:var(--muted2);margin-top:4px;}
+.sr-ref-prize{font-family:var(--M);font-size:.54rem;color:var(--gold);margin-top:3px;}
+.sr-copy-btn{margin-top:8px;background:var(--gold);border:none;color:#000;padding:6px 14px;border-radius:6px;font-family:var(--D);font-size:.75rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.sr-copy-btn:hover{background:#fcd34d;box-shadow:0 0 14px rgba(251,191,36,.3);}
+.sr-not-found{text-align:center;padding:16px;font-family:var(--M);font-size:.58rem;color:var(--muted2);letter-spacing:1px;}
 
-        /* BOARD */
-        .board-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
-        .tab-content{display:none;}
-        .tab-content.active{display:block;animation:fadeTab .3s ease;}
-        @keyframes fadeTab{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        .prize-ribbon{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:linear-gradient(90deg,transparent,rgba(251,191,36,.07),transparent);border-bottom:1px solid rgba(251,191,36,.12);font-family:var(--mono);font-size:.56rem;color:var(--gold);letter-spacing:1px;text-align:center;}
-        .prize-ribbon.green-rib{color:var(--green);border-bottom-color:rgba(0,230,118,.1);background:linear-gradient(90deg,transparent,rgba(0,230,118,.05),transparent);}
+/* ══ RATE ══ */
+.rate-card{background:var(--surface);border:1px solid var(--border-red);border-radius:14px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;animation:up .5s .1s cubic-bezier(.16,1,.3,1) both;}
+.rate-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),transparent);}
+.rate-card::after{content:'¥';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-family:var(--D);font-size:5rem;color:rgba(255,255,255,.015);pointer-events:none;}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.rate-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase;}
+.rate-val{font-family:var(--D);font-size:2.2rem;color:var(--red);letter-spacing:2px;line-height:1;text-shadow:0 0 24px var(--red-glow);}
+.rate-val .u{font-size:1rem;color:var(--muted2);margin-left:5px;}
+.rate-meta{text-align:right;}
+.rate-meta-lbl{font-size:.5rem;color:var(--muted);font-family:var(--M);letter-spacing:1px;}
+.rate-meta-val{font-family:var(--M);font-size:.68rem;color:var(--green);margin-top:4px;}
 
-        .table-scroll-wrap{max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1e1e26 transparent;}
-        .table-scroll-wrap::-webkit-scrollbar{width:3px;}
-        .table-scroll-wrap::-webkit-scrollbar-thumb{background:#1e1e26;border-radius:2px;}
+/* ══ PROMOS ══ */
+.promos-section{margin-bottom:20px;animation:up .5s .2s cubic-bezier(.16,1,.3,1) both;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-title{font-family:var(--D);font-size:1.3rem;letter-spacing:3px;color:#fff;}
+.sec-sub{font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:1px;}
+.promos-grid{display:flex;flex-direction:column;gap:10px;}
+.promo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;transition:border-color .25s,transform .25s;}
+.promo-card:hover{border-color:var(--border-red);transform:translateY(-2px);}
+.promo-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.promo-card.gold-card::before{background:linear-gradient(180deg,var(--gold),transparent);}
+.promo-card.red-card::before{background:linear-gradient(180deg,var(--red),transparent);}
+.promo-card.green-card::before{background:linear-gradient(180deg,var(--green),transparent);}
+.promo-card.blue-card::before{background:linear-gradient(180deg,#60a5fa,transparent);}
+.promo-emoji{font-size:1.6rem;flex-shrink:0;margin-top:2px;}
+.promo-body{flex:1;}
+.promo-name{font-family:var(--D);font-size:1.1rem;letter-spacing:1px;color:#fff;margin-bottom:4px;}
+.promo-desc{font-size:.72rem;color:var(--muted2);line-height:1.5;font-family:var(--B);}
+.promo-cond{font-family:var(--M);font-size:.48rem;color:var(--muted);letter-spacing:1px;margin-top:6px;}
+.promo-badge-wrap{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.promo-tag{font-family:var(--D);font-size:.75rem;letter-spacing:1px;padding:3px 10px;border-radius:5px;}
+.promo-tag.gold{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
+.promo-tag.red{background:var(--red);color:#fff;}
+.promo-tag.green{background:var(--green);color:#000;}
+.promo-tag.blue{background:#3b82f6;color:#fff;}
+.promo-wa{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);color:var(--green);padding:5px 12px;border-radius:6px;font-family:var(--M);font-size:.48rem;letter-spacing:1px;text-decoration:none;transition:all .2s;}
+.promo-wa:hover{background:var(--green);color:#000;}
 
-        .board-table{width:100%;border-collapse:collapse;}
-        .board-table thead tr{border-bottom:1px solid var(--border);}
-        .board-table th{padding:9px 12px;text-align:left;font-family:var(--mono);font-size:.48rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:400;}
-        .board-table th:last-child,.board-table td:last-child{text-align:right;}
-        .board-table tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .18s;}
-        .board-table tbody tr:last-child{border-bottom:none;}
-        .board-table tbody tr:hover{background:rgba(255,255,255,.02);}
-        .board-table td{padding:12px 12px;font-size:.86rem;vertical-align:middle;}
-        .pos-cell{font-family:var(--display);font-size:1.05rem;color:var(--muted);width:32px;}
-        .pos-cell.gp{color:var(--gold);text-shadow:0 0 10px rgba(251,191,36,.45);}
-        .pos-cell.sp{color:#9ca3af;} .pos-cell.bp{color:#cd7c5e;}
-        .user-cell{font-weight:500;font-size:.82rem;font-family:var(--mono);}
-        .pts-cell{font-family:var(--mono);font-size:.78rem;color:var(--text);}
-        .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-family:var(--mono);font-size:.46rem;letter-spacing:1px;font-weight:700;}
-        .badge-legend{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
-        .badge-maestro{background:linear-gradient(135deg,#9ca3af,#4b5563);color:#000;}
-        .badge-elite{background:transparent;border:1px solid #6b7280;color:#9ca3af;}
-        .badge-rookie{background:transparent;border:1px solid var(--border-red);color:var(--red);}
+/* ══ RANKING ══ */
+.rank-section{margin-bottom:16px;}
+.sync-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:1px;margin-bottom:10px;padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.sync-dot.loading{background:var(--gold);animation:blink 1s infinite;}
+.sync-dot.err{background:var(--red);}
+.tabs{display:flex;gap:5px;margin-bottom:10px;}
+.tab-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted2);padding:9px 4px;font-family:var(--M);font-size:.48rem;letter-spacing:1px;cursor:pointer;border-radius:8px;transition:all .22s;text-transform:uppercase;}
+.tab-btn.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 18px var(--red-dim);}
+.tab-btn:hover:not(.active){border-color:var(--border-red);color:#ddd;}
+.board{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.prize-bar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 16px;font-family:var(--M);font-size:.54rem;letter-spacing:1px;text-align:center;}
+.prize-bar.gold-bar{background:linear-gradient(90deg,transparent,rgba(251,191,36,.08),transparent);border-bottom:1px solid rgba(251,191,36,.12);color:var(--gold);}
+.prize-bar.green-bar{background:linear-gradient(90deg,transparent,rgba(0,230,118,.06),transparent);border-bottom:1px solid rgba(0,230,118,.1);color:var(--green);}
+.tscroll{max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1a24 transparent;}
+.tscroll::-webkit-scrollbar{width:3px;}
+.tscroll::-webkit-scrollbar-thumb{background:#1a1a24;border-radius:2px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--border);}
+th{padding:9px 12px;text-align:left;font-family:var(--M);font-size:.44rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:400;}
+th:last-child,td:last-child{text-align:right;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .18s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody tr.highlighted{background:rgba(232,25,44,.08)!important;border-left:2px solid var(--red);}
+td{padding:13px 12px;font-size:.84rem;vertical-align:middle;}
+.pc{font-family:var(--D);font-size:1.1rem;color:var(--muted2);width:32px;}
+.pc.gp{color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,.5);}
+.pc.sp{color:#9ca3af;} .pc.bp{color:#cd7c5e;}
+.uc{font-family:var(--M);font-size:.78rem;font-weight:500;}
+.ptc{font-family:var(--M);font-size:.75rem;}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-family:var(--M);font-size:.44rem;letter-spacing:1px;font-weight:700;}
+.b-legend{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
+.b-maestro{background:linear-gradient(135deg,#9ca3af,#4b5563);color:#000;}
+.b-elite{background:transparent;border:1px solid #6b7280;color:#9ca3af;}
+.b-rookie{background:transparent;border:1px solid var(--border-red);color:var(--red);}
+.loading-cell{text-align:center!important;padding:28px 12px!important;font-family:var(--M)!important;font-size:.58rem!important;color:var(--muted2)!important;letter-spacing:2px!important;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--border-red);border-top-color:var(--red);border-radius:50%;animation:rotation .7s linear infinite;margin-right:8px;vertical-align:middle;}
+@keyframes rotation{to{transform:rotate(360deg)}}
 
-        /* LOADING STATE */
-        .loading-row td{text-align:center;padding:28px 12px;font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:2px;}
-        .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border-red);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle;}
-        @keyframes spin{to{transform:rotate(360deg)}}
+/* ══ COUNTDOWN ══ */
+.countdown-card{background:var(--surface);border:1px solid var(--border-red);border-radius:14px;padding:16px 20px;margin-bottom:16px;position:relative;overflow:hidden;animation:up .5s .3s cubic-bezier(.16,1,.3,1) both;}
+.countdown-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(232,25,44,.06),transparent);}
+.cd-label{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
+.cd-label span{color:var(--red);}
+.cd-units{display:flex;gap:8px;align-items:center;}
+.cd-unit{flex:1;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 4px;}
+.cd-num{font-family:var(--D);font-size:1.8rem;color:#fff;line-height:1;display:block;}
+.cd-lbl{font-family:var(--M);font-size:.42rem;color:var(--muted2);letter-spacing:1px;margin-top:3px;}
+.cd-sep{font-family:var(--D);font-size:1.4rem;color:var(--red);margin-bottom:14px;}
 
-        /* ERROR / EMPTY */
-        .state-msg{text-align:center;padding:28px 16px;font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:1px;line-height:1.8;}
-        .state-msg .state-icon{font-size:1.4rem;display:block;margin-bottom:8px;}
+/* ══ HOW IT WORKS ══ */
+.how-section{margin-bottom:20px;animation:up .5s .35s cubic-bezier(.16,1,.3,1) both;}
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--red-dim);border:1px solid var(--border-red);display:flex;align-items:center;justify-content:center;font-family:var(--D);font-size:1.1rem;color:var(--red);flex-shrink:0;margin-top:2px;}
+.step-title{font-family:var(--D);font-size:1rem;letter-spacing:1px;color:#fff;margin-bottom:3px;}
+.step-desc{font-size:.72rem;color:var(--muted2);line-height:1.5;}
 
-        /* SYNC BADGE */
-        .sync-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.5rem;color:var(--muted);letter-spacing:1px;margin-bottom:10px;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;width:fit-content;}
-        .sync-dot{width:5px;height:5px;background:var(--green);border-radius:50%;flex-shrink:0;}
-        .sync-dot.syncing{background:var(--gold);animation:pulse 1s ease-in-out infinite;}
-        .sync-dot.error{background:var(--red);}
+/* ══ SORTEO ══ */
+.sorteo-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;animation:up .5s .4s cubic-bezier(.16,1,.3,1) both;}
+.sorteo-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(251,191,36,.06),transparent);}
+.sorteo-locked{text-align:center;padding:10px 0;}
+.sorteo-icon{font-size:2.5rem;margin-bottom:12px;display:block;}
+.sorteo-title{font-family:var(--D);font-size:1.4rem;letter-spacing:3px;color:#fff;margin-bottom:6px;}
+.sorteo-desc{font-family:var(--M);font-size:.54rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;}
+.sorteo-progress-wrap{margin-top:16px;}
+.sorteo-progress-lbl{display:flex;justify-content:space-between;font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;margin-bottom:8px;}
+.sorteo-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.sorteo-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;transition:width .5s ease;}
+.sorteo-users{font-family:var(--D);font-size:1rem;color:var(--gold);margin-top:6px;letter-spacing:1px;}
 
-        .divider{height:1px;background:var(--border);margin:8px 0 20px;}
+/* ══ WINNERS HISTORY ══ */
+.winners-section{margin-bottom:20px;animation:up .5s .45s cubic-bezier(.16,1,.3,1) both;}
+.winner-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;transition:border-color .2s;}
+.winner-card:hover{border-color:var(--border-red);}
+.winner-medal{font-size:1.4rem;flex-shrink:0;}
+.winner-info{flex:1;}
+.winner-id{font-family:var(--M);font-size:.75rem;color:#fff;font-weight:700;}
+.winner-period{font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:1px;margin-top:2px;}
+.winner-prize{font-family:var(--D);font-size:1rem;letter-spacing:1px;color:var(--gold);}
 
-        /* CALCULATOR */
-        .calc-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;animation:slideUp .5s .55s cubic-bezier(.16,1,.3,1) both;}
-        .calc-label{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px;}
-        .calc-label span{color:var(--red);}
-        .calc-row{display:flex;gap:10px;align-items:stretch;}
-        .calc-input-wrap{flex:1;position:relative;}
-        .calc-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.68rem;color:var(--muted);}
-        #calcInput{width:100%;background:var(--surface2);border:1px solid var(--border);padding:13px 12px 13px 30px;border-radius:8px;color:#fff;font-family:var(--mono);font-size:.88rem;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
-        #calcInput::-webkit-outer-spin-button,#calcInput::-webkit-inner-spin-button{-webkit-appearance:none;}
-        #calcInput:focus{border-color:var(--border-red);}
-        #calcInput::placeholder{color:var(--muted);font-size:.7rem;}
-        #calcResult{flex:1;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:var(--green-dim);border:1px solid rgba(0,230,118,.14);border-radius:8px;padding:10px 14px;}
-        .result-value{font-family:var(--display);font-size:1.2rem;color:var(--green);letter-spacing:1px;text-shadow:0 0 14px rgba(0,230,118,.28);line-height:1;}
-        .result-label{font-family:var(--mono);font-size:.48rem;color:rgba(0,230,118,.45);margin-top:3px;letter-spacing:1px;}
+/* ══ REFERIDOS ══ */
+.ref-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;animation:up .5s .5s cubic-bezier(.16,1,.3,1) both;}
+.ref-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--green),transparent);}
+.ref-title{font-family:var(--D);font-size:1.3rem;letter-spacing:3px;color:#fff;margin-bottom:4px;}
+.ref-sub{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;margin-bottom:14px;line-height:1.6;}
+.ref-sub strong{color:var(--green);}
+.ref-scale{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.ref-tier{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
+.ref-tier-icon{font-size:1.1rem;flex-shrink:0;}
+.ref-tier-txt{flex:1;font-family:var(--M);font-size:.55rem;color:var(--muted2);letter-spacing:1px;}
+.ref-tier-prize{font-family:var(--D);font-size:.95rem;color:var(--gold);letter-spacing:1px;}
 
-        /* ACTIONS */
-        .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;animation:slideUp .5s .65s cubic-bezier(.16,1,.3,1) both;}
-        .btn-action{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:17px 12px;border-radius:12px;text-decoration:none;font-family:var(--display);font-size:1.05rem;letter-spacing:2px;transition:all .28s cubic-bezier(.16,1,.3,1);}
-        .btn-action i{font-size:1rem;} .btn-action .btn-sub{font-family:var(--mono);font-size:.42rem;letter-spacing:1px;opacity:.55;}
-        .btn-action:active{transform:scale(.97);}
-        .btn-deposit{background:var(--green-dim);border:1.5px solid rgba(0,230,118,.28);color:var(--green);}
-        .btn-deposit:hover{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 28px rgba(0,230,118,.22);}
-        .btn-withdraw{background:var(--red-dim);border:1.5px solid var(--border-red);color:var(--red);}
-        .btn-withdraw:hover{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 28px var(--red-dim);}
+/* ══ REGISTRO ══ */
+.reg-form{display:flex;flex-direction:column;gap:10px;}
+.reg-input{width:100%;background:var(--surface2);border:1px solid var(--border);padding:12px 14px;border-radius:8px;color:#fff;font-family:var(--M);font-size:.72rem;outline:none;transition:border-color .2s;letter-spacing:1px;}
+.reg-input:focus{border-color:rgba(0,230,118,.4);}
+.reg-input::placeholder{color:var(--muted);font-size:.62rem;}
+.reg-btn{background:var(--green);border:none;color:#000;padding:13px;border-radius:8px;font-family:var(--D);font-size:1.1rem;letter-spacing:2px;cursor:pointer;transition:all .25s;width:100%;}
+.reg-btn:hover{background:#00ff88;box-shadow:0 0 24px rgba(0,230,118,.3);}
+.reg-btn:active{transform:scale(.98);}
+.reg-note{font-family:var(--M);font-size:.48rem;color:var(--muted);letter-spacing:1px;text-align:center;line-height:1.7;}
 
-        /* INFO CARDS */
-        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;animation:slideUp .5s .7s cubic-bezier(.16,1,.3,1) both;}
-        .info-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px;text-decoration:none;color:var(--text);transition:border-color .2s,transform .2s;}
-        .info-card:hover{border-color:var(--border-red);transform:translateY(-2px);}
-        .info-card-icon{font-size:1.15rem;margin-bottom:7px;}
-        .info-card-title{font-family:var(--display);font-size:.9rem;letter-spacing:1px;color:#fff;}
-        .info-card-sub{font-size:.62rem;color:var(--muted);margin-top:3px;font-family:var(--mono);}
+/* ══ CALC ══ */
+.calc-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;animation:up .5s .55s cubic-bezier(.16,1,.3,1) both;}
+.calc-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
+.calc-lbl span{color:var(--red);}
+.calc-row{display:flex;gap:10px;align-items:stretch;}
+.calc-iw{flex:1;position:relative;}
+.calc-pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--M);font-size:.65rem;color:var(--muted);}
+#calcInput{width:100%;background:var(--surface2);border:1px solid var(--border);padding:13px 12px 13px 28px;border-radius:8px;color:#fff;font-family:var(--M);font-size:.85rem;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
+#calcInput::-webkit-outer-spin-button,#calcInput::-webkit-inner-spin-button{-webkit-appearance:none;}
+#calcInput:focus{border-color:var(--border-red);}
+#calcInput::placeholder{color:var(--muted);font-size:.65rem;}
+.calc-result{flex:1;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:var(--green-dim);border:1px solid rgba(0,230,118,.14);border-radius:8px;padding:10px 14px;}
+.cr-val{font-family:var(--D);font-size:1.2rem;color:var(--green);letter-spacing:1px;text-shadow:0 0 14px rgba(0,230,118,.3);line-height:1;}
+.cr-lbl{font-family:var(--M);font-size:.46rem;color:rgba(0,230,118,.45);margin-top:3px;letter-spacing:1px;}
 
-        /* FOOTER */
-        footer{text-align:center;padding-top:22px;border-top:1px solid var(--border);animation:slideUp .5s .78s cubic-bezier(.16,1,.3,1) both;}
-        .footer-brand{font-family:var(--display);font-size:1rem;letter-spacing:4px;color:#fff;margin-bottom:6px;}
-        .footer-brand span{color:var(--red);}
-        .footer-links{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;}
-        .footer-link{color:var(--muted);font-family:var(--mono);font-size:.52rem;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color .2s;}
-        .footer-link:hover{color:var(--red);}
-        .footer-copy{font-family:var(--mono);font-size:.48rem;color:#2a2a35;margin-top:12px;letter-spacing:1px;}
+/* ══ ACTIONS ══ */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;animation:up .5s .6s cubic-bezier(.16,1,.3,1) both;}
+.btn-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:18px 12px;border-radius:12px;text-decoration:none;font-family:var(--D);font-size:1.1rem;letter-spacing:2px;transition:all .28s cubic-bezier(.16,1,.3,1);}
+.btn-act i{font-size:1rem;} .btn-act .sub{font-family:var(--M);font-size:.4rem;letter-spacing:1px;opacity:.55;}
+.btn-act:active{transform:scale(.97);}
+.btn-dep{background:var(--green-dim);border:1.5px solid rgba(0,230,118,.28);color:var(--green);}
+.btn-dep:hover{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 32px rgba(0,230,118,.22);}
+.btn-ret{background:var(--red-dim);border:1.5px solid var(--border-red);color:var(--red);}
+.btn-ret:hover{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 32px var(--red-dim);}
 
-        /* WA FLOAT */
-        .wa-float{position:fixed;bottom:24px;right:18px;z-index:100;width:52px;height:52px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.35rem;text-decoration:none;box-shadow:0 4px 22px rgba(37,211,102,.38);transition:transform .28s,box-shadow .28s;animation:waIn .5s 1.1s cubic-bezier(.16,1,.3,1) both;}
-        @keyframes waIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
-        .wa-float:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(37,211,102,.55);}
+/* ══ FOOTER ══ */
+footer{text-align:center;padding-top:24px;border-top:1px solid var(--border);animation:up .5s .7s cubic-bezier(.16,1,.3,1) both;}
+.ft-brand{font-family:var(--D);font-size:1.1rem;letter-spacing:4px;color:#fff;margin-bottom:6px;}
+.ft-brand em{color:var(--red);font-style:normal;}
+.ft-links{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;}
+.ft-link{color:var(--muted2);font-family:var(--M);font-size:.5rem;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color .2s;}
+.ft-link:hover{color:var(--red);}
+.ft-copy{font-family:var(--M);font-size:.46rem;color:#222230;margin-top:12px;letter-spacing:1px;}
 
-        /* MODAL RANGOS */
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;}
-        .modal-overlay.open{opacity:1;pointer-events:all;}
-        .modal{background:var(--surface);border:1px solid var(--border-red);border-radius:20px 20px 0 0;padding:26px 22px 38px;width:100%;max-width:480px;transform:translateY(100%);transition:transform .38s cubic-bezier(.16,1,.3,1);position:relative;}
-        .modal-overlay.open .modal{transform:translateY(0);}
-        .modal-handle{width:34px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
-        .modal-title{font-family:var(--display);font-size:1.3rem;letter-spacing:3px;margin-bottom:8px;}
-        .modal-desc{font-family:var(--mono);font-size:.55rem;color:var(--muted);margin-bottom:14px;letter-spacing:1px;line-height:1.7;}
-        .modal-desc span{color:#fff;}
-        .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;}
-        .rank-list{display:flex;flex-direction:column;gap:8px;}
-        .rank-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
-        .rank-icon{font-size:1.15rem;width:26px;text-align:center;}
-        .rank-info{flex:1;}
-        .rank-name{font-family:var(--display);font-size:.95rem;letter-spacing:1px;}
-        .rank-req{font-family:var(--mono);font-size:.52rem;color:var(--muted);margin-top:2px;}
-        .rank-prize{font-family:var(--mono);font-size:.54rem;color:var(--gold);margin-top:2px;}
+/* ══ WA FLOAT ══ */
+.wa{position:fixed;bottom:24px;right:18px;z-index:100;width:52px;height:52px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;text-decoration:none;box-shadow:0 4px 24px rgba(37,211,102,.4);transition:transform .28s,box-shadow .28s;animation:popIn .5s 1.2s cubic-bezier(.16,1,.3,1) both;}
+@keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+.wa:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(37,211,102,.6);}
 
-        /* SETUP BANNER — solo se muestra si no hay URL configurada */
-        .setup-banner{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:none;}
-        .setup-banner.show{display:block;}
-        .setup-banner-title{font-family:var(--display);font-size:1rem;letter-spacing:2px;color:var(--gold);margin-bottom:6px;}
-        .setup-banner p{font-family:var(--mono);font-size:.56rem;color:#aaa;letter-spacing:1px;line-height:1.8;}
-        .setup-banner code{color:var(--green);background:var(--surface2);padding:1px 6px;border-radius:3px;}
-    </style>
+/* ══ MODALS ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{background:var(--surface);border:1px solid var(--border-red);border-radius:22px 22px 0 0;padding:28px 22px 42px;width:100%;max-width:480px;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);position:relative;max-height:88vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1a24 transparent;}
+.overlay.open .sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.sheet-title{font-family:var(--D);font-size:1.4rem;letter-spacing:3px;margin-bottom:8px;}
+.sheet-desc{font-family:var(--M);font-size:.54rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;margin-bottom:16px;}
+.sheet-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;transition:color .2s;}
+.sheet-close:hover{color:var(--red);}
+.rank-list{display:flex;flex-direction:column;gap:8px;}
+.rank-item{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
+.rank-icon-wrap{font-size:1.2rem;width:28px;text-align:center;}
+.rank-body{flex:1;}
+.rank-name{font-family:var(--D);font-size:1rem;letter-spacing:1px;}
+.rank-req{font-family:var(--M);font-size:.5rem;color:var(--muted2);margin-top:2px;}
+.rank-pts-rule{font-family:var(--M);font-size:.52rem;color:var(--green);margin-top:3px;}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface2);border:1px solid var(--border-red);color:#fff;font-family:var(--M);font-size:.58rem;letter-spacing:1px;padding:10px 20px;border-radius:30px;z-index:500;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.divider{height:1px;background:var(--border);margin:8px 0 20px;}
+</style>
 </head>
 <body>
 
-<!-- BG -->
-<div class="bg-layer">
-    <svg class="cloud-svg c1" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-    <svg class="cloud-svg c2" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-    <svg class="cloud-svg c3" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-    <svg class="cloud-svg c4" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-    <svg class="sharingan s1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#e8192c" stroke-width="3"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="60" r="9" fill="#e8192c" stroke="none"/><circle cx="133" cy="122" r="9" fill="#e8192c" stroke="none"/><circle cx="67" cy="122" r="9" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="29" y1="29" x2="171" y2="171"/><line x1="171" y1="29" x2="29" y2="171"/></svg>
-    <svg class="sharingan s2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#e8192c" stroke-width="3"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="18"/><circle cx="100" cy="60" r="9" fill="#e8192c" stroke="none"/><circle cx="133" cy="122" r="9" fill="#e8192c" stroke="none"/><circle cx="67" cy="122" r="9" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="29" y1="29" x2="171" y2="171"/><line x1="171" y1="29" x2="29" y2="171"/></svg>
+<!-- ══ BG ══ -->
+<div class="bg">
+  <div class="bg-glow"></div>
+  <div class="bg-scan"></div>
+  <div class="bg-grain"></div>
+  <!-- Nubes -->
+  <svg class="cloud k1" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+  <svg class="cloud k2" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+  <svg class="cloud k3" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+  <svg class="cloud k4" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+  <svg class="cloud k5" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
+  <!-- Sharingan -->
+  <svg class="shari sh1" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
+  <svg class="shari sh2" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
+  <svg class="shari sh3" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
+  <!-- Kunai particles (generadas por JS) -->
+  <div id="kunaiContainer"></div>
 </div>
 
-<a href="https://wa.me/5350677110?text=Hola,%20necesito%20soporte" class="wa-float"><i class="fab fa-whatsapp"></i></a>
+<a href="https://wa.me/5350677110?text=Hola,%20necesito%20soporte" class="wa"><i class="fab fa-whatsapp"></i></a>
+<div class="toast" id="toast"></div>
 
-<!-- MODAL RANGOS -->
-<div class="modal-overlay" id="rankModal" onclick="closeModal()">
-    <div class="modal" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-        <div class="modal-handle"></div>
-        <div class="modal-title">SISTEMA DE RANGOS</div>
-        <p class="modal-desc">Rangos por <span>posición en el podio</span> al cierre de cada período.<br>Ranking general: se renueva cada <span style="color:var(--red)">4 meses</span>.</p>
-        <div class="rank-list">
-            <div class="rank-item"><div class="rank-icon">👑</div><div class="rank-info"><div class="rank-name" style="color:var(--gold)">LEYENDA</div><div class="rank-req">1er lugar del podio</div><div class="rank-prize">Premio máximo de temporada</div></div><span class="badge badge-legend">LEYENDA</span></div>
-            <div class="rank-item"><div class="rank-icon">⚔️</div><div class="rank-info"><div class="rank-name" style="color:#c0c0c0">MAESTRO</div><div class="rank-req">2do lugar del podio</div><div class="rank-prize">Premio intermedio de temporada</div></div><span class="badge badge-maestro">MAESTRO</span></div>
-            <div class="rank-item"><div class="rank-icon">🔥</div><div class="rank-info"><div class="rank-name" style="color:#cd7c5e">ELITE</div><div class="rank-req">3er lugar del podio</div><div class="rank-prize">Premio de entrada de temporada</div></div><span class="badge badge-elite">ELITE</span></div>
-            <div class="rank-item"><div class="rank-icon">🌀</div><div class="rank-info"><div class="rank-name" style="color:var(--muted)">ROOKIE</div><div class="rank-req">Fuera del podio</div><div class="rank-prize">Sigue compitiendo</div></div><span class="badge badge-rookie">ROOKIE</span></div>
-        </div>
+<!-- ══ MODAL RANGOS ══ -->
+<div class="overlay" id="rankOverlay" onclick="closeOverlay('rankOverlay')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <button class="sheet-close" onclick="closeOverlay('rankOverlay')"><i class="fas fa-times"></i></button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">SISTEMA DE RANGOS</div>
+    <p class="sheet-desc">
+      Los rangos se otorgan por <strong style="color:#fff">posición en el podio</strong> al cierre de cada período.<br>
+      Los puntos se acumulan según tus operaciones: <strong style="color:var(--green)">1 punto por cada $1 USD depositado</strong> y <strong style="color:var(--green)">0.5 puntos por cada $1 USD retirado</strong>.
+    </p>
+    <div class="rank-list">
+      <div class="rank-item"><div class="rank-icon-wrap">👑</div><div class="rank-body"><div class="rank-name" style="color:var(--gold)">LEYENDA</div><div class="rank-req">1er lugar del podio</div><div class="rank-pts-rule">Premio máximo de temporada</div></div><span class="badge b-legend">LEYENDA</span></div>
+      <div class="rank-item"><div class="rank-icon-wrap">⚔️</div><div class="rank-body"><div class="rank-name" style="color:#c0c0c0">MAESTRO</div><div class="rank-req">2do lugar del podio</div><div class="rank-pts-rule">Premio intermedio de temporada</div></div><span class="badge b-maestro">MAESTRO</span></div>
+      <div class="rank-item"><div class="rank-icon-wrap">🔥</div><div class="rank-body"><div class="rank-name" style="color:#cd7c5e">ELITE</div><div class="rank-req">3er lugar del podio</div><div class="rank-pts-rule">Premio de entrada de temporada</div></div><span class="badge b-elite">ELITE</span></div>
+      <div class="rank-item"><div class="rank-icon-wrap">🌀</div><div class="rank-body"><div class="rank-name" style="color:var(--muted2)">ROOKIE</div><div class="rank-req">Fuera del podio · Sigue compitiendo</div><div class="rank-pts-rule">$1 USD = 1 pto depósito · $1 USD = 0.5 pto retiro</div></div><span class="badge b-rookie">ROOKIE</span></div>
     </div>
+  </div>
 </div>
 
-<!-- ════════════ PÁGINA ════════════ -->
-<div class="page-wrapper">
-
-    <div class="topbar">
-        <div class="topbar-brand">AKATSU<span>KI</span>CASH</div>
-        <div class="live-pill"><div class="pulse-dot"></div> SYSTEM LIVE</div>
+<!-- ══ MODAL REGISTRO ══ -->
+<div class="overlay" id="regOverlay" onclick="closeOverlay('regOverlay')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <button class="sheet-close" onclick="closeOverlay('regOverlay')"><i class="fas fa-times"></i></button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">REGISTRARSE</div>
+    <p class="sheet-desc">
+      Regístrate con tu ID de 1xbet para participar en los rankings, premios y programa de referidos.<br>
+      Recibirás tu código de referido único para invitar amigos y ganar <strong style="color:var(--green)">$2 USD por cada 5 referidos</strong> que depositen.
+    </p>
+    <div class="reg-form">
+      <input class="reg-input" id="regId" type="text" placeholder="Tu ID de 1xbet (ej: 1565593149)" maxlength="20">
+      <input class="reg-input" id="regName" type="text" placeholder="Nombre o alias (opcional)" maxlength="30">
+      <button class="reg-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-right:8px;font-size:.9rem;"></i>CREAR CUENTA</button>
+      <p class="reg-note">Al registrarte aceptas los términos del programa.<br>Tu ID de 1xbet es tu identificador único en el sistema.</p>
     </div>
+    <div id="regResult" style="display:none;margin-top:16px;"></div>
+  </div>
+</div>
 
-    <div class="ticker-strip">
-        <div class="ticker-inner">
-            <span class="ticker-item">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="hi" id="tickerTasa1">$620 CUP</span></span>
-            <span class="ticker-item">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="lo">INMEDIATOS</span></span>
-            <span class="ticker-item">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="lo">¡PARTICIPA!</span></span>
-            <span class="ticker-item">SOPORTE VÍA WHATSAPP &nbsp;·&nbsp; <span class="hi">RESPUESTA RÁPIDA</span></span>
-            <span class="ticker-item">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="hi" id="tickerTasa2">$620 CUP</span></span>
-            <span class="ticker-item">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="lo">INMEDIATOS</span></span>
-            <span class="ticker-item">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="lo">¡PARTICIPA!</span></span>
-            <span class="ticker-item">SOPORTE VÍA WHATSAPP &nbsp;·&nbsp; <span class="hi">RESPUESTA RÁPIDA</span></span>
-        </div>
+<!-- ══ PÁGINA ══ -->
+<div class="wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">AKATSU<em>KI</em>CASH</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="openOverlay('regOverlay')" style="background:var(--red-dim);border:1px solid var(--border-red);color:var(--red);padding:5px 12px;border-radius:20px;font-family:var(--M);font-size:.48rem;letter-spacing:1px;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='var(--red-dim)';this.style.color='var(--red)'">REGISTRARSE</button>
+      <div class="live-pill"><div class="pdot"></div>SYSTEM LIVE</div>
     </div>
+  </div>
 
-    <div class="hero">
-        <h1 class="hero-title">AKATSU<span class="acc">KI</span>CASH</h1>
-        <p class="hero-sub">PREMIUM BETTING SYSTEM &nbsp;|&nbsp; CAJERO OFICIAL 1XBET</p>
-        <div class="hero-line"></div>
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ti">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="r" id="t1">$620 CUP</span></span>
+      <span class="ti">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="g">INMEDIATOS</span></span>
+      <span class="ti">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="g">¡PARTICIPA!</span></span>
+      <span class="ti">REFERIDOS: <span class="g">$2 USD POR CADA 5</span> QUE DEPOSITEN</span>
+      <span class="ti">SOPORTE 24/7 &nbsp;·&nbsp; <span class="r">WHATSAPP DIRECTO</span></span>
+      <span class="ti">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="r" id="t2">$620 CUP</span></span>
+      <span class="ti">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="g">INMEDIATOS</span></span>
+      <span class="ti">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="g">¡PARTICIPA!</span></span>
+      <span class="ti">REFERIDOS: <span class="g">$2 USD POR CADA 5</span> QUE DEPOSITEN</span>
+      <span class="ti">SOPORTE 24/7 &nbsp;·&nbsp; <span class="r">WHATSAPP DIRECTO</span></span>
     </div>
+  </div>
 
-    <!-- SETUP BANNER (solo visible si falta configurar) -->
-    <div class="setup-banner" id="setupBanner">
-        <div class="setup-banner-title">⚙ CONFIGURACIÓN PENDIENTE</div>
-        <p>
-            Aún no has conectado Google Sheets.<br>
-            Sigue las instrucciones del archivo <code>INSTRUCCIONES.md</code><br>
-            y reemplaza <code>TU_URL_AQUI</code> en el script de esta página.
-        </p>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">CAJERO OFICIAL · 1XBET · CUBA</div>
+    <h1 class="hero-title">AKATSU<em>KI</em>CASH</h1>
+    <p class="hero-sub">PREMIUM BETTING SYSTEM · EST. 2026</p>
+    <div class="hero-divider"><div class="hero-divider-icon">◆</div></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" type="text" placeholder="🔍  Busca tu ID de 1xbet para ver tu posición..." maxlength="20" oninput="doSearch(this.value)">
+    <i class="fas fa-search search-icon"></i>
+    <div class="search-result" id="searchResult"></div>
+  </div>
+
+  <!-- RATE -->
+  <div class="rate-card">
+    <div>
+      <div class="rate-lbl">TASA DE CAMBIO USDT / USD</div>
+      <div class="rate-val" id="rateDisplay">620 <span class="u">CUP</span></div>
     </div>
-
-    <div class="rate-card">
-        <div>
-            <div class="rate-label">TASA DE CAMBIO USDT / USD</div>
-            <div class="rate-value" id="rateDisplay">— <span class="unit">CUP</span></div>
-        </div>
-        <div class="rate-meta">
-            <div class="rate-meta-label">ACTUALIZADO</div>
-            <div class="rate-meta-time" id="updateTime">—</div>
-        </div>
+    <div class="rate-meta">
+      <div class="rate-meta-lbl">ACTUALIZADO</div>
+      <div class="rate-meta-val" id="updateTime">—</div>
     </div>
+  </div>
 
-    <div class="promo-banner">
-        <div class="promo-icon">🎁</div>
-        <div>
-            <div class="promo-text-main" id="promoTitle">BONO DE BIENVENIDA</div>
-            <div class="promo-text-sub" id="promoSub">Primer depósito · Consulta condiciones por WA</div>
-        </div>
-        <div class="promo-badge" id="promoBadge">+10%</div>
+  <!-- COUNTDOWN -->
+  <div class="countdown-card">
+    <div class="cd-label">CIERRE RANKING SEMANAL &nbsp;<span>· QUEDAN</span></div>
+    <div class="cd-units">
+      <div class="cd-unit"><span class="cd-num" id="cdD">00</span><div class="cd-lbl">DÍAS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cdH">00</span><div class="cd-lbl">HORAS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cdM">00</span><div class="cd-lbl">MIN</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cdS">00</span><div class="cd-lbl">SEG</div></div>
     </div>
+  </div>
 
-    <!-- RANKING DEPÓSITOS -->
-    <div class="section-header" style="animation:slideUp .5s .35s cubic-bezier(.16,1,.3,1) both">
-        <div class="section-title">RANKING DEPÓSITOS</div>
-        <button class="section-action" onclick="openModal()">VER RANGOS <i class="fas fa-chevron-right" style="font-size:.44rem;margin-left:3px;"></i></button>
+  <!-- PROMOS -->
+  <div class="promos-section">
+    <div class="sec-hdr">
+      <div class="sec-title">PROMOCIONES</div>
+      <div class="sec-sub">ACTIVAS AHORA</div>
     </div>
-
-    <div class="sync-badge" id="syncDep">
-        <div class="sync-dot syncing" id="syncDotDep"></div>
-        <span id="syncTextDep">CARGANDO...</span>
+    <div class="promos-grid" id="promosGrid">
+      <!-- Renderizado por JS desde Google Sheets -->
     </div>
+  </div>
 
+  <!-- RANKING DEPÓSITOS -->
+  <div class="rank-section" style="animation:up .5s .3s cubic-bezier(.16,1,.3,1) both">
+    <div class="sec-hdr">
+      <div class="sec-title">RANKING DEPÓSITOS</div>
+      <button class="sheet-close" style="position:static;color:var(--muted2);font-family:var(--M);font-size:.5rem;letter-spacing:1px;padding:0;" onclick="openOverlay('rankOverlay')">VER RANGOS <i class="fas fa-chevron-right" style="font-size:.4rem;"></i></button>
+    </div>
+    <div class="sync-pill"><div class="sync-dot loading" id="sdDep"></div><span id="stDep">CARGANDO...</span></div>
     <div class="tabs" id="tabsDep">
-        <button class="tab-btn active" onclick="openTab(event,'dep-sem','dep')">SEMANAL</button>
-        <button class="tab-btn"        onclick="openTab(event,'dep-men','dep')">MENSUAL</button>
+      <button class="tab-btn active" onclick="openTab(event,'ds','dep')">SEMANAL</button>
+      <button class="tab-btn" onclick="openTab(event,'dm','dep')">MENSUAL</button>
     </div>
-    <div class="board-card" id="boardDep">
-        <div id="dep-sem" class="tab-content active">
-            <div class="prize-ribbon" id="prize-dep-sem">🏆 TOP 1: CONSULTAR POR WA · TOP 2: CONSULTAR POR WA · TOP 3: CONSULTAR POR WA</div>
-            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-dep-sem"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>CARGANDO DATOS...</td></tr></tbody></table></div>
-        </div>
-        <div id="dep-men" class="tab-content">
-            <div class="prize-ribbon" id="prize-dep-men">💎 TOP 1: CONSULTAR POR WA + REGALO VIP</div>
-            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-dep-men"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>CARGANDO DATOS...</td></tr></tbody></table></div>
-        </div>
+    <div class="board" id="boardDep">
+      <div id="ds" class="tab-pane active">
+        <div class="prize-bar gold-bar" id="pds">🏆 TOP 1: CONSULTAR POR WA · TOP 2: CONSULTAR POR WA · TOP 3: CONSULTAR POR WA</div>
+        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tds"><tr><td colspan="4" class="loading-cell"><span class="spin"></span>CARGANDO...</td></tr></tbody></table></div>
+      </div>
+      <div id="dm" class="tab-pane">
+        <div class="prize-bar gold-bar" id="pdm">💎 TOP 1: CONSULTAR POR WA + REGALO VIP</div>
+        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tdm"><tr><td colspan="4" class="loading-cell"><span class="spin"></span>CARGANDO...</td></tr></tbody></table></div>
+      </div>
     </div>
+  </div>
 
-    <div style="height:1px;background:var(--border);margin:8px 0 20px;"></div>
+  <div class="divider"></div>
 
-    <!-- RANKING RETIROS -->
-    <div class="section-header" style="animation:slideUp .5s .5s cubic-bezier(.16,1,.3,1) both">
-        <div class="section-title">RANKING RETIROS</div>
-    </div>
-
-    <div class="sync-badge" id="syncRet">
-        <div class="sync-dot syncing" id="syncDotRet"></div>
-        <span id="syncTextRet">CARGANDO...</span>
-    </div>
-
+  <!-- RANKING RETIROS -->
+  <div class="rank-section" style="animation:up .5s .35s cubic-bezier(.16,1,.3,1) both">
+    <div class="sec-hdr"><div class="sec-title">RANKING RETIROS</div></div>
+    <div class="sync-pill"><div class="sync-dot loading" id="sdRet"></div><span id="stRet">CARGANDO...</span></div>
     <div class="tabs" id="tabsRet">
-        <button class="tab-btn active" onclick="openTab(event,'ret-sem','ret')">SEMANAL</button>
-        <button class="tab-btn"        onclick="openTab(event,'ret-men','ret')">MENSUAL</button>
+      <button class="tab-btn active" onclick="openTab(event,'rs','ret')">SEMANAL</button>
+            <button class="tab-btn" onclick="openTab(event,'rm','ret')">MENSUAL</button>
     </div>
-    <div class="board-card" id="boardRet">
-        <div id="ret-sem" class="tab-content active">
-            <div class="prize-ribbon green-rib" id="prize-ret-sem">💸 TOP 1 RETIRO: CONSULTAR POR WA</div>
-            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-ret-sem"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>CARGANDO DATOS...</td></tr></tbody></table></div>
-        </div>
-        <div id="ret-men" class="tab-content">
-            <div class="prize-ribbon green-rib" id="prize-ret-men">💎 TOP 1 RETIRO MES: CONSULTAR POR WA</div>
-            <div class="table-scroll-wrap"><table class="board-table"><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tbody-ret-men"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>CARGANDO DATOS...</td></tr></tbody></table></div>
-        </div>
+    <div class="board" id="boardRet">
+      <div id="rs" class="tab-pane active">
+        <div class="prize-bar green-bar" id="prs">💸 TOP 1 RETIRO SEMANAL: CONSULTAR POR WA</div>
+        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="trs"><tr><td colspan="4" class="loading-cell"><span class="spin"></span>CARGANDO...</td></tr></tbody></table></div>
+      </div>
+      <div id="rm" class="tab-pane">
+        <div class="prize-bar green-bar" id="prm">💎 TOP 1 RETIRO MENSUAL: CONSULTAR POR WA</div>
+        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="trm"><tr><td colspan="4" class="loading-cell"><span class="spin"></span>CARGANDO...</td></tr></tbody></table></div>
+      </div>
     </div>
+  </div>
 
-    <!-- CALCULATOR -->
-    <div class="calc-section">
-        <div class="calc-label">CALCULADORA DE CAMBIO &nbsp;<span>USDT → CUP</span></div>
-        <div class="calc-row">
-            <div class="calc-input-wrap">
-                <span class="calc-prefix">$</span>
-                <input type="number" id="calcInput" placeholder="0.00 USDT / USD" min="0">
-            </div>
-            <div id="calcResult">
-                <div class="result-value" id="resultVal">0.00</div>
-                <div class="result-label">CUP</div>
-            </div>
+  <div class="divider"></div>
+
+  <!-- CÓMO FUNCIONA -->
+  <div class="how-section">
+    <div class="sec-hdr"><div class="sec-title">CÓMO FUNCIONA</div></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div><div class="step-title">REGÍSTRATE EN 1XBET</div><div class="step-desc">Crea tu cuenta en 1xbet. Si aún no tienes, escríbenos por WhatsApp y te ayudamos con el proceso paso a paso.</div></div></div>
+      <div class="step"><div class="step-num">2</div><div><div class="step-title">DEPOSITA CON NOSOTROS</div><div class="step-desc">Contáctanos por WhatsApp, indícanos el monto y te hacemos el cambio a la tasa del día. Rápido, seguro y sin complicaciones.</div></div></div>
+      <div class="step"><div class="step-num">3</div><div><div class="step-title">ACUMULA PUNTOS</div><div class="step-desc">Cada $1 USD depositado = 1 punto. Cada $1 USD retirado = 0.5 puntos. Sube en el ranking y gana premios al cierre de cada período.</div></div></div>
+      <div class="step"><div class="step-num">4</div><div><div class="step-title">INVITA Y GANA MÁS</div><div class="step-desc">Comparte tu código de referido. Por cada 5 amigos que depositen, recibes $2 USD directo. Sin límite de referidos.</div></div></div>
+    </div>
+  </div>
+
+  <!-- SORTEO -->
+  <div class="sorteo-section">
+    <div class="sorteo-locked">
+      <span class="sorteo-icon">🎰</span>
+      <div class="sorteo-title">SORTEO ÉLITE</div>
+      <p class="sorteo-desc">
+        Cada 15 días, 2 ganadores aleatorios entre los<br>
+        <strong style="color:#fff">TOP 10 del ranking</strong> reciben un premio especial.<br>
+        Se activa al alcanzar <strong style="color:var(--gold)">50 usuarios registrados</strong>.
+      </p>
+      <div class="sorteo-progress-wrap">
+        <div class="sorteo-progress-lbl">
+          <span>USUARIOS REGISTRADOS</span>
+          <span id="sorteoCount">0 / 50</span>
         </div>
+        <div class="sorteo-bar"><div class="sorteo-fill" id="sorteoFill" style="width:0%"></div></div>
+        <div class="sorteo-users" id="sorteoLabel">PRÓXIMAMENTE</div>
+      </div>
     </div>
+  </div>
 
-    <div class="actions">
-        <a href="https://wa.me/5350677110?text=Hola,%20quiero%20hacer%20un%20depósito" class="btn-action btn-deposit">
-            <i class="fas fa-arrow-down"></i>DEPOSITAR<span class="btn-sub">VÍA WHATSAPP</span>
-        </a>
-        <a href="https://wa.me/5350677110?text=Hola,%20quiero%20consultar%20un%20retiro" class="btn-action btn-withdraw">
-            <i class="fas fa-arrow-up"></i>RETIRAR<span class="btn-sub">VÍA WHATSAPP</span>
-        </a>
+  <!-- HISTORIAL DE GANADORES -->
+  <div class="winners-section">
+    <div class="sec-hdr">
+      <div class="sec-title">HISTORIAL GANADORES</div>
+      <div class="sec-sub">ÚLTIMAS TEMPORADAS</div>
     </div>
-
-    <div class="info-grid">
-        <a href="https://wa.me/5350677110?text=Quiero%20saber%20sobre%20promociones" class="info-card">
-            <div class="info-card-icon">🎁</div><div class="info-card-title">PROMOS</div><div class="info-card-sub">Ver todas las ofertas</div>
-        </a>
-        <a href="https://wa.me/5350677110?text=Consulta%20sobre%20mi%20cuenta" class="info-card">
-            <div class="info-card-icon">💬</div><div class="info-card-title">SOPORTE</div><div class="info-card-sub">Atención 24/7</div>
-        </a>
+    <div id="winnersGrid">
+      <!-- Renderizado por JS desde Google Sheets -->
+      <div style="text-align:center;padding:20px;font-family:var(--M);font-size:.56rem;color:var(--muted2);letter-spacing:1px;">
+        <span style="display:block;font-size:1.4rem;margin-bottom:8px;">🏆</span>
+        LOS PRIMEROS GANADORES SERÁN REGISTRADOS AQUÍ
+      </div>
     </div>
+  </div>
 
-    <footer>
-        <div class="footer-brand">AKATSU<span>KI</span>CASH</div>
-        <div class="footer-links">
-            <a href="https://wa.me/5350677110" class="footer-link"><i class="fab fa-whatsapp"></i> CONTACTO</a>
-            <span style="color:#1e1e26">|</span>
-            <a href="https://wa.me/5350677110?text=Reglas%20y%20condiciones" class="footer-link">TÉRMINOS</a>
-            <span style="color:#1e1e26">|</span>
-            <a href="https://wa.me/5350677110?text=Quiero%20unirme" class="footer-link">REGISTRARSE</a>
-        </div>
-        <div class="footer-copy">© 2026 AKATSUKICASH GLOBAL · CAJERO OFICIAL 1XBET · SOPORTE 24/7</div>
-    </footer>
+  <!-- REFERIDOS -->
+  <div class="ref-section">
+    <div class="ref-title">PROGRAMA REFERIDOS</div>
+    <p class="ref-sub">
+      Comparte tu enlace único. Por cada <strong>5 amigos que depositen por primera vez</strong>, recibes <strong>$2 USD</strong> directo. Sin límite.
+    </p>
+    <div class="ref-scale">
+      <div class="ref-tier"><div class="ref-tier-icon">💵</div><div class="ref-tier-txt">5 referidos con 1er depósito</div><div class="ref-tier-prize">$2 USD</div></div>
+      <div class="ref-tier"><div class="ref-tier-icon">💵💵</div><div class="ref-tier-txt">10 referidos con 1er depósito</div><div class="ref-tier-prize">$4 USD</div></div>
+      <div class="ref-tier"><div class="ref-tier-icon">💰</div><div class="ref-tier-txt">25 referidos con 1er depósito</div><div class="ref-tier-prize">$10 USD</div></div>
+      <div class="ref-tier"><div class="ref-tier-icon">🤑</div><div class="ref-tier-txt">50 referidos con 1er depósito</div><div class="ref-tier-prize">$20 USD</div></div>
+    </div>
+    <p style="font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;line-height:1.7;">
+      Regístrate para obtener tu enlace personal. Cuando alguien entra por tu enlace y se registra, queda vinculado a ti automáticamente.
+    </p>
+    <button onclick="openOverlay('regOverlay')" style="margin-top:14px;width:100%;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.25);color:var(--green);padding:12px;border-radius:8px;font-family:var(--D);font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all .25s;" onmouseover="this.style.background='var(--green)';this.style.color='#000'" onmouseout="this.style.background='rgba(0,230,118,.08)';this.style.color='var(--green)'">
+      OBTENER MI ENLACE →
+    </button>
+  </div>
+
+  <!-- CALC -->
+  <div class="calc-section">
+    <div class="calc-lbl">CALCULADORA DE CAMBIO &nbsp;<span>USDT → CUP</span></div>
+    <div class="calc-row">
+      <div class="calc-iw"><span class="calc-pre">$</span><input type="number" id="calcInput" placeholder="0.00 USDT / USD" min="0"></div>
+      <div class="calc-result"><div class="cr-val" id="crVal">0.00</div><div class="cr-lbl">CUP</div></div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <a href="https://wa.me/5350677110?text=Hola,%20quiero%20hacer%20un%20depósito" class="btn-act btn-dep">
+      <i class="fas fa-arrow-down"></i>DEPOSITAR<span class="sub">VÍA WHATSAPP</span>
+    </a>
+    <a href="https://wa.me/5350677110?text=Hola,%20quiero%20consultar%20un%20retiro" class="btn-act btn-ret">
+      <i class="fas fa-arrow-up"></i>RETIRAR<span class="sub">VÍA WHATSAPP</span>
+    </a>
+  </div>
+
+  <footer>
+    <div class="ft-brand">AKATSU<em>KI</em>CASH</div>
+    <div class="ft-links">
+      <a href="https://wa.me/5350677110" class="ft-link"><i class="fab fa-whatsapp"></i> CONTACTO</a>
+      <span style="color:#1e1e26">|</span>
+      <a href="https://wa.me/5350677110?text=Términos%20y%20condiciones" class="ft-link">TÉRMINOS</a>
+      <span style="color:#1e1e26">|</span>
+      <a onclick="openOverlay('regOverlay')" class="ft-link" style="cursor:pointer;">REGISTRARSE</a>
+    </div>
+    <div class="ft-copy">© 2026 AKATSUKICASH GLOBAL · CAJERO OFICIAL 1XBET · SOPORTE 24/7</div>
+  </footer>
 </div>
 
 <script>
-    // ══════════════════════════════════════════════════════
-//  ▼▼▼  ÚNICA LÍNEA QUE DEBES CAMBIAR  ▼▼▼
-//  Pega aquí la URL que te da Google Apps Script
-//  Sigue el archivo INSTRUCCIONES.md paso a paso
-// ══════════════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrCZeIo4OUgEgDXX0e4K_HYTDG7rkPskV1thHdWjtZkmGlK8pDSf7dKR8uzWp1oMj4/exec';
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// ▼ ÚNICA LÍNEA A CAMBIAR — tu URL de Apps Script
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEuohURuUXdQeMDqP8hdmZDMiK9QoBvE44RpaRe2nyzCfcaTptx5-OeqUh3ANIITnH/exec';
+// ══════════════════════════════════════════════
 
+// Estado global
 let TASA = 620;
+let allData = {};
+let currentUserId = '';
 
-// ── Helpers de UI ──
-function getBadge(pos) {
-    if(pos===1) return '<span class="badge badge-legend">LEYENDA</span>';
-    if(pos===2) return '<span class="badge badge-maestro">MAESTRO</span>';
-    if(pos===3) return '<span class="badge badge-elite">ELITE</span>';
-    return '<span class="badge badge-rookie">ROOKIE</span>';
+// Leer ref del URL
+const urlRef = new URLSearchParams(location.search).get('ref') || '';
+
+// ── KUNAI PARTICLES ──
+(function spawnKunai(){
+  const c = document.getElementById('kunaiContainer');
+  for(let i=0;i<18;i++){
+    const k = document.createElement('div');
+    k.className = 'kunai';
+    k.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*-20}px;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*12}s;height:${12+Math.random()*20}px;`;
+    c.appendChild(k);
+  }
+})();
+
+// ── COUNTDOWN al próximo domingo 23:59 ──
+function updateCountdown(){
+  const now  = new Date();
+  const next = new Date(now);
+  next.setDate(now.getDate() + (7 - now.getDay()) % 7 || 7);
+  next.setHours(23,59,59,0);
+  const diff = next - now;
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  document.getElementById('cdD').textContent = String(d).padStart(2,'0');
+  document.getElementById('cdH').textContent = String(h).padStart(2,'0');
+  document.getElementById('cdM').textContent = String(m).padStart(2,'0');
+  document.getElementById('cdS').textContent = String(s).padStart(2,'0');
 }
-function getPosClass(pos) {
-    if(pos===1) return 'gp'; if(pos===2) return 'sp'; if(pos===3) return 'bp'; return '';
+updateCountdown(); setInterval(updateCountdown,1000);
+
+// ── HORA ──
+function setTime(){
+  document.getElementById('updateTime').textContent =
+    new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})+' hrs';
+}
+setTime(); setInterval(setTime,60000);
+
+// ── HELPERS ──
+function badge(pos){
+  if(pos===1) return '<span class="badge b-legend">LEYENDA</span>';
+  if(pos===2) return '<span class="badge b-maestro">MAESTRO</span>';
+  if(pos===3) return '<span class="badge b-elite">ELITE</span>';
+  return '<span class="badge b-rookie">ROOKIE</span>';
+}
+function posClass(pos){
+  return pos===1?'gp':pos===2?'sp':pos===3?'bp':'';
 }
 
-function renderTable(key, rows) {
-    const tbody = document.getElementById('tbody-' + key);
-    if(!tbody) return;
-    if(!rows || rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4"><div class="state-msg"><span class="state-icon">📋</span>SIN USUARIOS AÚN</div></td></tr>`;
-        return;
+function renderTable(key, rows, searchId){
+  const tbody = document.getElementById('t'+key);
+  if(!tbody) return;
+  if(!rows||rows.length===0){
+    tbody.innerHTML='<tr><td colspan="4" class="loading-cell">SIN USUARIOS AÚN</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((u,i)=>{
+    const pos=i+1;
+    const hl = searchId && u.id===searchId ? 'class="highlighted"' : '';
+    return `<tr ${hl}>
+      <td class="pc ${posClass(pos)}">${String(pos).padStart(2,'0')}</td>
+      <td class="uc">${u.id}</td>
+      <td class="ptc">${Number(u.pts).toLocaleString()}</td>
+      <td>${badge(pos)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAllTables(sid){
+  ['ds','dm','rs','rm'].forEach(k=>{
+    const map = {ds:'dep-sem',dm:'dep-men',rs:'ret-sem',rm:'ret-men'};
+    if(allData[map[k]]) renderTable(k, allData[map[k]], sid);
+  });
+}
+
+function setSyncState(sec,state,txt){
+  document.getElementById('sd'+sec).className='sync-dot'+(state==='loading'?' loading':state==='err'?' err':'');
+  document.getElementById('st'+sec).textContent=txt;
+}
+
+// ── PROMOS (renderizado desde Sheets o defaults) ──
+const DEFAULT_PROMOS = [
+  {emoji:'🎁',name:'BONO DE BIENVENIDA',desc:'Tu primer depósito con nosotros lleva un +10% extra directo a tu cuenta de 1xbet.',cond:'Solo nuevos usuarios · Una vez por cuenta',tag:'+10%',tagClass:'gold',tipo:'gold-card'},
+  {emoji:'👥',name:'PROGRAMA REFERIDOS',desc:'Por cada 5 amigos que depositen por primera vez, ganas $2 USD sin límite de veces.',cond:'El referido debe completar su 1er depósito',tag:'$2 x 5',tagClass:'green',tipo:'green-card'},
+  {emoji:'🏆',name:'PREMIO SEMANAL',desc:'El Top 1 del ranking de depósitos semanal recibe un premio exclusivo al cierre del período.',cond:'Válido cada semana · Podio renovable',tag:'TOP 1',tagClass:'red',tipo:'red-card'},
+  {emoji:'💎',name:'BONO MENSUAL VIP',desc:'El Top 1 mensual recibe un bono extra + regalo sorpresa VIP al cierre del mes.',cond:'Válido cada mes · Acumulativo con semanal',tag:'VIP',tagClass:'gold',tipo:'gold-card'},
+  {emoji:'💸',name:'PREMIO RETIRO',desc:'El usuario con más retiros en la semana también entra al podio y compite por su propio premio.',cond:'Ranking separado · Semanal y mensual',tag:'RETIROS',tagClass:'blue',tipo:'blue-card'},
+];
+
+function renderPromos(promos){
+  const grid = document.getElementById('promosGrid');
+  grid.innerHTML = promos.map(p=>`
+    <div class="promo-card ${p.tipo||'gold-card'}">
+      <div class="promo-emoji">${p.emoji}</div>
+      <div class="promo-body">
+        <div class="promo-name">${p.name}</div>
+        <div class="promo-desc">${p.desc}</div>
+        <div class="promo-cond">📌 ${p.cond}</div>
+        <div class="promo-badge-wrap">
+          <span class="promo-tag ${p.tagClass||'gold'}">${p.tag}</span>
+        </div>
+        <a href="https://wa.me/5350677110?text=Quiero%20reclamar%20la%20promo:%20${encodeURIComponent(p.name)}" class="promo-wa" target="_blank">
+          <i class="fab fa-whatsapp"></i> RECLAMAR POR WA
+        </a>
+      </div>
+    </div>`).join('');
+}
+renderPromos(DEFAULT_PROMOS);
+
+// ── WINNERS ──
+function renderWinners(winners){
+  if(!winners||winners.length===0) return;
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('winnersGrid').innerHTML = winners.map((w,i)=>`
+    <div class="winner-card">
+      <div class="winner-medal">${medals[i]||'🏅'}</div>
+      <div class="winner-info">
+        <div class="winner-id">${w.id}</div>
+        <div class="winner-period">${w.periodo}</div>
+      </div>
+      <div class="winner-prize">${w.premio}</div>
+    </div>`).join('');
+}
+
+// ── SEARCH ──
+function doSearch(val){
+  const id = val.trim();
+  const box = document.getElementById('searchResult');
+  if(!id){ box.classList.remove('show'); box.innerHTML=''; renderAllTables(''); return; }
+  currentUserId = id;
+  renderAllTables(id);
+
+  const maps = {
+    'ds':'dep-sem','dm':'dep-men','rs':'ret-sem','rm':'ret-men'
+  };
+  const labels = {'dep-sem':'Depósitos Semanal','dep-men':'Depósitos Mensual','ret-sem':'Retiros Semanal','ret-men':'Retiros Mensual'};
+  let found = [];
+  Object.entries(maps).forEach(([k,mk])=>{
+    const arr = allData[mk]||[];
+    const idx = arr.findIndex(u=>u.id===id);
+    if(idx>=0) found.push({pos:idx+1,table:labels[mk],pts:arr[idx].pts});
+  });
+
+  // Buscar en usuarios registrados
+  const userData = allData.usuarios ? allData.usuarios.find(u=>u.id===id) : null;
+
+  if(found.length===0 && !userData){
+    box.innerHTML=`<div class="sr-not-found">😶 ID <strong>${id}</strong> no encontrado en ningún ranking aún.<br><span style="color:var(--muted);font-size:.5rem;">Regístrate y comienza a depositar para aparecer.</span></div>`;
+  } else {
+    let html = `<div class="sr-label">RESULTADOS PARA ${id}</div>`;
+    found.forEach(f=>{
+      const pc = posClass(f.pos);
+      html+=`<div class="sr-row">
+        <div class="sr-pos ${pc}">${String(f.pos).padStart(2,'0')}</div>
+        <div class="sr-info">
+          <div class="sr-table">${f.table}</div>
+          <div class="sr-pts">${Number(f.pts).toLocaleString()} pts</div>
+        </div>
+        ${badge(f.pos)}
+      </div>`;
+    });
+    if(userData){
+      const refLink = `${location.origin}${location.pathname}?ref=${userData.code}`;
+      html+=`<div class="sr-ref">
+        <div class="sr-ref-label">TU CÓDIGO DE REFERIDO</div>
+        <div class="sr-ref-code">${userData.code}</div>
+        <div class="sr-ref-count">Referidos con depósito: <strong style="color:#fff">${userData.referidos||0}</strong></div>
+        <div class="sr-ref-prize">Ganado por referidos: <strong style="color:var(--gold)">$${Math.floor((userData.referidos||0)/5)*2} USD</strong></div>
+        <button class="sr-copy-btn" onclick="copyRef('${refLink}')"><i class="fas fa-copy"></i> COPIAR MI ENLACE</button>
+      </div>`;
     }
-    tbody.innerHTML = rows.map((u, i) => {
-        const pos = i + 1;
-        return `<tr>
-            <td class="pos-cell ${getPosClass(pos)}">${String(pos).padStart(2,'0')}</td>
-            <td class="user-cell">${u.id}</td>
-            <td class="pts-cell">${Number(u.pts).toLocaleString()}</td>
-            <td>${getBadge(pos)}</td>
-        </tr>`;
-    }).join('');
+    box.innerHTML = html;
+  }
+  box.classList.add('show');
 }
 
-function setSyncState(section, state, text) {
-    const dot  = document.getElementById('syncDot'  + section);
-    const span = document.getElementById('syncText' + section);
-    dot.className  = 'sync-dot' + (state === 'loading' ? ' syncing' : state === 'error' ? ' error' : '');
-    span.textContent = text;
+function copyRef(link){
+  navigator.clipboard.writeText(link).then(()=>showToast('✓ Enlace copiado'));
 }
 
-// ── Fetch de Google Sheets via Apps Script ──
-function loadData() {
-    if(SCRIPT_URL === 'TU_URL_AQUI') {
-        document.getElementById('setupBanner').classList.add('show');
-        setSyncState('Dep', 'error', 'SIN CONFIGURAR');
-        setSyncState('Ret', 'error', 'SIN CONFIGURAR');
-        // Mostrar datos de muestra para que veas cómo queda
-        const sample = [
-            {id:'1565593149',pts:4800},{id:'2234109876',pts:3950},
-            {id:'3312847651',pts:3200},{id:'4478291034',pts:2750},
-            {id:'5590128374',pts:2300},{id:'6601837492',pts:1870},
-            {id:'7712093845',pts:1540},{id:'8823740192',pts:1120},
-            {id:'9934021847',pts:780}, {id:'1045938271',pts:430}
-        ];
-        ['dep-sem','dep-men','ret-sem','ret-men'].forEach(k => renderTable(k, sample));
-        updateRateDisplay(620);
-        return;
-    }
+// ── REGISTRO ──
+function doRegister(){
+  const idVal  = document.getElementById('regId').value.trim();
+  const nameVal= document.getElementById('regName').value.trim();
+  const res    = document.getElementById('regResult');
 
-    setSyncState('Dep', 'loading', 'SINCRONIZANDO...');
-    setSyncState('Ret', 'loading', 'SINCRONIZANDO...');
+  if(!idVal){ showToast('⚠ Escribe tu ID de 1xbet'); return; }
+  if(!/^\d{5,20}$/.test(idVal)){ showToast('⚠ ID inválido — solo números'); return; }
 
-    fetch(SCRIPT_URL)
-        .then(r => r.json())
-        .then(data => {
-            // Tasa
-            if(data.tasa) {
-                TASA = parseInt(data.tasa);
-                updateRateDisplay(TASA);
-            }
-            // Promo
-            if(data.promo) {
-                document.getElementById('promoTitle').textContent = data.promo.titulo  || 'BONO DE BIENVENIDA';
-                document.getElementById('promoSub').textContent   = data.promo.subtitulo || 'Consulta condiciones por WA';
-                document.getElementById('promoBadge').textContent = data.promo.badge  || '+10%';
-            }
-            // Premios texto
-            if(data.premios) {
-                if(data.premios['dep-sem']) document.getElementById('prize-dep-sem').textContent = data.premios['dep-sem'];
-                if(data.premios['dep-men']) document.getElementById('prize-dep-men').textContent = data.premios['dep-men'];
-                if(data.premios['ret-sem']) document.getElementById('prize-ret-sem').textContent = data.premios['ret-sem'];
-                if(data.premios['ret-men']) document.getElementById('prize-ret-men').textContent = data.premios['ret-men'];
-            }
-            // Rankings
-            ['dep-sem','dep-men','ret-sem','ret-men'].forEach(k => {
-                if(data[k]) renderTable(k, data[k]);
-            });
-            const now = new Date();
-            const hm  = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-            setSyncState('Dep', 'ok', 'EN VIVO · ' + hm);
-            setSyncState('Ret', 'ok', 'EN VIVO · ' + hm);
-        })
-        .catch(() => {
-            setSyncState('Dep', 'error', 'ERROR DE CONEXIÓN');
-            setSyncState('Ret', 'error', 'ERROR DE CONEXIÓN');
-        });
+  const code = 'AK' + idVal.slice(-4) + Math.floor(Math.random()*90+10);
+  const refLink = `${location.origin}${location.pathname}?ref=${code}`;
+
+  // Enviamos al Apps Script
+  const payload = {action:'register', id:idVal, name:nameVal, code, refBy: urlRef};
+
+  fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify(payload)})
+    .catch(()=>{});
+
+  res.style.display='block';
+  res.innerHTML=`
+    <div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:10px;padding:16px;">
+      <div style="font-family:var(--D);font-size:1.2rem;letter-spacing:2px;color:var(--green);margin-bottom:8px;">✓ REGISTRO EXITOSO</div>
+      <div style="font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;">
+        ID: <strong style="color:#fff">${idVal}</strong><br>
+        Código: <strong style="color:var(--gold)">${code}</strong><br>
+        ${urlRef ? `Referido por: <strong style="color:#fff">${urlRef}</strong><br>` : ''}
+      </div>
+      <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--M);font-size:.58rem;word-break:break-all;color:var(--green);">${refLink}</div>
+      <button onclick="copyRef('${refLink}')" style="margin-top:10px;width:100%;background:var(--gold);border:none;color:#000;padding:10px;border-radius:7px;font-family:var(--D);font-size:.9rem;letter-spacing:1px;cursor:pointer;">
+        <i class="fas fa-copy"></i> COPIAR MI ENLACE DE REFERIDO
+      </button>
+      <p style="font-family:var(--M);font-size:.46rem;color:var(--muted2);margin-top:10px;text-align:center;letter-spacing:1px;">Comparte este enlace. Cada amigo que entre por él queda vinculado a ti.</p>
+    </div>`;
+
+  document.getElementById('regId').value='';
+  document.getElementById('regName').value='';
+  showToast('✓ ¡Bienvenido a AKATSUKICASH!');
 }
 
-function updateRateDisplay(val) {
-    document.getElementById('rateDisplay').innerHTML = val + ' <span class="unit">CUP</span>';
-    document.getElementById('tickerTasa1').textContent = '$' + val + ' CUP';
-    document.getElementById('tickerTasa2').textContent = '$' + val + ' CUP';
+// ── LOAD DATA ──
+function loadData(){
+  if(SCRIPT_URL==='TU_URL_AQUI'){
+    // Datos de muestra
+    allData = {
+      'dep-sem':[{id:'1565593149',pts:4800},{id:'2234109876',pts:3950},{id:'3312847651',pts:3200},{id:'4478291034',pts:2750},{id:'5590128374',pts:2300},{id:'6601837492',pts:1870},{id:'7712093845',pts:1540},{id:'8823740192',pts:1120},{id:'9934021847',pts:780},{id:'1045938271',pts:430}],
+      'dep-men':[{id:'2234109876',pts:18500},{id:'1565593149',pts:16200},{id:'5590128374',pts:13800},{id:'3312847651',pts:11400},{id:'7712093845',pts:9600},{id:'4478291034',pts:7800},{id:'9934021847',pts:6100},{id:'6601837492',pts:4400},{id:'8823740192',pts:2900},{id:'1045938271',pts:1500}],
+      'ret-sem':[{id:'3312847651',pts:5200},{id:'6601837492',pts:4300},{id:'1565593149',pts:3700},{id:'9934021847',pts:2900},{id:'2234109876',pts:2400},{id:'8823740192',pts:1900},{id:'4478291034',pts:1500},{id:'7712093845',pts:1100},{id:'5590128374',pts:700},{id:'1045938271',pts:300}],
+      'ret-men':[{id:'6601837492',pts:22000},{id:'3312847651',pts:19500},{id:'9934021847',pts:16000},{id:'1565593149',pts:13200},{id:'8823740192',pts:10500},{id:'2234109876',pts:8100},{id:'7712093845',pts:6200},{id:'4478291034',pts:4400},{id:'5590128374',pts:2700},{id:'1045938271',pts:1000}],
+      usuarios:[{id:'1565593149',code:'AK91491',referidos:3},{id:'2234109876',code:'AK98762',referidos:7}],
+      tasa:620,
+      premios:{'dep-sem':'🏆 TOP 1: CONSULTAR POR WA · TOP 2: CONSULTAR POR WA · TOP 3: CONSULTAR POR WA','dep-men':'💎 TOP 1: CONSULTAR POR WA + REGALO VIP','ret-sem':'💸 TOP 1: CONSULTAR POR WA','ret-men':'💎 TOP 1: CONSULTAR POR WA'},
+      ganadores:[],
+      userCount:2
+    };
+    applyData();
+    setSyncState('Dep','ok','DATOS DE MUESTRA');
+    setSyncState('Ret','ok','DATOS DE MUESTRA');
+    return;
+  }
+
+  setSyncState('Dep','loading','SINCRONIZANDO...');
+  setSyncState('Ret','loading','SINCRONIZANDO...');
+
+  fetch(SCRIPT_URL)
+    .then(r=>r.json())
+    .then(d=>{
+      allData=d;
+      applyData();
+      const hm=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+      setSyncState('Dep','ok','EN VIVO · '+hm);
+      setSyncState('Ret','ok','EN VIVO · '+hm);
+    })
+    .catch(()=>{
+      setSyncState('Dep','err','ERROR DE CONEXIÓN');
+      setSyncState('Ret','err','ERROR DE CONEXIÓN');
+    });
+}
+
+function applyData(){
+  if(allData.tasa){ TASA=parseInt(allData.tasa); updateRate(TASA); }
+  if(allData.premios){
+    const p=allData.premios;
+    if(p['dep-sem']) document.getElementById('pds').textContent=p['dep-sem'];
+    if(p['dep-men']) document.getElementById('pdm').textContent=p['dep-men'];
+    if(p['ret-sem']) document.getElementById('prs').textContent=p['ret-sem'];
+    if(p['ret-men']) document.getElementById('prm').textContent=p['ret-men'];
+  }
+  if(allData.promos && allData.promos.length>0) renderPromos(allData.promos);
+  if(allData.ganadores) renderWinners(allData.ganadores);
+
+  // Sorteo progress
+  const uc = allData.userCount||0;
+  document.getElementById('sorteoCount').textContent=uc+' / 50';
+  document.getElementById('sorteoFill').style.width=Math.min(uc/50*100,100)+'%';
+  document.getElementById('sorteoLabel').textContent = uc>=50 ? '🎰 ¡ACTIVO!' : 'FALTAN '+(50-uc)+' USUARIOS';
+
+  renderAllTables(currentUserId);
+}
+
+function updateRate(v){
+  document.getElementById('rateDisplay').innerHTML=v+' <span class="u">CUP</span>';
+  document.getElementById('t1').textContent='$'+v+' CUP';
+  document.getElementById('t2').textContent='$'+v+' CUP';
 }
 
 // ── TABS ──
-function openTab(evt, tabId, group) {
-    const boardId = group==='dep' ? 'boardDep' : 'boardRet';
-    const tabsId  = group==='dep' ? 'tabsDep'  : 'tabsRet';
-    document.getElementById(boardId).querySelectorAll('.tab-content').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
-    document.getElementById(tabsId).querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    const tab = document.getElementById(tabId);
-    tab.style.display='block'; tab.classList.add('active');
-    evt.currentTarget.classList.add('active');
+function openTab(evt,id,group){
+  const bId=group==='dep'?'boardDep':'boardRet';
+  const tId=group==='dep'?'tabsDep':'tabsRet';
+  document.getElementById(bId).querySelectorAll('.tab-pane').forEach(e=>{e.style.display='none';e.classList.remove('active');});
+  document.getElementById(tId).querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const pane=document.getElementById(id);
+  pane.style.display='block'; pane.classList.add('active');
+  evt.currentTarget.classList.add('active');
 }
 
-// ── CALCULADORA ──
-document.getElementById('calcInput').addEventListener('input', function() {
-    const val = parseFloat(this.value) || 0;
-    document.getElementById('resultVal').textContent =
-        (val * TASA).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+// ── OVERLAYS ──
+function openOverlay(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeOverlay(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); document.body.style.overflow=''; });
+
+// ── CALCULATOR ──
+document.getElementById('calcInput').addEventListener('input',function(){
+  document.getElementById('crVal').textContent=((parseFloat(this.value)||0)*TASA).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 });
 
-// ── HORA ──
-function setTime() {
-    document.getElementById('updateTime').textContent =
-        new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}) + ' hrs';
+// ── TOAST ──
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2800);
 }
-setTime(); setInterval(setTime, 60000);
 
-// ── MODAL ──
-function openModal()  { document.getElementById('rankModal').classList.add('open');    document.body.style.overflow='hidden'; }
-function closeModal() { document.getElementById('rankModal').classList.remove('open'); document.body.style.overflow=''; }
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+// ── INIT ──
+// Si viene con ?ref= en el URL, abre el registro automáticamente
+if(urlRef){ setTimeout(()=>openOverlay('regOverlay'),800); }
 
-// ── INIT — carga datos y refresca cada 60 segundos ──
 loadData();
 setInterval(loadData, 60000);
 </script>
 </body>
-</html>
+    </html>
