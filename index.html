@@ -3,415 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>AKATSUKICASH | PREMIUM SYSTEM</title>
+<title>AKATSUKICASH | Mantenimiento</title>
+<meta name="description" content="AKATSUKICASH está en mantenimiento. Volvemos pronto con mejoras.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23000'/><ellipse cx='50' cy='66' rx='40' ry='18' fill='%23e8192c'/><circle cx='24' cy='54' r='14' fill='%23e8192c'/><circle cx='42' cy='46' r='16' fill='%23e8192c'/><circle cx='62' cy='44' r='18' fill='%23e8192c'/><circle cx='80' cy='52' r='14' fill='%23e8192c'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --red:#e8192c;--red-dim:rgba(232,25,44,.18);--red-glow:rgba(232,25,44,.6);
-  --green:#00e676;--green-dim:rgba(0,230,118,.09);
-  --gold:#fbbf24;--gold-dim:rgba(251,191,36,.1);
-  --bg:#040406;--surface:#0a0a0e;--surface2:#0f0f14;--surface3:#141419;
-  --border:rgba(255,255,255,.055);--border-red:rgba(232,25,44,.28);
+  --red:#e8192c;--red-glow:rgba(232,25,44,.6);--green:#00e676;--gold:#fbbf24;
+  --bg:#040406;--surface:#0a0a0e;--border:rgba(255,255,255,.055);--border-red:rgba(232,25,44,.28);
   --text:#eeeef5;--muted:#4a4a62;--muted2:#6a6a88;
   --D:'Bebas Neue',sans-serif;--M:'Space Mono',monospace;--B:'DM Sans',sans-serif;
-  --max:480px;
 }
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
-body{background:var(--bg);color:var(--text);font-family:var(--B);min-height:100vh;overflow-x:hidden;width:100%;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--B);display:flex;align-items:center;justify-content:center;position:relative;}
 
-/* ══ RESPONSIVE BASE ══ */
-img,svg,video{max-width:100%;height:auto;}
-input,button,select,textarea{font-family:inherit;}
-
-/* ══ BG ══ */
+/* BG */
 .bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
 .bg-glow{position:absolute;inset:0;
   background:radial-gradient(ellipse 90% 50% at 50% -8%,rgba(232,25,44,.22) 0%,transparent 65%),
     radial-gradient(ellipse 60% 40% at 95% 50%,rgba(232,25,44,.1) 0%,transparent 55%),
-    radial-gradient(ellipse 50% 35% at 3% 75%,rgba(232,25,44,.08) 0%,transparent 50%),
-    radial-gradient(ellipse 40% 30% at 50% 100%,rgba(232,25,44,.06) 0%,transparent 60%);}
-.bg-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);}
-.cloud{position:absolute;fill:#e8192c;filter:drop-shadow(0 0 14px rgba(232,25,44,.55));}
-.cloud.k1{width:min(340px,85vw);top:2%;left:-60px;opacity:.14;animation:fc 20s ease-in-out infinite;}
-.cloud.k2{width:min(260px,65vw);top:28%;right:-50px;opacity:.1;animation:fc 25s ease-in-out infinite reverse 3s;}
-.cloud.k3{width:min(300px,75vw);top:58%;left:5%;opacity:.09;animation:fc 30s ease-in-out infinite 6s;}
-.cloud.k4{width:min(220px,55vw);top:80%;right:2%;opacity:.11;animation:fc 22s ease-in-out infinite 10s;}
-.cloud.k5{width:min(380px,95vw);top:42%;left:50%;transform:translateX(-50%);opacity:.05;animation:fc 35s ease-in-out infinite 2s;}
-@keyframes fc{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-18px) translateX(8px)}66%{transform:translateY(10px) translateX(-6px)}}
-.shari{position:absolute;animation:spin 50s linear infinite;}
-.shari.sh1{width:min(400px,100vw);top:5%;right:-120px;opacity:.09;}
-.shari.sh2{width:min(280px,70vw);bottom:3%;left:-80px;opacity:.07;animation-direction:reverse;animation-duration:38s;}
-.shari.sh3{width:min(160px,40vw);top:45%;left:38%;opacity:.045;animation-duration:28s;}
+    radial-gradient(ellipse 40% 30% at 5% 75%,rgba(232,25,44,.07) 0%,transparent 50%);}
+.bg-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);}
+.cloud{position:absolute;fill:#e8192c;filter:drop-shadow(0 0 14px rgba(232,25,44,.55));opacity:.1;animation:fc 20s ease-in-out infinite;}
+.cloud.k1{width:min(320px,80vw);top:5%;left:-50px;}
+.cloud.k2{width:min(240px,60vw);top:30%;right:-40px;animation-delay:3s;}
+.cloud.k3{width:min(280px,70vw);bottom:15%;left:5%;animation-delay:6s;}
+@keyframes fc{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-16px) translateX(7px)}}
+.shari{position:absolute;animation:spin 50s linear infinite;opacity:.07;}
+.shari.sh1{width:min(380px,95vw);top:8%;right:-110px;}
+.shari.sh2{width:min(260px,65vw);bottom:10%;left:-75px;animation-direction:reverse;animation-duration:38s;}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.kunai{position:absolute;width:1px;height:18px;background:linear-gradient(180deg,transparent,rgba(232,25,44,.4),transparent);animation:kfall linear infinite;opacity:0;}
-@keyframes kfall{0%{transform:translateY(-30px) rotate(45deg);opacity:0}10%{opacity:1}90%{opacity:.5}100%{transform:translateY(110vh) rotate(45deg);opacity:0}}
 
-/* ══ WRAPPER ══ */
-.wrap{position:relative;z-index:2;width:100%;max-width:var(--max);margin:0 auto;padding:0 16px 64px;}
+/* CONTAINER */
+.container{position:relative;z-index:10;max-width:500px;width:90%;text-align:center;padding:0 20px;animation:fadeIn 1s cubic-bezier(.16,1,.3,1) both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 
-/* ══ TOPBAR ══ */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;border-bottom:1px solid var(--border);gap:8px;}
-.topbar-brand{font-family:var(--D);font-size:clamp(1rem,5vw,1.25rem);letter-spacing:3px;color:#fff;flex-shrink:0;}
-.topbar-brand em{color:var(--red);font-style:normal;}
-.topbar-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
-.pill-btn{background:var(--red-dim);border:1px solid var(--border-red);color:var(--red);padding:5px 10px;border-radius:20px;font-family:var(--M);font-size:clamp(.4rem,.45rem+.2vw,.5rem);letter-spacing:1px;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.pill-btn:hover,.pill-btn.active-reg{background:var(--red);color:#fff;}
-.pill-btn.green{background:rgba(0,230,118,.08);border-color:rgba(0,230,118,.2);color:var(--green);}
-.pill-btn.green:hover{background:var(--green);color:#000;}
-.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);padding:5px 10px;border-radius:20px;font-family:var(--M);font-size:.48rem;color:var(--green);letter-spacing:1px;white-space:nowrap;}
-.pdot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite;flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+/* LOGO AREA */
+.logo-area{margin-bottom:30px;}
+.brand{font-family:var(--D);font-size:clamp(2.5rem,12vw,4rem);letter-spacing:clamp(4px,2vw,8px);line-height:.95;color:#fff;
+  text-shadow:0 0 60px rgba(232,25,44,.5),0 0 120px rgba(232,25,44,.2);animation:pulse 3s ease-in-out infinite;}
+.brand em{color:var(--red);font-style:normal;position:relative;}
+.brand em::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:2px;background:var(--red);box-shadow:0 0 10px var(--red);}
+@keyframes pulse{0%,100%{text-shadow:0 0 60px rgba(232,25,44,.5)}50%{text-shadow:0 0 80px rgba(232,25,44,.8),0 0 140px rgba(232,25,44,.3)}}
+.eyebrow{font-family:var(--M);font-size:clamp(.4rem,.48rem,.52rem);color:var(--muted2);letter-spacing:4px;margin-top:8px;text-transform:uppercase;}
 
-/* ══ TICKER ══ */
-.ticker{background:rgba(232,25,44,.06);border-top:1px solid var(--border-red);border-bottom:1px solid var(--border-red);padding:7px 0;overflow:hidden;margin-bottom:0;}
-.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:tick 30s linear infinite;}
-@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.ti{font-family:var(--M);font-size:.52rem;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;flex-shrink:0;}
-.ti .r{color:var(--red);}.ti .g{color:var(--green);}
+/* ICON */
+.icon-wrap{margin:30px 0;animation:bounce 2s ease-in-out infinite;}
+.icon{font-size:clamp(3rem,15vw,5rem);color:var(--red);filter:drop-shadow(0 0 20px var(--red-glow));}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
-/* ══ NOTIFICATION BANNER ══ */
-.notif-banner{display:none;background:linear-gradient(90deg,rgba(232,25,44,.15),rgba(232,25,44,.05));border-bottom:1px solid var(--border-red);padding:10px 16px;font-family:var(--M);font-size:.54rem;letter-spacing:1px;color:#fff;text-align:center;}
-.notif-banner.show{display:block;}
-.notif-banner em{color:var(--red);font-style:normal;}
+/* TITLE */
+.title{font-family:var(--D);font-size:clamp(1.8rem,8vw,2.5rem);letter-spacing:3px;color:#fff;margin-bottom:12px;line-height:1.1;}
+.title-sub{font-family:var(--M);font-size:clamp(.5rem,.6rem,.7rem);color:var(--muted2);letter-spacing:2px;margin-top:8px;}
 
-/* ══ HERO ══ */
-.hero{text-align:center;padding:28px 0 24px;position:relative;}
-.hero-eyebrow{font-family:var(--M);font-size:clamp(.42rem,.5rem,.55rem);color:var(--muted2);letter-spacing:4px;margin-bottom:10px;text-transform:uppercase;}
-.hero-title{font-family:var(--D);font-size:clamp(2.4rem,12vw,4.2rem);letter-spacing:clamp(4px,2vw,8px);line-height:.95;color:#fff;
-  text-shadow:0 0 60px rgba(232,25,44,.5),0 0 120px rgba(232,25,44,.2);
-  animation:heroIn .8s cubic-bezier(.16,1,.3,1) both;}
-.hero-title em{color:var(--red);font-style:normal;position:relative;}
-.hero-title em::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:2px;background:var(--red);box-shadow:0 0 10px var(--red);}
-@keyframes heroIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-.hero-sub{font-family:var(--M);font-size:clamp(.46rem,.54rem,.58rem);color:var(--muted2);letter-spacing:3px;margin-top:12px;}
-.hero-div{display:flex;align-items:center;gap:10px;margin:16px auto 0;width:160px;}
-.hero-div::before,.hero-div::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--red));}
-.hero-div::after{background:linear-gradient(270deg,transparent,var(--red));}
-.hero-div-ico{color:var(--red);font-size:.65rem;}
+/* MESSAGE BOX */
+.msg-box{background:rgba(232,25,44,.08);border:1px solid var(--border-red);border-radius:14px;padding:20px 24px;margin:24px 0;position:relative;overflow:hidden;}
+.msg-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),transparent);}
+.msg-title{font-family:var(--D);font-size:clamp(1rem,5vw,1.2rem);letter-spacing:2px;color:var(--red);margin-bottom:10px;}
+.msg-text{font-family:var(--M);font-size:clamp(.54rem,.62rem,.7rem);color:var(--muted2);letter-spacing:1px;line-height:1.8;}
 
-/* ══ IN-APP NOTIFICATION ══ */
-.inapp-notif{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:600;
-  background:var(--surface2);border:1px solid var(--border-red);border-radius:12px;
-  padding:12px 18px;min-width:260px;max-width:90vw;
-  font-family:var(--M);font-size:.58rem;color:#fff;letter-spacing:1px;
-  opacity:0;transition:all .4s cubic-bezier(.16,1,.3,1);pointer-events:none;text-align:center;}
-.inapp-notif.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.inapp-notif .ni-icon{font-size:1.1rem;display:block;margin-bottom:5px;}
+/* FEATURES */
+.features{margin:24px 0;display:flex;flex-direction:column;gap:10px;}
+.feature{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:border-color .3s;}
+.feature:hover{border-color:var(--border-red);}
+.feature-icon{font-size:1.2rem;color:var(--green);width:28px;text-align:center;flex-shrink:0;}
+.feature-text{font-family:var(--M);font-size:clamp(.5rem,.56rem,.62rem);color:var(--muted2);letter-spacing:1px;text-align:left;line-height:1.6;}
 
-/* ══ SEARCH ══ */
-.search-wrap{margin-bottom:16px;position:relative;animation:up .5s .2s cubic-bezier(.16,1,.3,1) both;}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.search-input{width:100%;background:var(--surface);border:1px solid var(--border);padding:13px 44px 13px 16px;border-radius:10px;color:#fff;font-family:var(--M);font-size:clamp(.62rem,.72rem,.8rem);outline:none;transition:border-color .25s,box-shadow .25s;letter-spacing:1px;}
-.search-input:focus{border-color:var(--border-red);box-shadow:0 0 0 3px rgba(232,25,44,.08);}
-.search-input::placeholder{color:var(--muted);font-size:clamp(.55rem,.62rem,.7rem);}
-.search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none;}
-.search-result{background:var(--surface2);border:1px solid var(--border-red);border-radius:10px;padding:14px 16px;margin-top:8px;display:none;}
-.search-result.show{display:block;animation:up .3s cubic-bezier(.16,1,.3,1);}
-.sr-label{font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
-.sr-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
-.sr-row:last-of-type{border-bottom:none;}
-.sr-pos{font-family:var(--D);font-size:1.2rem;width:34px;flex-shrink:0;}
-.sr-pos.gp{color:var(--gold);text-shadow:0 0 10px rgba(251,191,36,.5);}
-.sr-pos.sp{color:#9ca3af;}.sr-pos.bp{color:#cd7c5e;}.sr-pos.rk{color:var(--muted2);}
-.sr-info{flex:1;min-width:0;}
-.sr-table{font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:1px;}
-.sr-pts{font-family:var(--M);font-size:.68rem;color:var(--green);}
-.sr-ref-box{margin-top:12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:8px;padding:12px 14px;}
-.sr-ref-lbl{font-family:var(--M);font-size:.46rem;color:var(--gold);letter-spacing:1px;margin-bottom:5px;}
-.sr-ref-code{font-family:var(--D);font-size:1.1rem;letter-spacing:3px;color:#fff;word-break:break-all;}
-.sr-ref-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
-.sr-stat{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:center;}
-.sr-stat-val{font-family:var(--D);font-size:1.1rem;color:#fff;}
-.sr-stat-lbl{font-family:var(--M);font-size:.44rem;color:var(--muted2);letter-spacing:1px;margin-top:2px;}
-.sr-share{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
-.sr-share-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:7px;font-family:var(--D);font-size:.75rem;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s;text-decoration:none;}
-.sr-share-btn.wa{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.25);color:var(--green);}
-.sr-share-btn.wa:hover{background:var(--green);color:#000;}
-.sr-share-btn.cp{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:var(--gold);}
-.sr-share-btn.cp:hover{background:var(--gold);color:#000;}
-.sr-not-found{text-align:center;padding:16px;font-family:var(--M);font-size:.56rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;}
+/* CONTACT */
+.contact{margin-top:28px;display:flex;flex-direction:column;gap:10px;}
+.contact-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:10px;text-decoration:none;font-family:var(--D);font-size:clamp(.9rem,4vw,1.1rem);letter-spacing:2px;transition:all .3s cubic-bezier(.16,1,.3,1);border:none;cursor:pointer;}
+.contact-btn:active{transform:scale(.97);}
+.wa-btn{background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.28);color:var(--green);}
+.wa-btn:hover{background:var(--green);color:#000;box-shadow:0 0 28px rgba(37,211,102,.3);}
+.wa-btn i{font-size:1.3rem;}
+.group-btn{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.15);color:var(--green);font-size:clamp(.52rem,.58rem,.64rem);}
+.group-btn:hover{background:rgba(37,211,102,.15);}
+.group-btn i{font-size:.9rem;}
 
-/* ══ RATE ══ */
-.rate-card{background:var(--surface);border:1px solid var(--border-red);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;animation:up .5s .1s cubic-bezier(.16,1,.3,1) both;}
-.rate-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),transparent);}
-.rate-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:4px;text-transform:uppercase;}
-.rate-val{font-family:var(--D);font-size:clamp(1.6rem,8vw,2.2rem);color:var(--red);letter-spacing:2px;line-height:1;text-shadow:0 0 24px var(--red-glow);}
-.rate-val .u{font-size:1rem;color:var(--muted2);margin-left:4px;}
-.rate-meta{text-align:right;}
-.rate-meta-lbl{font-size:.5rem;color:var(--muted);font-family:var(--M);letter-spacing:1px;}
-.rate-meta-val{font-family:var(--M);font-size:.66rem;color:var(--green);margin-top:3px;}
+/* FOOTER */
+.footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--border);}
+.footer-text{font-family:var(--M);font-size:clamp(.44rem,.5rem,.56rem);color:var(--muted);letter-spacing:1px;line-height:1.6;}
+.footer-brand{color:#fff;font-weight:700;}
+.footer-brand em{color:var(--red);font-style:normal;}
 
-/* ══ COUNTDOWN ══ */
-.cd-card{background:var(--surface);border:1px solid var(--border-red);border-radius:14px;padding:16px 20px;margin-bottom:16px;position:relative;overflow:hidden;}
-.cd-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(232,25,44,.06),transparent);}
-.cd-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
-.cd-lbl span{color:var(--red);}
-.cd-units{display:flex;gap:6px;align-items:center;}
-.cd-unit{flex:1;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 4px;}
-.cd-num{font-family:var(--D);font-size:clamp(1.4rem,6vw,1.8rem);color:#fff;line-height:1;display:block;}
-.cd-lbl2{font-family:var(--M);font-size:.4rem;color:var(--muted2);letter-spacing:1px;margin-top:3px;}
-.cd-sep{font-family:var(--D);font-size:clamp(1rem,4vw,1.4rem);color:var(--red);margin-bottom:14px;flex-shrink:0;}
-
-/* ══ PROMOS ══ */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.sec-title{font-family:var(--D);font-size:clamp(1rem,5vw,1.3rem);letter-spacing:3px;color:#fff;}
-.sec-sub{font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:1px;}
-.promos-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
-.promo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:12px;position:relative;overflow:hidden;transition:border-color .25s,transform .25s;}
-.promo-card:hover{border-color:var(--border-red);transform:translateY(-2px);}
-.promo-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
-.promo-card.gold-card::before{background:linear-gradient(180deg,var(--gold),transparent);}
-.promo-card.red-card::before{background:linear-gradient(180deg,var(--red),transparent);}
-.promo-card.green-card::before{background:linear-gradient(180deg,var(--green),transparent);}
-.promo-card.blue-card::before{background:linear-gradient(180deg,#60a5fa,transparent);}
-.promo-emoji{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
-.promo-body{flex:1;min-width:0;}
-.promo-name{font-family:var(--D);font-size:clamp(.9rem,4vw,1.1rem);letter-spacing:1px;color:#fff;margin-bottom:4px;}
-.promo-desc{font-size:clamp(.65rem,.72rem,.78rem);color:var(--muted2);line-height:1.5;}
-.promo-cond{font-family:var(--M);font-size:.46rem;color:var(--muted);letter-spacing:1px;margin-top:6px;}
-.promo-tag{display:inline-block;font-family:var(--D);font-size:.72rem;letter-spacing:1px;padding:3px 10px;border-radius:5px;margin-top:8px;}
-.promo-tag.gold{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
-.promo-tag.red{background:var(--red);color:#fff;}
-.promo-tag.green{background:var(--green);color:#000;}
-.promo-tag.blue{background:#3b82f6;color:#fff;}
-.promo-wa{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);color:var(--green);padding:5px 12px;border-radius:6px;font-family:var(--M);font-size:.46rem;letter-spacing:1px;text-decoration:none;transition:all .2s;}
-.promo-wa:hover{background:var(--green);color:#000;}
-
-/* ══ RANKING ══ */
-.rank-section{margin-bottom:16px;}
-.sync-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:1px;margin-bottom:10px;padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;}
-.sync-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;}
-.sync-dot.loading{background:var(--gold);animation:blink 1s infinite;}
-.sync-dot.err{background:var(--red);}
-.tabs{display:flex;gap:5px;margin-bottom:10px;}
-.tab-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted2);padding:9px 4px;font-family:var(--M);font-size:clamp(.42rem,.5rem,.55rem);letter-spacing:1px;cursor:pointer;border-radius:8px;transition:all .22s;text-transform:uppercase;}
-.tab-btn.active{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 18px var(--red-dim);}
-.tab-btn:hover:not(.active){border-color:var(--border-red);color:#ddd;}
-.board{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.tab-pane{display:none;}
-.tab-pane.active{display:block;animation:fadeIn .3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.prize-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;padding:10px 16px;font-family:var(--M);font-size:.52rem;letter-spacing:1px;text-align:center;}
-.prize-bar.gold-bar{background:linear-gradient(90deg,transparent,rgba(251,191,36,.08),transparent);border-bottom:1px solid rgba(251,191,36,.12);color:var(--gold);}
-.prize-bar.green-bar{background:linear-gradient(90deg,transparent,rgba(0,230,118,.06),transparent);border-bottom:1px solid rgba(0,230,118,.1);color:var(--green);}
-.tscroll{max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1a24 transparent;}
-.tscroll::-webkit-scrollbar{width:3px;}
-.tscroll::-webkit-scrollbar-thumb{background:#1a1a24;border-radius:2px;}
-table{width:100%;border-collapse:collapse;}
-thead tr{border-bottom:1px solid var(--border);}
-th{padding:9px 10px;text-align:left;font-family:var(--M);font-size:.44rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:400;}
-th:last-child,td:last-child{text-align:right;}
-tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .18s;}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,.02);}
-tbody tr.hl{background:rgba(232,25,44,.08)!important;outline:1px solid rgba(232,25,44,.3);}
-td{padding:12px 10px;font-size:clamp(.75rem,.84rem,.9rem);vertical-align:middle;}
-.pc{font-family:var(--D);font-size:clamp(.9rem,1.05rem,1.1rem);color:var(--muted2);width:30px;}
-.pc.gp{color:var(--gold);text-shadow:0 0 10px rgba(251,191,36,.5);}
-.pc.sp{color:#9ca3af;}.pc.bp{color:#cd7c5e;}
-.uc{font-family:var(--M);font-size:clamp(.7rem,.78rem,.85rem);word-break:break-all;}
-.ptc{font-family:var(--M);font-size:clamp(.68rem,.75rem,.8rem);}
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-family:var(--M);font-size:.43rem;letter-spacing:1px;font-weight:700;white-space:nowrap;}
-.b-legend{background:linear-gradient(135deg,#fbbf24,#b45309);color:#000;}
-.b-maestro{background:linear-gradient(135deg,#9ca3af,#4b5563);color:#000;}
-.b-elite{background:transparent;border:1px solid #6b7280;color:#9ca3af;}
-.b-rookie{background:transparent;border:1px solid var(--border-red);color:var(--red);}
-.loading-cell{text-align:center!important;padding:28px 12px!important;font-family:var(--M)!important;font-size:.56rem!important;color:var(--muted2)!important;letter-spacing:2px!important;}
-.spin-ico{display:inline-block;width:12px;height:12px;border:2px solid var(--border-red);border-top-color:var(--red);border-radius:50%;animation:rotation .7s linear infinite;margin-right:8px;vertical-align:middle;}
-@keyframes rotation{to{transform:rotate(360deg)}}
-
-/* ══ SORTEO ══ */
-.sorteo-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
-.sorteo-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(251,191,36,.06),transparent);}
-.sorteo-body{position:relative;z-index:1;}
-.sorteo-icon{font-size:2.2rem;display:block;text-align:center;margin-bottom:10px;}
-.sorteo-title{font-family:var(--D);font-size:clamp(1.2rem,5vw,1.4rem);letter-spacing:3px;color:#fff;text-align:center;margin-bottom:6px;}
-.sorteo-desc{font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;text-align:center;}
-.sorteo-prog-wrap{margin-top:16px;}
-.sorteo-prog-lbl{display:flex;justify-content:space-between;font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:1px;margin-bottom:7px;}
-.sorteo-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
-.sorteo-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;transition:width .6s ease;}
-.sorteo-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
-.sorteo-users{font-family:var(--D);font-size:clamp(.9rem,4vw,1rem);color:var(--gold);letter-spacing:1px;}
-.sorteo-next{font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:1px;}
-
-/* Sorteo activo */
-.sorteo-active{display:none;}
-.sorteo-active.show{display:block;}
-.sorteo-cd{display:flex;gap:6px;margin-top:14px;justify-content:center;}
-.sorteo-cd .cd-unit{width:64px;}
-.sorteo-btn{width:100%;margin-top:14px;background:linear-gradient(135deg,var(--gold),#b45309);border:none;color:#000;padding:14px;border-radius:10px;font-family:var(--D);font-size:1.1rem;letter-spacing:2px;cursor:pointer;transition:all .25s;display:none;}
-.sorteo-btn:hover{box-shadow:0 0 28px rgba(251,191,36,.4);transform:translateY(-1px);}
-
-/* Ruleta animación */
-.sorteo-roulette{display:none;text-align:center;padding:20px 0;}
-.roulette-display{font-family:var(--D);font-size:clamp(1.4rem,7vw,2rem);color:var(--gold);letter-spacing:3px;min-height:48px;animation:rouletteSpin .1s linear infinite;}
-@keyframes rouletteSpin{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
-.roulette-label{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:12px;}
-
-/* ══ CÓMO FUNCIONA ══ */
-.how-section{margin-bottom:20px;}
-.steps{display:flex;flex-direction:column;}
-.step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
-.step:last-child{border-bottom:none;}
-.step-num{width:34px;height:34px;border-radius:50%;background:var(--red-dim);border:1px solid var(--border-red);display:flex;align-items:center;justify-content:center;font-family:var(--D);font-size:1rem;color:var(--red);flex-shrink:0;margin-top:2px;}
-.step-title{font-family:var(--D);font-size:clamp(.9rem,4vw,1rem);letter-spacing:1px;color:#fff;margin-bottom:3px;}
-.step-desc{font-size:clamp(.65rem,.72rem,.78rem);color:var(--muted2);line-height:1.5;}
-
-/* ══ REFERIDOS ══ */
-.ref-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
-.ref-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--green),transparent);}
-.ref-title{font-family:var(--D);font-size:clamp(1rem,5vw,1.3rem);letter-spacing:3px;color:#fff;margin-bottom:4px;}
-.ref-sub{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;margin-bottom:14px;line-height:1.7;}
-.ref-sub strong{color:var(--green);}
-.ref-scale{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.ref-tier{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
-.ref-tier-icon{font-size:1rem;flex-shrink:0;width:24px;text-align:center;}
-.ref-tier-txt{flex:1;font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;}
-.ref-tier-prize{font-family:var(--D);font-size:.9rem;color:var(--gold);letter-spacing:1px;}
-.ref-cta{width:100%;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.25);color:var(--green);padding:12px;border-radius:8px;font-family:var(--D);font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all .25s;}
-.ref-cta:hover{background:var(--green);color:#000;}
-
-/* ══ WINNERS ══ */
-.winners-section{margin-bottom:20px;}
-.winner-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;transition:border-color .2s;}
-.winner-card:hover{border-color:var(--border-red);}
-.winner-medal{font-size:1.3rem;flex-shrink:0;}
-.winner-info{flex:1;min-width:0;}
-.winner-id{font-family:var(--M);font-size:.75rem;color:#fff;font-weight:700;word-break:break-all;}
-.winner-period{font-family:var(--M);font-size:.46rem;color:var(--muted2);letter-spacing:1px;margin-top:2px;}
-.winner-prize{font-family:var(--D);font-size:.95rem;letter-spacing:1px;color:var(--gold);flex-shrink:0;}
-.no-winners{text-align:center;padding:20px;font-family:var(--M);font-size:.54rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;}
-
-/* ══ CALC ══ */
-.calc-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
-.calc-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;}
-.calc-lbl span{color:var(--red);}
-.calc-row{display:flex;gap:10px;align-items:stretch;}
-.calc-iw{flex:1;position:relative;}
-.calc-pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:var(--M);font-size:.65rem;color:var(--muted);}
-#calcInput{width:100%;background:var(--surface2);border:1px solid var(--border);padding:13px 12px 13px 26px;border-radius:8px;color:#fff;font-family:var(--M);font-size:.85rem;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
-#calcInput::-webkit-outer-spin-button,#calcInput::-webkit-inner-spin-button{-webkit-appearance:none;}
-#calcInput:focus{border-color:var(--border-red);}
-#calcInput::placeholder{color:var(--muted);font-size:.65rem;}
-.calc-res{flex:1;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:var(--green-dim);border:1px solid rgba(0,230,118,.14);border-radius:8px;padding:10px 14px;}
-.cr-val{font-family:var(--D);font-size:clamp(1rem,5vw,1.2rem);color:var(--green);letter-spacing:1px;text-shadow:0 0 14px rgba(0,230,118,.3);line-height:1;}
-.cr-lbl{font-family:var(--M);font-size:.46rem;color:rgba(0,230,118,.45);margin-top:3px;letter-spacing:1px;}
-
-/* ══ ACTIONS ══ */
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-.btn-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:16px 10px;border-radius:12px;text-decoration:none;font-family:var(--D);font-size:clamp(.9rem,4vw,1.1rem);letter-spacing:2px;transition:all .28s cubic-bezier(.16,1,.3,1);}
-.btn-act i{font-size:.95rem;}.btn-act .sub{font-family:var(--M);font-size:.4rem;letter-spacing:1px;opacity:.55;}
-.btn-act:active{transform:scale(.97);}
-.btn-dep{background:var(--green-dim);border:1.5px solid rgba(0,230,118,.28);color:var(--green);}
-.btn-dep:hover{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 28px rgba(0,230,118,.22);}
-.btn-ret{background:var(--red-dim);border:1.5px solid var(--border-red);color:var(--red);}
-.btn-ret:hover{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 28px var(--red-dim);}
-
-/* ══ FOOTER ══ */
-footer{text-align:center;padding-top:22px;border-top:1px solid var(--border);}
-.ft-brand{font-family:var(--D);font-size:1rem;letter-spacing:4px;color:#fff;margin-bottom:6px;}
-.ft-brand em{color:var(--red);font-style:normal;}
-.ft-links{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px;flex-wrap:wrap;}
-.ft-link{color:var(--muted2);font-family:var(--M);font-size:.5rem;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color .2s;cursor:pointer;background:none;border:none;}
-.ft-link:hover{color:var(--red);}
-.ft-copy{font-family:var(--M);font-size:.46rem;color:#222230;margin-top:12px;letter-spacing:1px;}
-
-/* ══ WA FLOAT ══ */
-.wa{position:fixed;bottom:24px;right:18px;z-index:100;width:52px;height:52px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.35rem;text-decoration:none;box-shadow:0 4px 24px rgba(37,211,102,.4);transition:transform .28s,box-shadow .28s;animation:popIn .5s 1.2s cubic-bezier(.16,1,.3,1) both;}
-@keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
-.wa:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(37,211,102,.6);}
-
-/* ══ DIVIDER ══ */
-.divider{height:1px;background:var(--border);margin:8px 0 20px;}
-
-/* ══ OVERLAYS / SHEETS ══ */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
-.overlay.open{opacity:1;pointer-events:all;}
-.sheet{background:var(--surface);border:1px solid var(--border-red);border-radius:22px 22px 0 0;padding:26px 20px 42px;width:100%;max-width:var(--max);transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);position:relative;max-height:90vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1a24 transparent;}
-.overlay.open .sheet{transform:translateY(0);}
-.sheet-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
-.sheet-title{font-family:var(--D);font-size:clamp(1.1rem,5vw,1.4rem);letter-spacing:3px;margin-bottom:8px;}
-.sheet-desc{font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;margin-bottom:14px;}
-.sheet-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;transition:color .2s;padding:4px;}
-.sheet-close:hover{color:var(--red);}
-
-/* Rangos modal */
-.rank-list{display:flex;flex-direction:column;gap:8px;}
-.rank-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
-.rank-icon-w{font-size:1.15rem;width:26px;text-align:center;flex-shrink:0;}
-.rank-body{flex:1;min-width:0;}
-.rank-name{font-family:var(--D);font-size:.95rem;letter-spacing:1px;}
-.rank-req{font-family:var(--M);font-size:.5rem;color:var(--muted2);margin-top:2px;}
-.rank-pts-rule{font-family:var(--M);font-size:.5rem;color:var(--green);margin-top:3px;}
-
-/* Términos modal */
-.terms-section{margin-bottom:18px;}
-.terms-section-title{font-family:var(--D);font-size:1rem;letter-spacing:2px;color:var(--red);margin-bottom:8px;border-bottom:1px solid var(--border-red);padding-bottom:6px;}
-.terms-text{font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.9;}
-.terms-text strong{color:#fff;}
-.terms-rule{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
-.terms-rule-dot{color:var(--red);flex-shrink:0;margin-top:1px;}
-
-/* Registro modal */
-.reg-form{display:flex;flex-direction:column;gap:10px;}
-.reg-input{width:100%;background:var(--surface2);border:1px solid var(--border);padding:12px 14px;border-radius:8px;color:#fff;font-family:var(--M);font-size:.72rem;outline:none;transition:border-color .2s;letter-spacing:1px;}
-.reg-input:focus{border-color:rgba(0,230,118,.4);}
-.reg-input::placeholder{color:var(--muted);font-size:.62rem;}
-.reg-btn{background:var(--green);border:none;color:#000;padding:13px;border-radius:8px;font-family:var(--D);font-size:1.1rem;letter-spacing:2px;cursor:pointer;transition:all .25s;width:100%;}
-.reg-btn:hover{background:#00ff88;box-shadow:0 0 24px rgba(0,230,118,.3);}
-.reg-note{font-family:var(--M);font-size:.46rem;color:var(--muted);letter-spacing:1px;text-align:center;line-height:1.7;}
-.reg-success{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:10px;padding:16px;margin-top:14px;}
-.reg-success-title{font-family:var(--D);font-size:1.2rem;letter-spacing:2px;color:var(--green);margin-bottom:8px;}
-.reg-success-info{font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;}
-.reg-link-box{margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--M);font-size:.56rem;word-break:break-all;color:var(--green);}
-.reg-copy-btn{width:100%;margin-top:10px;background:var(--gold);border:none;color:#000;padding:10px;border-radius:7px;font-family:var(--D);font-size:.9rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
-.reg-copy-btn:hover{background:#fcd34d;}
-
-/* Admin modal */
-.admin-tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
-.admin-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted2);padding:7px 12px;font-family:var(--M);font-size:.46rem;letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all .22s;white-space:nowrap;flex-shrink:0;}
-.admin-tab.active{background:var(--red);color:#fff;border-color:var(--red);}
-.admin-pane{display:none;}
-.admin-pane.active{display:block;}
-.admin-lbl{font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;margin-bottom:8px;display:block;text-transform:uppercase;}
-.admin-select{width:100%;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:11px 14px;border-radius:8px;font-family:var(--M);font-size:.68rem;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;margin-bottom:12px;}
-.admin-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:11px 12px;border-radius:8px;font-family:var(--M);font-size:.72rem;outline:none;transition:border-color .2s;-moz-appearance:textfield;margin-bottom:6px;}
-.admin-input::-webkit-outer-spin-button,.admin-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.admin-input:focus{border-color:var(--border-red);}
-.admin-input::placeholder{color:var(--muted);font-size:.62rem;}
-.admin-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:11px 12px;border-radius:8px;font-family:var(--M);font-size:.65rem;outline:none;resize:vertical;min-height:70px;margin-bottom:6px;letter-spacing:1px;}
-.admin-textarea:focus{border-color:var(--border-red);}
-.admin-btn{width:100%;background:var(--red);border:none;color:#fff;padding:11px;border-radius:8px;font-family:var(--D);font-size:.9rem;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:4px;}
-.admin-btn:hover{background:#ff2d3f;box-shadow:0 0 18px var(--red-glow);}
-.admin-btn.green-btn{background:var(--green);color:#000;}
-.admin-btn.green-btn:hover{background:#00ff88;box-shadow:0 0 18px rgba(0,230,118,.3);}
-.admin-btn.gold-btn{background:var(--gold);color:#000;}
-.admin-divider{height:1px;background:var(--border);margin:16px 0;}
-.admin-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:10px;scrollbar-width:thin;scrollbar-color:#1a1a24 transparent;}
-.admin-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-family:var(--M);font-size:.68rem;}
-.admin-row:last-child{border-bottom:none;}
-.admin-row-pos{width:22px;font-family:var(--D);font-size:.95rem;color:var(--muted2);flex-shrink:0;}
-.admin-row-pos.gp{color:var(--gold);}
-.admin-row-id{flex:1;color:#fff;word-break:break-all;}
-.admin-row-pts{color:var(--green);flex-shrink:0;}
-.admin-del{background:none;border:none;color:#333;cursor:pointer;font-size:.72rem;padding:2px 6px;transition:color .2s;flex-shrink:0;}
-.admin-del:hover{color:var(--red);}
-.admin-lock{text-align:center;padding:20px 0;}
-.admin-lock-title{font-family:var(--D);font-size:1.3rem;letter-spacing:3px;color:#fff;margin-bottom:12px;}
-.admin-pw-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:#fff;padding:12px 14px;border-radius:8px;font-family:var(--M);font-size:.8rem;outline:none;text-align:center;letter-spacing:4px;margin-bottom:10px;}
-.admin-pw-input:focus{border-color:var(--border-red);}
-
-/* ══ TOAST ══ */
-.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface2);border:1px solid var(--border-red);color:#fff;font-family:var(--M);font-size:.56rem;letter-spacing:1px;padding:10px 20px;border-radius:30px;z-index:500;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ══ ADMIN TRIGGER ══ */
-.admin-trigger{position:fixed;bottom:86px;right:18px;z-index:100;width:40px;height:40px;background:rgba(232,25,44,.1);border:1px solid var(--border-red);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:.8rem;cursor:pointer;transition:all .25s;animation:popIn .5s 1.4s cubic-bezier(.16,1,.3,1) both;}
-.admin-trigger:hover{background:var(--red);color:#fff;box-shadow:0 0 18px var(--red-glow);}
+/* PROGRESS BAR (opcional) */
+.progress-wrap{margin:20px 0;}
+.progress-label{font-family:var(--M);font-size:.48rem;color:var(--muted2);letter-spacing:1px;margin-bottom:8px;}
+.progress-bar{height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:2px;width:75%;animation:progress 2s ease-in-out infinite;}
+@keyframes progress{0%,100%{width:70%}50%{width:80%}}
 </style>
 </head>
 <body>
@@ -423,911 +106,85 @@ footer{text-align:center;padding-top:22px;border-top:1px solid var(--border);}
   <svg class="cloud k1" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
   <svg class="cloud k2" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
   <svg class="cloud k3" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-  <svg class="cloud k4" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
-  <svg class="cloud k5" viewBox="0 0 200 80"><ellipse cx="100" cy="60" rx="95" ry="22"/><circle cx="38" cy="48" r="20"/><circle cx="72" cy="36" r="26"/><circle cx="114" cy="32" r="28"/><circle cx="158" cy="42" r="22"/></svg>
   <svg class="shari sh1" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
   <svg class="shari sh2" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
-  <svg class="shari sh3" viewBox="0 0 200 200" fill="none" stroke="#e8192c" stroke-width="2.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="20"/><circle cx="100" cy="55" r="10" fill="#e8192c" stroke="none"/><circle cx="136" cy="127" r="10" fill="#e8192c" stroke="none"/><circle cx="64" cy="127" r="10" fill="#e8192c" stroke="none"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="27" y1="27" x2="173" y2="173"/><line x1="173" y1="27" x2="27" y2="173"/></svg>
-  <div id="kunaiWrap"></div>
 </div>
 
-<a href="https://wa.me/5350677110?text=Hola,%20necesito%20soporte" class="wa"><i class="fab fa-whatsapp"></i></a>
-<button class="admin-trigger" onclick="openAdmin()" title="Admin"><i class="fas fa-sliders-h"></i></button>
-<div class="toast" id="toast"></div>
-<div class="inapp-notif" id="inappNotif"><span class="ni-icon" id="niIcon"></span><span id="niMsg"></span></div>
+<!-- CONTENT -->
+<div class="container">
+  
+  <!-- LOGO -->
+  <div class="logo-area">
+    <div class="brand">AKATSU<em>KI</em>CASH</div>
+    <div class="eyebrow">CAJERO OFICIAL · 1XBET · CUBA</div>
+  </div>
 
-<!-- ══ OVERLAYS ══ -->
+  <!-- ICON -->
+  <div class="icon-wrap">
+    <div class="icon"><i class="fas fa-tools"></i></div>
+  </div>
 
-<!-- RANGOS -->
-<div class="overlay" id="ovRangos" onclick="closeOverlay('ovRangos')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <button class="sheet-close" onclick="closeOverlay('ovRangos')"><i class="fas fa-times"></i></button>
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">SISTEMA DE RANGOS</div>
-    <p class="sheet-desc">Rangos por <strong style="color:#fff">posición en el podio</strong> al cierre de cada período.<br>
-    <strong style="color:var(--green)">1 punto = $1 USD</strong> depositado · <strong style="color:var(--green)">1 punto = $1 USD</strong> retirado.</p>
-    <div class="rank-list">
-      <div class="rank-item"><div class="rank-icon-w">👑</div><div class="rank-body"><div class="rank-name" style="color:var(--gold)">LEYENDA</div><div class="rank-req">1er lugar del podio</div><div class="rank-pts-rule">Premio máximo de temporada</div></div><span class="badge b-legend">LEYENDA</span></div>
-      <div class="rank-item"><div class="rank-icon-w">⚔️</div><div class="rank-body"><div class="rank-name" style="color:#c0c0c0">MAESTRO</div><div class="rank-req">2do lugar del podio</div><div class="rank-pts-rule">Premio intermedio de temporada</div></div><span class="badge b-maestro">MAESTRO</span></div>
-      <div class="rank-item"><div class="rank-icon-w">🔥</div><div class="rank-body"><div class="rank-name" style="color:#cd7c5e">ELITE</div><div class="rank-req">3er lugar del podio</div><div class="rank-pts-rule">Premio de entrada de temporada</div></div><span class="badge b-elite">ELITE</span></div>
-      <div class="rank-item"><div class="rank-icon-w">🌀</div><div class="rank-body"><div class="rank-name" style="color:var(--muted2)">ROOKIE</div><div class="rank-req">Fuera del podio · Sigue compitiendo</div><div class="rank-pts-rule">Cada operación suma puntos</div></div><span class="badge b-rookie">ROOKIE</span></div>
+  <!-- TITLE -->
+  <div class="title">PÁGINA EN MANTENIMIENTO</div>
+  <div class="title-sub">MEJORANDO TU EXPERIENCIA</div>
+
+  <!-- MESSAGE -->
+  <div class="msg-box">
+    <div class="msg-title">🔧 ESTAMOS TRABAJANDO PARA TI</div>
+    <div class="msg-text">
+      Estamos actualizando AKATSUKICASH para ofrecerte una experiencia más rápida, segura y con nuevas funcionalidades.<br><br>
+      <strong style="color:#fff">Volvemos muy pronto</strong> con mejoras en el sistema de ranking, premios y referidos.
     </div>
   </div>
+
+  <!-- PROGRESS (opcional, puedes quitarlo si no quieres) -->
+  <div class="progress-wrap">
+    <div class="progress-label">Progreso de actualización</div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+      <div class="feature-text">Sistema más rápido y estable con Firebase/Supabase</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+      <div class="feature-text">Mayor seguridad en tus datos y operaciones</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="feature-text">Ranking en tiempo real sin demoras</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon"><i class="fas fa-gift"></i></div>
+      <div class="feature-text">Nuevas promociones y sorteos exclusivos</div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="contact">
+    <a href="https://wa.me/5350677110?text=Hola,%20vi%20que%20la%20página%20está%20en%20mantenimiento.%20¿Cuándo%20vuelve?" class="contact-btn wa-btn">
+      <i class="fab fa-whatsapp"></i>
+      <span>CONTACTAR POR WHATSAPP</span>
+    </a>
+    <a href="https://chat.whatsapp.com/J8nBFiocNcO0ZTOzr1EzxT" class="contact-btn group-btn" target="_blank">
+      <i class="fab fa-whatsapp"></i>
+      <span>UNIRSE AL GRUPO OFICIAL</span>
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">
+      <span class="footer-brand">AKATSU<em>KI</em>CASH</span><br>
+      © 2026 · Cajero Oficial 1xbet Cuba<br>
+      Soporte 24/7 · Volvemos pronto 🔥
+    </div>
+  </div>
+
 </div>
 
-<!-- TÉRMINOS -->
-<div class="overlay" id="ovTerminos" onclick="closeOverlay('ovTerminos')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <button class="sheet-close" onclick="closeOverlay('ovTerminos')"><i class="fas fa-times"></i></button>
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">TÉRMINOS Y CONDICIONES</div>
-    <div class="terms-section">
-      <div class="terms-section-title">QUIÉNES SOMOS</div>
-      <p class="terms-text">Somos un <strong>equipo especializado</strong> en servicios de cambio y gestión de fondos para jugadores de 1xbet en Cuba. Nos formamos con un objetivo claro: darte acceso rápido, seguro y con beneficios reales a tu dinero — sin esperas, sin complicaciones.</p>
-    </div>
-    <div class="terms-section">
-      <div class="terms-section-title">SISTEMA DE PUNTOS</div>
-      <div class="terms-text">
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span><strong>Depósitos:</strong> 1 punto por cada $1 USD depositado</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span><strong>Retiros:</strong> 1 punto por cada $1 USD retirado</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Los puntos se acumulan semanalmente y mensualmente por separado</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>El ranking semanal cierra cada domingo a las 23:59</span></div>
-      </div>
-    </div>
-    <div class="terms-section">
-      <div class="terms-section-title">PROGRAMA DE REFERIDOS</div>
-      <div class="terms-text">
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Por cada <strong>10 referidos que se registren</strong>: $1 USD</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Por cada <strong>5 referidos que depositen</strong>: $2 USD adicionales</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Bono de bienvenida: <strong>20% en el primer depósito</strong> (máximo $20 USD)</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Los premios se pagan por el mismo canal que los retiros</span></div>
-      </div>
-    </div>
-    <div class="terms-section">
-      <div class="terms-section-title">SORTEO ÉLITE</div>
-      <div class="terms-text">
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Se activa al alcanzar <strong>50 usuarios registrados</strong></span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Se realiza <strong>cada 15 días</strong> entre los Top 10 del ranking</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>2 ganadores aleatorios por sorteo</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>El premio escala con cada meta: 50 → 100 → 250 → 500 → 1000 usuarios</span></div>
-      </div>
-    </div>
-    <div class="terms-section">
-      <div class="terms-section-title">CONDICIONES GENERALES</div>
-      <div class="terms-text">
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Un registro por persona usando su ID real de 1xbet</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>AKATSUKICASH es un servicio de cajero — no somos 1xbet</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Soporte disponible 24/7 vía WhatsApp</span></div>
-        <div class="terms-rule"><span class="terms-rule-dot">◆</span><span>Nos reservamos el derecho de modificar los términos con previo aviso</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- REGISTRO -->
-<div class="overlay" id="ovRegistro" onclick="closeOverlay('ovRegistro')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <button class="sheet-close" onclick="closeOverlay('ovRegistro')"><i class="fas fa-times"></i></button>
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">REGISTRARSE</div>
-    <p class="sheet-desc">
-      Somos un equipo especializado en cambio y gestión de fondos para jugadores de 1xbet en Cuba.<br>
-      Regístrate para participar en rankings, premios y referidos.<br>
-      <strong style="color:var(--green)">Bono de bienvenida: 20% en tu primer depósito</strong> (máximo $20 USD).
-    </p>
-    <div id="regFormWrap">
-      <div class="reg-form">
-        <input class="reg-input" id="regId" type="number" placeholder="Tu ID de 1xbet (ej: 1565593149)" maxlength="20">
-        <input class="reg-input" id="regName" type="text" placeholder="Nombre o alias (opcional)" maxlength="30">
-        <button class="reg-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-right:8px;"></i>CREAR CUENTA</button>
-        <p class="reg-note">Un solo registro por persona usando tu ID real de 1xbet.<br>Al registrarte aceptas los términos del programa.</p>
-      </div>
-    </div>
-    <div id="regResult"></div>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div class="overlay" id="ovAdmin" onclick="closeOverlay('ovAdmin')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <button class="sheet-close" onclick="closeOverlay('ovAdmin')"><i class="fas fa-times"></i></button>
-    <div class="sheet-handle"></div>
-    <div id="adminLockWrap">
-      <div class="admin-lock">
-        <div class="admin-lock-title">⚙ PANEL ADMIN</div>
-        <p style="font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;margin-bottom:16px;">Acceso restringido</p>
-        <input class="admin-pw-input" id="adminPw" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkAdminPw()">
-        <button class="admin-btn" onclick="checkAdminPw()">ENTRAR</button>
-      </div>
-    </div>
-    <div id="adminPanelWrap" style="display:none;">
-      <div class="sheet-title">⚙ PANEL ADMIN</div>
-      <p style="font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;margin-bottom:16px;">Los cambios se guardan en Google Sheets y todos los usuarios los ven en ~15 segundos.</p>
-      <div class="admin-tabs">
-        <button class="admin-tab active" onclick="openAdminTab('ranking')">RANKING</button>
-        <button class="admin-tab" onclick="openAdminTab('config')">TASA / PROMO</button>
-        <button class="admin-tab" onclick="openAdminTab('ganadores')">GANADORES</button>
-        <button class="admin-tab" onclick="openAdminTab('sorteo')">SORTEO</button>
-      </div>
-
-      <!-- Ranking tab -->
-      <div id="admin-ranking" class="admin-pane active">
-        <label class="admin-lbl">TABLA A EDITAR</label>
-        <select class="admin-select" id="adminTableSel" onchange="renderAdminList()">
-          <option value="dep-sem">📥 DEPÓSITOS SEMANAL</option>
-          <option value="dep-men">📥 DEPÓSITOS MENSUAL</option>
-          <option value="ret-sem">📤 RETIROS SEMANAL</option>
-          <option value="ret-men">📤 RETIROS MENSUAL</option>
-        </select>
-        <label class="admin-lbl">AGREGAR / ACTUALIZAR USUARIO</label>
-        <input class="admin-input" id="adminUserId" type="text" placeholder="ID del usuario">
-        <input class="admin-input" id="adminUserPts" type="number" placeholder="Puntos" min="0">
-        <button class="admin-btn" onclick="adminAddUser()">+ GUARDAR EN SHEET</button>
-        <div class="admin-list" id="adminList"></div>
-      </div>
-
-      <!-- Config tab -->
-      <div id="admin-config" class="admin-pane">
-        <label class="admin-lbl">NUEVA TASA (CUP)</label>
-        <input class="admin-input" id="adminTasa" type="number" placeholder="Ej: 620">
-        <button class="admin-btn" onclick="adminSaveTasa()">GUARDAR TASA</button>
-        <div class="admin-divider"></div>
-        <label class="admin-lbl">BANNER DE URGENCIA</label>
-        <input class="admin-input" id="adminBanner" type="text" placeholder="Ej: 🔴 RANKING CIERRA EN 2 DÍAS — ¡DEPOSITA AHORA!">
-        <button class="admin-btn" onclick="adminSaveBanner()">ACTIVAR BANNER</button>
-        <button class="admin-btn" style="margin-top:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted2);" onclick="adminClearBanner()">DESACTIVAR BANNER</button>
-        <div class="admin-divider"></div>
-        <label class="admin-lbl">PREMIO DEP SEMANAL</label>
-        <input class="admin-input" id="adminPremioDS" type="text" placeholder="🏆 TOP 1: X CUP ...">
-        <label class="admin-lbl">PREMIO DEP MENSUAL</label>
-        <input class="admin-input" id="adminPremioDM" type="text" placeholder="💎 TOP 1: X CUP ...">
-        <label class="admin-lbl">PREMIO RET SEMANAL</label>
-        <input class="admin-input" id="adminPremioRS" type="text" placeholder="💸 TOP 1: X CUP ...">
-        <label class="admin-lbl">PREMIO RET MENSUAL</label>
-        <input class="admin-input" id="adminPremioRM" type="text" placeholder="💎 TOP 1: X CUP ...">
-        <button class="admin-btn" onclick="adminSavePremios()">GUARDAR PREMIOS</button>
-      </div>
-
-      <!-- Ganadores tab -->
-      <div id="admin-ganadores" class="admin-pane">
-        <label class="admin-lbl">AGREGAR GANADOR</label>
-        <input class="admin-input" id="adminGanId" type="text" placeholder="ID del usuario ganador">
-        <input class="admin-input" id="adminGanPeriodo" type="text" placeholder="Período (ej: Semanal · Ene W1)">
-        <input class="admin-input" id="adminGanPremio" type="text" placeholder="Premio (ej: 5000 CUP)">
-        <button class="admin-btn gold-btn" onclick="adminAddGanador()">+ AGREGAR GANADOR</button>
-      </div>
-
-      <!-- Sorteo tab -->
-      <div id="admin-sorteo" class="admin-pane">
-        <p style="font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:1px;line-height:1.8;margin-bottom:14px;">
-          El sorteo se puede realizar cuando haya <strong style="color:#fff">50+ usuarios</strong>.<br>
-          Selecciona la tabla, presiona INICIAR y el sistema elige 2 ganadores aleatorios del Top 10.
-        </p>
-        <label class="admin-lbl">TABLA PARA EL SORTEO</label>
-        <select class="admin-select" id="sorteoTableSel">
-          <option value="dep-sem">Depósitos Semanal</option>
-          <option value="dep-men">Depósitos Mensual</option>
-          <option value="ret-sem">Retiros Semanal</option>
-          <option value="ret-men">Retiros Mensual</option>
-        </select>
-        <button class="admin-btn gold-btn" id="sorteoBtn" onclick="doSorteo()">🎰 INICIAR SORTEO</button>
-        <div id="sorteoResultWrap" style="margin-top:14px;"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ PÁGINA ══ -->
-<div class="notif-banner" id="notifBanner"></div>
-<div class="wrap">
-
-  <div class="topbar">
-    <div class="topbar-brand">AKATSU<em>KI</em>CASH</div>
-    <div class="topbar-actions">
-      <button id="regBtn" class="pill-btn" onclick="openRegOrProfile()">REGISTRARSE</button>
-      <div class="live-pill"><div class="pdot"></div>LIVE</div>
-    </div>
-  </div>
-
-  <div class="ticker">
-    <div class="ticker-track">
-      <span class="ti">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="r" id="t1">$620 CUP</span></span>
-      <span class="ti">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="g">INMEDIATOS</span></span>
-      <span class="ti">BONO BIENVENIDA: <span class="g">20% PRIMER DEPÓSITO</span> (máx $20 USD)</span>
-      <span class="ti">REFERIDOS: <span class="g">$1 USD x 10 registros · $2 USD x 5 depósitos</span></span>
-      <span class="ti">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="g">¡PARTICIPA!</span></span>
-      <span class="ti">CAJERO OFICIAL 1XBET &nbsp;·&nbsp; TASA: <span class="r" id="t2">$620 CUP</span></span>
-      <span class="ti">DEPÓSITOS 24/7 &nbsp;·&nbsp; RETIROS: <span class="g">INMEDIATOS</span></span>
-      <span class="ti">BONO BIENVENIDA: <span class="g">20% PRIMER DEPÓSITO</span> (máx $20 USD)</span>
-      <span class="ti">REFERIDOS: <span class="g">$1 USD x 10 registros · $2 USD x 5 depósitos</span></span>
-      <span class="ti">🏆 PREMIOS SEMANALES Y MENSUALES &nbsp;·&nbsp; <span class="g">¡PARTICIPA!</span></span>
-    </div>
-  </div>
-
-  <div class="hero">
-    <div class="hero-eyebrow">CAJERO OFICIAL · 1XBET · CUBA</div>
-    <h1 class="hero-title">AKATSU<em>KI</em>CASH</h1>
-    <p class="hero-sub">PREMIUM BETTING SYSTEM · EST. 2026</p>
-    <div class="hero-div"><div class="hero-div-ico">◆</div></div>
-  </div>
-
-  <div class="search-wrap">
-    <input class="search-input" id="searchInput" type="text" placeholder="🔍  Busca tu ID de 1xbet para ver tu posición..." maxlength="20" oninput="doSearch(this.value)">
-    <i class="fas fa-search search-icon"></i>
-    <div class="search-result" id="searchResult"></div>
-  </div>
-
-  <div class="rate-card">
-    <div>
-      <div class="rate-lbl">TASA DE CAMBIO USDT / USD</div>
-      <div class="rate-val" id="rateDisplay">620 <span class="u">CUP</span></div>
-    </div>
-    <div class="rate-meta">
-      <div class="rate-meta-lbl">ACTUALIZADO</div>
-      <div class="rate-meta-val" id="updateTime">—</div>
-    </div>
-  </div>
-
-  <div class="cd-card">
-    <div class="cd-lbl">CIERRE RANKING SEMANAL &nbsp;<span>· QUEDAN</span></div>
-    <div class="cd-units">
-      <div class="cd-unit"><span class="cd-num" id="cdD">00</span><div class="cd-lbl2">DÍAS</div></div>
-      <div class="cd-sep">:</div>
-      <div class="cd-unit"><span class="cd-num" id="cdH">00</span><div class="cd-lbl2">HORAS</div></div>
-      <div class="cd-sep">:</div>
-      <div class="cd-unit"><span class="cd-num" id="cdM">00</span><div class="cd-lbl2">MIN</div></div>
-      <div class="cd-sep">:</div>
-      <div class="cd-unit"><span class="cd-num" id="cdS">00</span><div class="cd-lbl2">SEG</div></div>
-    </div>
-  </div>
-
-  <!-- PROMOS -->
-  <div class="sec-hdr"><div class="sec-title">PROMOCIONES</div><div class="sec-sub">ACTIVAS AHORA</div></div>
-  <div class="promos-grid" id="promosGrid"></div>
-
-  <!-- RANKING DEP -->
-  <div class="rank-section">
-    <div class="sec-hdr">
-      <div class="sec-title">RANKING DEPÓSITOS</div>
-      <button class="ft-link" onclick="openOverlay('ovRangos')">VER RANGOS <i class="fas fa-chevron-right" style="font-size:.4rem;"></i></button>
-    </div>
-    <div class="sync-pill"><div class="sync-dot loading" id="sdDep"></div><span id="stDep">CARGANDO...</span></div>
-    <div class="tabs" id="tabsDep">
-      <button class="tab-btn active" onclick="openTab(event,'ds','dep')">SEMANAL</button>
-      <button class="tab-btn" onclick="openTab(event,'dm','dep')">MENSUAL</button>
-    </div>
-    <div class="board" id="boardDep">
-      <div id="ds" class="tab-pane active">
-        <div class="prize-bar gold-bar" id="pds">🏆 TOP 1: CONSULTAR POR WA · TOP 2: CONSULTAR POR WA · TOP 3: CONSULTAR POR WA</div>
-        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tds"><tr><td colspan="4" class="loading-cell"><span class="spin-ico"></span>CARGANDO...</td></tr></tbody></table></div>
-      </div>
-      <div id="dm" class="tab-pane">
-        <div class="prize-bar gold-bar" id="pdm">💎 TOP 1: CONSULTAR POR WA + REGALO VIP</div>
-        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="tdm"><tr><td colspan="4" class="loading-cell"><span class="spin-ico"></span>CARGANDO...</td></tr></tbody></table></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- RANKING RET -->
-  <div class="rank-section">
-    <div class="sec-hdr"><div class="sec-title">RANKING RETIROS</div></div>
-    <div class="sync-pill"><div class="sync-dot loading" id="sdRet"></div><span id="stRet">CARGANDO...</span></div>
-    <div class="tabs" id="tabsRet">
-      <button class="tab-btn active" onclick="openTab(event,'rs','ret')">SEMANAL</button>
-      <button class="tab-btn" onclick="openTab(event,'rm','ret')">MENSUAL</button>
-    </div>
-    <div class="board" id="boardRet">
-      <div id="rs" class="tab-pane active">
-        <div class="prize-bar green-bar" id="prs">💸 TOP 1: CONSULTAR POR WA</div>
-        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="trs"><tr><td colspan="4" class="loading-cell"><span class="spin-ico"></span>CARGANDO...</td></tr></tbody></table></div>
-      </div>
-      <div id="rm" class="tab-pane">
-        <div class="prize-bar green-bar" id="prm">💎 TOP 1: CONSULTAR POR WA</div>
-        <div class="tscroll"><table><thead><tr><th>#</th><th>ID USUARIO</th><th>PUNTOS</th><th>RANGO</th></tr></thead><tbody id="trm"><tr><td colspan="4" class="loading-cell"><span class="spin-ico"></span>CARGANDO...</td></tr></tbody></table></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- CÓMO FUNCIONA -->
-  <div class="how-section">
-    <div class="sec-hdr"><div class="sec-title">CÓMO FUNCIONA</div></div>
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><div><div class="step-title">REGÍSTRATE</div><div class="step-desc">Crea tu cuenta con tu ID de 1xbet. Obtén tu código de referido único y el bono de bienvenida del 20%.</div></div></div>
-      <div class="step"><div class="step-num">2</div><div><div class="step-title">DEPOSITA CON NOSOTROS</div><div class="step-desc">Contáctanos por WhatsApp, indícanos el monto y realizamos el cambio a la tasa del día. Rápido y seguro.</div></div></div>
-      <div class="step"><div class="step-num">3</div><div><div class="step-title">ACUMULA PUNTOS</div><div class="step-desc">1 punto por cada $1 USD en depósitos o retiros. Sube en el ranking y gana premios al cierre de cada período.</div></div></div>
-      <div class="step"><div class="step-num">4</div><div><div class="step-title">INVITA Y GANA MÁS</div><div class="step-desc">$1 USD por cada 10 amigos que se registren. $2 USD adicionales por cada 5 que depositen. Sin límite.</div></div></div>
-    </div>
-  </div>
-
-  <!-- SORTEO -->
-  <div class="sorteo-card">
-    <div class="sorteo-body">
-      <span class="sorteo-icon">🎰</span>
-      <div class="sorteo-title">SORTEO ÉLITE</div>
-      <p class="sorteo-desc">Cada 15 días, <strong style="color:#fff">2 ganadores aleatorios</strong> del Top 10<br>reciben un premio especial.</p>
-      <div class="sorteo-prog-wrap">
-        <div class="sorteo-prog-lbl"><span id="sorteoMetaLabel">META: 50 USUARIOS</span><span id="sorteoCount">0 / 50</span></div>
-        <div class="sorteo-bar"><div class="sorteo-fill" id="sorteoFill" style="width:0%"></div></div>
-        <div class="sorteo-meta">
-          <div class="sorteo-users" id="sorteoStatus">PRÓXIMAMENTE</div>
-          <div class="sorteo-next" id="sorteoNextLabel"></div>
-        </div>
-      </div>
-      <!-- Countdown sorteo (visible cuando está activo) -->
-      <div class="sorteo-active" id="sorteoActiveSection">
-        <div style="font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:2px;text-align:center;margin-top:16px;margin-bottom:8px;">PRÓXIMO SORTEO EN</div>
-        <div class="sorteo-cd">
-          <div class="cd-unit"><span class="cd-num" id="scdD">00</span><div class="cd-lbl2">DÍAS</div></div>
-          <div class="cd-sep">:</div>
-          <div class="cd-unit"><span class="cd-num" id="scdH">00</span><div class="cd-lbl2">HRS</div></div>
-          <div class="cd-sep">:</div>
-          <div class="cd-unit"><span class="cd-num" id="scdM">00</span><div class="cd-lbl2">MIN</div></div>
-          <div class="cd-sep">:</div>
-          <div class="cd-unit"><span class="cd-num" id="scdS">00</span><div class="cd-lbl2">SEG</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- REFERIDOS -->
-  <div class="ref-card">
-    <div class="ref-title">PROGRAMA REFERIDOS</div>
-    <p class="ref-sub">Comparte tu enlace único. Gana por cada amigo que se una y por cada uno que deposite. <strong>Sin límite.</strong></p>
-    <div class="ref-scale">
-      <div class="ref-tier"><div class="ref-tier-icon">👤</div><div class="ref-tier-txt">10 referidos registrados</div><div class="ref-tier-prize">$1 USD</div></div>
-      <div class="ref-tier"><div class="ref-tier-icon">💵</div><div class="ref-tier-txt">5 referidos con 1er depósito</div><div class="ref-tier-prize">$2 USD</div></div>
-      <div class="ref-tier"><div class="ref-tier-icon">💰</div><div class="ref-tier-txt">25 referidos con depósito</div><div class="ref-tier-prize">$10 USD</div></div>
-      <div class="ref-tier"><div class="ref-tier-icon">🤑</div><div class="ref-tier-txt">50 referidos con depósito</div><div class="ref-tier-prize">$20 USD</div></div>
-    </div>
-    <button class="ref-cta" onclick="openRegOrProfile()">OBTENER MI ENLACE →</button>
-  </div>
-
-  <!-- GANADORES -->
-  <div class="winners-section">
-    <div class="sec-hdr"><div class="sec-title">HISTORIAL GANADORES</div><div class="sec-sub">ÚLTIMAS TEMPORADAS</div></div>
-    <div id="winnersGrid">
-      <div class="no-winners"><span style="font-size:1.4rem;display:block;margin-bottom:8px;">🏆</span>LOS PRIMEROS GANADORES SERÁN REGISTRADOS AQUÍ</div>
-    </div>
-  </div>
-
-  <!-- CALC -->
-  <div class="calc-section">
-    <div class="calc-lbl">CALCULADORA DE CAMBIO &nbsp;<span>USDT → CUP</span></div>
-    <div class="calc-row">
-      <div class="calc-iw"><span class="calc-pre">$</span><input type="number" id="calcInput" placeholder="0.00 USDT / USD" min="0"></div>
-      <div class="calc-res"><div class="cr-val" id="crVal">0.00</div><div class="cr-lbl">CUP</div></div>
-    </div>
-  </div>
-
-  <div class="actions">
-    <a href="https://wa.me/5350677110?text=Hola,%20quiero%20hacer%20un%20depósito" class="btn-act btn-dep"><i class="fas fa-arrow-down"></i>DEPOSITAR<span class="sub">VÍA WHATSAPP</span></a>
-    <a href="https://wa.me/5350677110?text=Hola,%20quiero%20consultar%20un%20retiro" class="btn-act btn-ret"><i class="fas fa-arrow-up"></i>RETIRAR<span class="sub">VÍA WHATSAPP</span></a>
-  </div>
-
-  <footer>
-    <div class="ft-brand">AKATSU<em>KI</em>CASH</div>
-    <div class="ft-links">
-      <a href="https://wa.me/5350677110" class="ft-link"><i class="fab fa-whatsapp"></i> CONTACTO</a>
-      <span style="color:#1e1e26">|</span>
-      <button class="ft-link" onclick="openOverlay('ovTerminos')">TÉRMINOS</button>
-      <span style="color:#1e1e26">|</span>
-      <button class="ft-link" onclick="openRegOrProfile()">REGISTRARSE</button>
-    </div>
-    <div class="ft-copy">© 2026 AKATSUKICASH GLOBAL · CAJERO OFICIAL 1XBET · SOPORTE 24/7</div>
-  </footer>
-</div>
-
-<script>
-// ══════════════════════════════════════════
-// ▼ CAMBIA ESTO POR TU URL DE APPS SCRIPT
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq4SbbGbBSxX_FBA9ms7wsf1ZmAQcEruNkMjeiOmjmADPGvWWHlDC7DTYU36zP4U4h/exec';
-// ▼ CONTRASEÑA DEL PANEL ADMIN
-const ADMIN_PASSWORD = 'AkatsukiAdmin2026';
-// ══════════════════════════════════════════
-
-const SORTEO_METAS = [50,100,250,500,1000];
-let TASA = 620;
-let allData = {};
-let prevPositions = {};
-let adminUnlocked = false;
-const urlRef = new URLSearchParams(location.search).get('ref') || '';
-const session = JSON.parse(localStorage.getItem('ak_session') || 'null');
-
-// ── KUNAI ──
-(function(){
-  const w = document.getElementById('kunaiWrap');
-  for(let i=0;i<20;i++){
-    const k=document.createElement('div'); k.className='kunai';
-    k.style.cssText=`left:${Math.random()*100}%;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*14}s;height:${10+Math.random()*20}px;`;
-    w.appendChild(k);
-  }
-})();
-
-// ── COUNTDOWN RANKING (domingo 23:59) ──
-function updateCd(){
-  const now=new Date(), next=new Date(now);
-  next.setDate(now.getDate()+(7-now.getDay())%7||7);
-  next.setHours(23,59,59,0);
-  const d=next-now, dd=Math.floor(d/86400000), hh=Math.floor((d%86400000)/3600000),
-        mm=Math.floor((d%3600000)/60000), ss=Math.floor((d%60000)/1000);
-  document.getElementById('cdD').textContent=String(dd).padStart(2,'0');
-  document.getElementById('cdH').textContent=String(hh).padStart(2,'0');
-  document.getElementById('cdM').textContent=String(mm).padStart(2,'0');
-  document.getElementById('cdS').textContent=String(ss).padStart(2,'0');
-}
-updateCd(); setInterval(updateCd,1000);
-
-// ── COUNTDOWN SORTEO (cada 15 días desde una fecha base) ──
-function updateSorteoCd(){
-  const base=new Date('2026-01-01T00:00:00');
-  const now=new Date();
-  const elapsed=now-base;
-  const period=15*24*3600*1000;
-  const next=new Date(base.getTime()+Math.ceil(elapsed/period)*period);
-  const d=next-now;
-  if(d<=0){updateSorteoCd();return;}
-  const dd=Math.floor(d/86400000),hh=Math.floor((d%86400000)/3600000),
-        mm=Math.floor((d%3600000)/60000),ss=Math.floor((d%60000)/1000);
-  document.getElementById('scdD').textContent=String(dd).padStart(2,'0');
-  document.getElementById('scdH').textContent=String(hh).padStart(2,'0');
-  document.getElementById('scdM').textContent=String(mm).padStart(2,'0');
-  document.getElementById('scdS').textContent=String(ss).padStart(2,'0');
-}
-
-// ── HORA ──
-function setTime(){
-  document.getElementById('updateTime').textContent=
-    new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})+' hrs';
-}
-setTime(); setInterval(setTime,60000);
-
-// ── HELPERS TABLE ──
-function badge(pos){
-  if(pos===1)return'<span class="badge b-legend">LEYENDA</span>';
-  if(pos===2)return'<span class="badge b-maestro">MAESTRO</span>';
-  if(pos===3)return'<span class="badge b-elite">ELITE</span>';
-  return'<span class="badge b-rookie">ROOKIE</span>';
-}
-function posClass(pos){return pos===1?'gp':pos===2?'sp':pos===3?'bp':'';}
-
-function renderTable(key,rows,hlId){
-  const tbody=document.getElementById('t'+key);
-  if(!tbody)return;
-  if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="4" class="loading-cell">SIN USUARIOS AÚN</td></tr>';return;}
-  tbody.innerHTML=rows.map((u,i)=>{
-    const pos=i+1, hi=hlId&&u.id===hlId?'class="hl"':'';
-    return`<tr ${hi}><td class="pc ${posClass(pos)}">${String(pos).padStart(2,'0')}</td><td class="uc">${u.id}</td><td class="ptc">${Number(u.pts).toLocaleString()}</td><td>${badge(pos)}</td></tr>`;
-  }).join('');
-}
-
-function renderAll(hlId){
-  const km={ds:'dep-sem',dm:'dep-men',rs:'ret-sem',rm:'ret-men'};
-  Object.entries(km).forEach(([k,mk])=>{if(allData[mk])renderTable(k,allData[mk],hlId);});
-}
-
-// ── NOTIFICACIONES IN-APP ──
-let niTimer;
-function showInApp(icon,msg,color){
-  const n=document.getElementById('inappNotif');
-  document.getElementById('niIcon').textContent=icon;
-  document.getElementById('niMsg').textContent=msg;
-  n.style.borderColor=color||'var(--border-red)';
-  n.classList.add('show');
-  clearTimeout(niTimer);
-  niTimer=setTimeout(()=>n.classList.remove('show'),4000);
-}
-
-function checkRankChanges(newData){
-  if(!session)return;
-  const id=session.id;
-  const maps={ds:'dep-sem',dm:'dep-men',rs:'ret-sem',rm:'ret-men'};
-  Object.entries(maps).forEach(([k,mk])=>{
-    const arr=newData[mk]||[];
-    const newPos=arr.findIndex(u=>u.id===id)+1||null;
-    const oldPos=prevPositions[k]||null;
-    if(!newPos)return;
-    if(oldPos&&newPos<oldPos) showInApp('⬆️',`Subiste al #${newPos} en ${mk.replace('-',' ').toUpperCase()}!`,'rgba(0,230,118,.4)');
-    else if(oldPos&&newPos>oldPos) showInApp('⬇️',`Bajaste al #${newPos} en ${mk.replace('-',' ').toUpperCase()}`);
-    else if(!oldPos&&newPos<=3) showInApp('🏆',`¡Entraste a zona de premios! #${newPos}`,'rgba(251,191,36,.4)');
-    prevPositions[k]=newPos;
-  });
-}
-
-// ── PROMOS ──
-const DEFAULT_PROMOS=[
-  {emoji:'🎁',name:'BONO BIENVENIDA',desc:'20% extra en tu primer depósito con nosotros. Máximo $20 USD. Solo una vez por usuario.',cond:'Solo nuevos usuarios · Máximo $20 USD',tag:'+20%',tagClass:'gold',tipo:'gold-card'},
-  {emoji:'👥',name:'PROGRAMA REFERIDOS',desc:'$1 USD por cada 10 amigos registrados. $2 USD adicionales por cada 5 que depositen.',cond:'Referido debe completar 1er depósito para el bono de depósito',tag:'$1+$2',tagClass:'green',tipo:'green-card'},
-  {emoji:'🏆',name:'PREMIO SEMANAL',desc:'El Top 1 de depósitos semanal recibe un premio exclusivo al cierre de cada semana.',cond:'Válido cada semana · El podio se renueva',tag:'TOP 1',tagClass:'red',tipo:'red-card'},
-  {emoji:'💎',name:'BONO MENSUAL VIP',desc:'El Top 1 mensual recibe bono extra más regalo sorpresa VIP al cierre del mes.',cond:'Acumulativo con el premio semanal',tag:'VIP',tagClass:'gold',tipo:'gold-card'},
-  {emoji:'💸',name:'RANKING RETIROS',desc:'Los usuarios con mayor volumen de retiros compiten en su propio podio con premios exclusivos.',cond:'Semanal y mensual · Ranking separado',tag:'RETIROS',tagClass:'blue',tipo:'blue-card'},
-];
-
-function renderPromos(p){
-  document.getElementById('promosGrid').innerHTML=p.map(x=>`
-    <div class="promo-card ${x.tipo||'gold-card'}">
-      <div class="promo-emoji">${x.emoji}</div>
-      <div class="promo-body">
-        <div class="promo-name">${x.name}</div>
-        <div class="promo-desc">${x.desc}</div>
-        <div class="promo-cond">📌 ${x.cond}</div>
-        <span class="promo-tag ${x.tagClass||'gold'}">${x.tag}</span>
-        <br><a href="https://wa.me/5350677110?text=Quiero%20reclamar:%20${encodeURIComponent(x.name)}" class="promo-wa" target="_blank"><i class="fab fa-whatsapp"></i> RECLAMAR POR WA</a>
-      </div>
-    </div>`).join('');
-}
-renderPromos(DEFAULT_PROMOS);
-
-// ── WINNERS ──
-function renderWinners(w){
-  if(!w||w.length===0)return;
-  const m=['🥇','🥈','🥉'];
-  document.getElementById('winnersGrid').innerHTML=w.map((x,i)=>`
-    <div class="winner-card"><div class="winner-medal">${m[i]||'🏅'}</div>
-    <div class="winner-info"><div class="winner-id">${x.id}</div><div class="winner-period">${x.periodo}</div></div>
-    <div class="winner-prize">${x.premio}</div></div>`).join('');
-}
-
-// ── SORTEO META PROGRESS ──
-function updateSorteoProgress(uc){
-  const metas=SORTEO_METAS;
-  let meta=metas[0];
-  for(let i=0;i<metas.length;i++){if(uc>=metas[i]){meta=metas[i+1]||metas[metas.length-1];}}
-  const prev=metas[metas.indexOf(meta)-1]||0;
-  const pct=Math.min((uc-prev)/(meta-prev)*100,100);
-  document.getElementById('sorteoCount').textContent=uc+' / '+meta;
-  document.getElementById('sorteoFill').style.width=pct+'%';
-  document.getElementById('sorteoMetaLabel').textContent='META: '+meta+' USUARIOS';
-  if(uc>=50){
-    document.getElementById('sorteoStatus').textContent='🎰 ¡SORTEO ACTIVO!';
-    document.getElementById('sorteoActiveSection').classList.add('show');
-    updateSorteoCd(); setInterval(updateSorteoCd,1000);
-    document.getElementById('sorteoNextLabel').textContent='Cada 15 días';
-  } else {
-    document.getElementById('sorteoStatus').textContent='FALTAN '+(meta-uc)+' USUARIOS';
-    document.getElementById('sorteoNextLabel').textContent='';
-  }
-}
-
-// ── SYNC STATE ──
-function setSyncState(sec,state,txt){
-  document.getElementById('sd'+sec).className='sync-dot'+(state==='loading'?' loading':state==='err'?' err':'');
-  document.getElementById('st'+sec).textContent=txt;
-}
-
-// ── LOAD DATA ──
-function loadData(){
-  if(SCRIPT_URL==='TU_URL_AQUI'){
-    allData={'dep-sem':[{id:'1565593149',pts:4800},{id:'2234109876',pts:3950},{id:'3312847651',pts:3200},{id:'4478291034',pts:2750},{id:'5590128374',pts:2300},{id:'6601837492',pts:1870},{id:'7712093845',pts:1540},{id:'8823740192',pts:1120},{id:'9934021847',pts:780},{id:'1045938271',pts:430}],'dep-men':[{id:'2234109876',pts:18500},{id:'1565593149',pts:16200},{id:'5590128374',pts:13800},{id:'3312847651',pts:11400},{id:'7712093845',pts:9600},{id:'4478291034',pts:7800},{id:'9934021847',pts:6100},{id:'6601837492',pts:4400},{id:'8823740192',pts:2900},{id:'1045938271',pts:1500}],'ret-sem':[{id:'3312847651',pts:5200},{id:'6601837492',pts:4300},{id:'1565593149',pts:3700},{id:'9934021847',pts:2900},{id:'2234109876',pts:2400},{id:'8823740192',pts:1900},{id:'4478291034',pts:1500},{id:'7712093845',pts:1100},{id:'5590128374',pts:700},{id:'1045938271',pts:300}],'ret-men':[{id:'6601837492',pts:22000},{id:'3312847651',pts:19500},{id:'9934021847',pts:16000},{id:'1565593149',pts:13200},{id:'8823740192',pts:10500},{id:'2234109876',pts:8100},{id:'7712093845',pts:6200},{id:'4478291034',pts:4400},{id:'5590128374',pts:2700},{id:'1045938271',pts:1000}],tasa:620,premios:{'dep-sem':'🏆 TOP 1: CONSULTAR POR WA · TOP 2: CONSULTAR POR WA · TOP 3: CONSULTAR POR WA','dep-men':'💎 TOP 1: CONSULTAR POR WA + REGALO VIP','ret-sem':'💸 TOP 1: CONSULTAR POR WA','ret-men':'💎 TOP 1: CONSULTAR POR WA'},ganadores:[],usuarios:[{id:'1565593149',code:'AK91491',referidos:3,refDeposit:1},{id:'2234109876',code:'AK98762',referidos:7,refDeposit:5}],userCount:2,banner:''};
-    applyData(true);
-    setSyncState('Dep','ok','DATOS DE MUESTRA');
-    setSyncState('Ret','ok','DATOS DE MUESTRA');
-    return;
-  }
-  setSyncState('Dep','loading','SINCRONIZANDO...');
-  setSyncState('Ret','loading','SINCRONIZANDO...');
-  fetch(SCRIPT_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      checkRankChanges(d);
-      allData=d; applyData(false);
-      const hm=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
-      setSyncState('Dep','ok','EN VIVO · '+hm);
-      setSyncState('Ret','ok','EN VIVO · '+hm);
-    })
-    .catch(()=>{setSyncState('Dep','err','ERROR');setSyncState('Ret','err','ERROR');});
-}
-
-function applyData(first){
-  if(allData.tasa){TASA=parseInt(allData.tasa);updateRate(TASA);}
-  const p=allData.premios||{};
-  if(p['dep-sem'])document.getElementById('pds').textContent=p['dep-sem'];
-  if(p['dep-men'])document.getElementById('pdm').textContent=p['dep-men'];
-  if(p['ret-sem'])document.getElementById('prs').textContent=p['ret-sem'];
-  if(p['ret-men'])document.getElementById('prm').textContent=p['ret-men'];
-  if(allData.promos&&allData.promos.length>0)renderPromos(allData.promos);
-  if(allData.ganadores)renderWinners(allData.ganadores);
-  updateSorteoProgress(allData.userCount||0);
-  // Banner
-  const ban=allData.banner||'';
-  const banEl=document.getElementById('notifBanner');
-  if(ban){banEl.innerHTML='<em>🔴</em> '+ban;banEl.classList.add('show');}else{banEl.classList.remove('show');}
-  // Render tables
-  const hlId=document.getElementById('searchInput').value.trim()||'';
-  renderAll(hlId);
-  if(hlId)doSearch(hlId);
-}
-
-function updateRate(v){
-  document.getElementById('rateDisplay').innerHTML=v+' <span class="u">CUP</span>';
-  document.getElementById('t1').textContent='$'+v+' CUP';
-  document.getElementById('t2').textContent='$'+v+' CUP';
-}
-
-// ── SEARCH ──
-function doSearch(val){
-  const id=val.trim(), box=document.getElementById('searchResult');
-  if(!id){box.classList.remove('show');box.innerHTML='';renderAll('');return;}
-  renderAll(id);
-  const maps={ds:'dep-sem',dm:'dep-men',rs:'ret-sem',rm:'ret-men'};
-  const labels={'dep-sem':'Dep. Semanal','dep-men':'Dep. Mensual','ret-sem':'Ret. Semanal','ret-men':'Ret. Mensual'};
-  let found=[];
-  Object.entries(maps).forEach(([k,mk])=>{
-    const arr=allData[mk]||[],idx=arr.findIndex(u=>u.id===id);
-    if(idx>=0)found.push({pos:idx+1,table:labels[mk],pts:arr[idx].pts});
-  });
-  const ud=allData.usuarios?allData.usuarios.find(u=>u.id===id):null;
-  // También buscar en sesión local
-  const localSess=JSON.parse(localStorage.getItem('ak_session')||'null');
-  const isMe=localSess&&localSess.id===id;
-
-  if(!found.length&&!ud&&!isMe){
-    box.innerHTML=`<div class="sr-not-found">😶 ID <strong>${id}</strong> no está en ningún ranking aún.<br><span style="color:var(--muted);font-size:.5rem;">Regístrate y empieza a operar para aparecer.</span></div>`;
-  } else {
-    let html=`<div class="sr-label">RESULTADOS PARA ${id}</div>`;
-    found.forEach(f=>{
-      html+=`<div class="sr-row"><div class="sr-pos ${posClass(f.pos)}">${String(f.pos).padStart(2,'0')}</div>
-      <div class="sr-info"><div class="sr-table">${f.table}</div><div class="sr-pts">${Number(f.pts).toLocaleString()} pts</div></div>${badge(f.pos)}</div>`;
-    });
-    const sessData=ud||(isMe?localSess:null);
-    if(sessData){
-      const refLink=`${location.origin}${location.pathname}?ref=${sessData.code}`;
-      const refs=sessData.referidos||0;
-      const refDep=sessData.refDeposit||0;
-      html+=`<div class="sr-ref-box">
-        <div class="sr-ref-lbl">TU CÓDIGO DE REFERIDO</div>
-        <div class="sr-ref-code">${sessData.code}</div>
-        <div class="sr-ref-stats">
-          <div class="sr-stat"><div class="sr-stat-val">${refs}</div><div class="sr-stat-lbl">REGISTRADOS</div></div>
-          <div class="sr-stat"><div class="sr-stat-val">$${Math.floor(refs/10)*1 + Math.floor(refDep/5)*2} USD</div><div class="sr-stat-lbl">GANADO</div></div>
-        </div>
-        <div class="sr-share">
-          <a href="https://wa.me/?text=${encodeURIComponent('¡Únete a AKATSUKICASH! Depósitos y retiros 1xbet con premios. '+refLink)}" class="sr-share-btn wa" target="_blank"><i class="fab fa-whatsapp"></i> WHATSAPP</a>
-          <button class="sr-share-btn cp" onclick="copyLink('${refLink}')"><i class="fas fa-copy"></i> COPIAR</button>
-        </div>
-      </div>`;
-    }
-    box.innerHTML=html;
-  }
-  box.classList.add('show');
-}
-
-function copyLink(link){navigator.clipboard.writeText(link).then(()=>showToast('✓ Enlace copiado al portapapeles'));}
-
-// ── REGISTRO ──
-function openRegOrProfile(){
-  const s=JSON.parse(localStorage.getItem('ak_session')||'null');
-  if(s){
-    document.getElementById('searchInput').value=s.id;
-    doSearch(s.id);
-    document.getElementById('searchInput').scrollIntoView({behavior:'smooth',block:'center'});
-    showToast('👁 Mostrando tu perfil');
-  } else {
-    openOverlay('ovRegistro');
-  }
-}
-
-function doRegister(){
-  const idVal=document.getElementById('regId').value.trim();
-  const nameVal=document.getElementById('regName').value.trim();
-  if(!idVal){showToast('⚠ Escribe tu ID de 1xbet');return;}
-  if(!/^\d{5,20}$/.test(idVal)){showToast('⚠ El ID solo contiene números');return;}
-  // Check sesión existente
-  const existing=JSON.parse(localStorage.getItem('ak_session')||'null');
-  if(existing){showToast('⚠ Ya tienes una cuenta: '+existing.id);return;}
-
-  const code='AK'+idVal.slice(-4)+Math.floor(Math.random()*90+10);
-  const refLink=`${location.origin}${location.pathname}?ref=${code}`;
-  const sessObj={id:idVal,name:nameVal,code,refBy:urlRef,referidos:0,refDeposit:0};
-  localStorage.setItem('ak_session',JSON.stringify(sessObj));
-
-  // Notificar al servidor
-  if(SCRIPT_URL!=='TU_URL_AQUI'){
-    fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'register',id:idVal,name:nameVal,code,refBy:urlRef})}).catch(()=>{});
-  }
-
-  // Actualizar botón
-  updateRegBtn();
-
-  // Mostrar resultado
-  document.getElementById('regResult').innerHTML=`
-    <div class="reg-success">
-      <div class="reg-success-title">✓ REGISTRO EXITOSO</div>
-      <div class="reg-success-info">
-        ID: <strong style="color:#fff">${idVal}</strong><br>
-        Código: <strong style="color:var(--gold)">${code}</strong><br>
-        ${urlRef?`Referido por: <strong style="color:#fff">${urlRef}</strong><br>`:''}
-        Bono de bienvenida: <strong style="color:var(--green)">20% en tu primer depósito (máx $20 USD)</strong>
-      </div>
-      <div class="reg-link-box">${refLink}</div>
-      <button class="reg-copy-btn" onclick="copyLink('${refLink}')"><i class="fas fa-copy"></i> COPIAR MI ENLACE DE REFERIDO</button>
-    </div>`;
-  document.getElementById('regFormWrap').style.display='none';
-  showToast('✓ ¡Bienvenido a AKATSUKICASH!');
-  showInApp('✅','¡Registro exitoso! Bono 20% activo','rgba(0,230,118,.4)');
-}
-
-function updateRegBtn(){
-  const s=JSON.parse(localStorage.getItem('ak_session')||'null');
-  const btn=document.getElementById('regBtn');
-  if(s){btn.textContent='MI CUENTA';btn.classList.add('green');}
-  else{btn.textContent='REGISTRARSE';btn.classList.remove('green');}
-}
-updateRegBtn();
-
-// ── TABS ──
-function openTab(evt,id,group){
-  const bId=group==='dep'?'boardDep':'boardRet', tId=group==='dep'?'tabsDep':'tabsRet';
-  document.getElementById(bId).querySelectorAll('.tab-pane').forEach(e=>{e.style.display='none';e.classList.remove('active');});
-  document.getElementById(tId).querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  const pane=document.getElementById(id); pane.style.display='block'; pane.classList.add('active');
-  evt.currentTarget.classList.add('active');
-}
-
-// ── OVERLAYS ──
-function openOverlay(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeOverlay(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open'));document.body.style.overflow='';}});
-
-// ── ADMIN ──
-function openAdmin(){openOverlay('ovAdmin');}
-function checkAdminPw(){
-  const pw=document.getElementById('adminPw').value;
-  if(pw===ADMIN_PASSWORD){
-    document.getElementById('adminLockWrap').style.display='none';
-    document.getElementById('adminPanelWrap').style.display='block';
-    adminUnlocked=true;
-    renderAdminList();
-  } else {
-    showToast('⚠ Contraseña incorrecta');
-    document.getElementById('adminPw').value='';
-  }
-}
-function openAdminTab(name){
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.admin-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.admin-tab[onclick*="${name}"]`).classList.add('active');
-  document.getElementById('admin-'+name).classList.add('active');
-}
-function renderAdminList(){
-  const key=document.getElementById('adminTableSel').value;
-  const arr=[...(allData[key]||[])].sort((a,b)=>b.pts-a.pts);
-  const list=document.getElementById('adminList');
-  if(!arr.length){list.innerHTML='<div class="admin-row" style="justify-content:center;color:var(--muted2);font-size:.56rem;">SIN DATOS</div>';return;}
-  list.innerHTML=arr.map((u,i)=>`
-    <div class="admin-row">
-      <div class="admin-row-pos ${posClass(i+1)}">${i+1}</div>
-      <div class="admin-row-id">${u.id}</div>
-      <div class="admin-row-pts">${u.pts.toLocaleString()}</div>
-      <button class="admin-del" onclick="adminDelUser('${key}','${u.id}')"><i class="fas fa-times"></i></button>
-    </div>`).join('');
-}
-async function adminPost(payload){
-  if(SCRIPT_URL==='TU_URL_AQUI'){showToast('⚠ Configura el SCRIPT_URL primero');return false;}
-  try{await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});return true;}catch{showToast('⚠ Error de conexión');return false;}
-}
-async function adminAddUser(){
-  const key=document.getElementById('adminTableSel').value;
-  const id=document.getElementById('adminUserId').value.trim();
-  const pts=parseInt(document.getElementById('adminUserPts').value);
-  if(!id||isNaN(pts)){showToast('⚠ Completa los campos');return;}
-  const arr=allData[key]||[];
-  const idx=arr.findIndex(u=>u.id===id);
-  if(idx>=0)arr[idx].pts=pts; else arr.push({id,pts});
-  allData[key]=arr;
-  renderAll(); renderAdminList();
-  showToast('✓ Guardando en Sheet...');
-  await adminPost({action:'updateRanking',table:key,id,pts});
-  showToast('✓ Guardado en Sheet');
-  document.getElementById('adminUserId').value='';
-  document.getElementById('adminUserPts').value='';
-}
-async function adminDelUser(key,id){
-  allData[key]=(allData[key]||[]).filter(u=>u.id!==id);
-  renderAll(); renderAdminList();
-  await adminPost({action:'deleteUser',table:key,id});
-  showToast('✓ Usuario eliminado');
-}
-async function adminSaveTasa(){
-  const v=parseInt(document.getElementById('adminTasa').value);
-  if(isNaN(v)||v<1){showToast('⚠ Tasa inválida');return;}
-  TASA=v; updateRate(v);
-  await adminPost({action:'setTasa',tasa:v});
-  showToast('✓ Tasa actualizada a '+v+' CUP');
-  document.getElementById('adminTasa').value='';
-}
-async function adminSaveBanner(){
-  const txt=document.getElementById('adminBanner').value.trim();
-  if(!txt){showToast('⚠ Escribe el texto del banner');return;}
-  const banEl=document.getElementById('notifBanner');
-  banEl.innerHTML='<em>🔴</em> '+txt; banEl.classList.add('show');
-  await adminPost({action:'setBanner',banner:txt});
-  showToast('✓ Banner activado');
-}
-async function adminClearBanner(){
-  document.getElementById('notifBanner').classList.remove('show');
-  await adminPost({action:'setBanner',banner:''});
-  showToast('✓ Banner desactivado');
-}
-async function adminSavePremios(){
-  const premios={
-    'dep-sem':document.getElementById('adminPremioDS').value,
-    'dep-men':document.getElementById('adminPremioDM').value,
-    'ret-sem':document.getElementById('adminPremioRS').value,
-    'ret-men':document.getElementById('adminPremioRM').value,
-  };
-  Object.entries(premios).forEach(([k,v])=>{if(v){const el=document.getElementById('p'+k.replace('-',''));if(el)el.textContent=v;}});
-  await adminPost({action:'setPremios',premios});
-  showToast('✓ Premios actualizados');
-}
-async function adminAddGanador(){
-  const id=document.getElementById('adminGanId').value.trim();
-  const periodo=document.getElementById('adminGanPeriodo').value.trim();
-  const premio=document.getElementById('adminGanPremio').value.trim();
-  if(!id||!periodo||!premio){showToast('⚠ Completa todos los campos');return;}
-  if(!allData.ganadores)allData.ganadores=[];
-  allData.ganadores.unshift({id,periodo,premio});
-  renderWinners(allData.ganadores);
-  await adminPost({action:'addGanador',id,periodo,premio});
-  showToast('✓ Ganador registrado');
-  ['adminGanId','adminGanPeriodo','adminGanPremio'].forEach(x=>document.getElementById(x).value='');
-}
-
-// ── SORTEO ──
-function doSorteo(){
-  const key=document.getElementById('sorteoTableSel').value;
-  const arr=(allData[key]||[]).slice(0,10);
-  if(arr.length<2){showToast('⚠ Se necesitan al menos 2 usuarios en el Top 10');return;}
-  const wrap=document.getElementById('sorteoResultWrap');
-  wrap.innerHTML=`<div style="text-align:center;padding:16px 0;">
-    <div style="font-family:var(--M);font-size:.52rem;color:var(--muted2);letter-spacing:2px;margin-bottom:10px;">SELECCIONANDO GANADORES...</div>
-    <div style="font-family:var(--D);font-size:1.6rem;color:var(--gold);letter-spacing:3px;" id="rouletteDisplay">——————</div>
-  </div>`;
-  let tick=0,total=40;
-  const ids=arr.map(u=>u.id);
-  const interval=setInterval(()=>{
-    const rnd=ids[Math.floor(Math.random()*ids.length)];
-    document.getElementById('rouletteDisplay').textContent=rnd;
-    tick++;
-    if(tick>=total){
-      clearInterval(interval);
-      // Elegir 2 ganadores únicos
-      const shuffled=[...arr].sort(()=>Math.random()-.5);
-      const w1=shuffled[0],w2=shuffled[1];
-      wrap.innerHTML=`
-        <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:16px;text-align:center;">
-          <div style="font-family:var(--D);font-size:1.2rem;letter-spacing:3px;color:var(--gold);margin-bottom:14px;">🎰 GANADORES DEL SORTEO</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--D);font-size:1rem;letter-spacing:2px;">🥇 ${w1.id}</div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--D);font-size:1rem;letter-spacing:2px;">🥈 ${w2.id}</div>
-          </div>
-          <p style="font-family:var(--M);font-size:.5rem;color:var(--muted2);letter-spacing:1px;margin-top:12px;">Anuncia los ganadores por WhatsApp/Telegram y registra el premio en la pestaña GANADORES.</p>
-        </div>`;
-      showInApp('🎰','¡Sorteo completado! 2 ganadores seleccionados','rgba(251,191,36,.4)');
-    }
-  },80);
-}
-
-// ── CALC ──
-document.getElementById('calcInput').addEventListener('input',function(){
-  document.getElementById('crVal').textContent=((parseFloat(this.value)||0)*TASA).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-});
-
-// ── TOAST ──
-let toastT;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);
-}
-
-// ── INIT ──
-if(urlRef&&!localStorage.getItem('ak_session')){setTimeout(()=>openOverlay('ovRegistro'),800);}
-loadData();
-setInterval(loadData,15000);
-</script>
 </body>
 </html>
