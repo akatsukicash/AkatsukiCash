@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AkatsukiCash · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ─── REEMPLAZA CON TU CONFIG DE FIREBASE ───
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROJECT.firebaseapp.com",
+    projectId: "TU_PROJECT_ID",
+    storageBucket: "TU_PROJECT.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+  };
+  // ────────────────────────────────────────────
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ── Estado global ──
+  let STATE = {
+    // Financiero
+    saldo: 0, depositado: 0, retirado: 0,
+    ganancia_hist: 0, total_arriesgado: 0,
+    // Maratón
+    capital_inicial: 0, capital_actual: 0,
+    meta: 1000, cuota: 1.05,
+    jugadas_dia: 0, hechas_hoy: 0,
+    credito_bolsa: 0,
+    // Apuesta fija
+    apuesta_fija: 1, acum_fija: 0,
+  };
+
+  // ── Helpers ──
+  const fmt  = (n, sign=false) => {
+    const v = parseFloat(n||0).toFixed(2);
+    return sign ? (n>=0 ? `+${v}` : v) : v;
+  };
+  const pct  = n => `${fmt(n,true)}%`;
+  const col  = n => parseFloat(n) >= 0 ? 'pos' : 'neg';
+
+  // ── Firebase helpers ──
+  async function loadState() {
+    const snap = await getDoc(doc(db, 'config', 'state'));
+    if (snap.exists()) STATE = { ...STATE, ...snap.data() };
+  }
+  async function saveState() {
+    await setDoc(doc(db, 'config', 'state'), STATE);
+  }
+  async function addLog(col_, data) {
+    await addDoc(collection(db, col_), { ...data, ts: new Date().toISOString() });
+  }
+  async function getLogs(col_, lim=50) {
+    const q = query(collection(db, col_), orderBy('ts','desc'));
+    const s = await getDocs(q);
+    return s.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, lim);
+  }
+  async function delLog(col_, id) {
+    await deleteDoc(doc(db, col_, id));
+  }
+
+  // ── Auth ──
+  onAuthStateChanged(auth, user => {
+    if (user) { document.getElementById('login-screen').style.display='none'; initDashboard(); }
+    else       { document.getElementById('login-screen').style.display='flex'; }
+  });
+
+  window.doLogin = async () => {
+    const email = document.getElementById('l-email').value;
+    const pass  = document.getElementById('l-pass').value;
+    const err   = document.getElementById('l-err');
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      err.textContent = 'Credenciales incorrectas';
+    }
+  };
+
+  window.doLogout = async () => {
+    await signOut(auth);
+    document.getElementById('login-screen').style.display='flex';
+  };
+
+  // ── Init ──
+  async function initDashboard() {
+    await loadState();
+    renderAll();
+    navTo('maraton');
+  }
+
+  // ── Render ──
+  function renderAll() {
+    renderMaraton();
+    renderFinanciero();
+    renderFija();
+  }
+
+  function renderMaraton() {
+    const { capital_inicial: ci, capital_actual: ca, meta, cuota,
+            jugadas_dia: jpd, hechas_hoy, credito_bolsa } = STATE;
+
+    const paso_act  = (ca>0 && ci>0 && cuota>1) ? Math.floor(Math.log(ca/ci)/Math.log(cuota)) : 0;
+    const pasos_tot = (ci>0 && cuota>1) ? Math.floor(Math.log(meta/ci)/Math.log(cuota)) : 0;
+    const pct_prog  = pasos_tot > 0 ? Math.min(100, Math.floor((paso_act/pasos_tot)*100)) : 0;
+    const falta     = meta - ca;
+    const pasos_rest = Math.max(0, pasos_tot - paso_act);
+
+    // Dias restantes
+    let dias_rest = 0;
+    if (jpd > 0 && ca > 0 && cuota > 1 && ca < meta) {
+      const pr_aj = Math.max(0, Math.log(meta/ca)/Math.log(cuota) - credito_bolsa);
+      dias_rest = Math.ceil(pr_aj / jpd);
+    }
+
+    // Objetivo hoy
+    const obj_hoy = Math.max(0, jpd).toFixed(1);
+    const diff_hoy = hechas_hoy - parseFloat(obj_hoy);
+
+    set('m-ci', fmt(ci));
+    set('m-ca', fmt(ca));
+    set('m-meta', fmt(meta));
+    set('m-cuota', `x${cuota}`);
+    set('m-pasos', `${paso_act} / ${pasos_tot}`);
+    set('m-falta', `${fmt(falta)} USDT`);
+    set('m-dias', dias_rest > 0 ? `${dias_rest} días` : '—');
+    set('m-jpd', jpd > 0 ? `${jpd}/día` : 'Sin plan');
+    set('m-bolsa', `${fmt(credito_bolsa)}/${jpd}`);
+
+    // Barra progreso
+    const bar = document.getElementById('m-bar');
+    if (bar) { bar.style.width = pct_prog + '%'; }
+    set('m-pct', pct_prog + '%');
+
+    // Estado día
+    const elDia = document.getElementById('m-dia-status');
+    if (elDia) {
+      if (jpd <= 0) {
+        elDia.innerHTML = `<span class="muted">${hechas_hoy} jugadas hoy (sin objetivo)</span>`;
+      } else if (diff_hoy > 0.05) {
+        elDia.innerHTML = `<span class="pos">${fmt(hechas_hoy)}/${obj_hoy} +${fmt(diff_hoy)} adelantado</span>`;
+      } else if (diff_hoy < -0.05) {
+        elDia.innerHTML = `<span class="warn">${fmt(hechas_hoy)}/${obj_hoy} faltan ${fmt(-diff_hoy)}</span>`;
+      } else {
+        elDia.innerHTML = `<span class="pos">${fmt(hechas_hoy)}/${obj_hoy} EXACTO ✓</span>`;
+      }
+    }
+  }
+
+  function renderFinanciero() {
+    const { saldo, depositado, retirado, ganancia_hist, total_arriesgado } = STATE;
+    const yield_   = total_arriesgado > 0 ? (ganancia_hist / total_arriesgado) * 100 : 0;
+    const pos_neta = saldo + retirado - depositado;
+
+    set('f-saldo',   fmt(saldo) + ' USDT');
+    set('f-dep',     fmt(depositado) + ' USDT');
+    set('f-ret',     fmt(retirado) + ' USDT');
+
+    const gEl = document.getElementById('f-gan');
+    if (gEl) { gEl.textContent = fmt(ganancia_hist,true) + ' USDT'; gEl.className = col(ganancia_hist); }
+
+    const yEl = document.getElementById('f-yield');
+    if (yEl) { yEl.textContent = pct(yield_); yEl.className = col(yield_); }
+
+    const pEl = document.getElementById('f-pos');
+    if (pEl) {
+      pEl.textContent = fmt(pos_neta,true) + ' USDT';
+      pEl.className   = col(pos_neta);
+      const lEl = document.getElementById('f-pos-label');
+      if (lEl) { lEl.textContent = pos_neta >= 0 ? '▲ POSITIVO' : '▼ NEGATIVO'; lEl.className = col(pos_neta); }
+    }
+  }
+
+  function renderFija() {
+    const { apuesta_fija, acum_fija } = STATE;
+    set('af-monto', fmt(apuesta_fija) + ' USDT');
+    const aEl = document.getElementById('af-acum');
+    if (aEl) { aEl.textContent = fmt(acum_fija,true) + ' USDT'; aEl.className = col(acum_fija); }
+  }
+
+  function set(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  // ── Navegación ──
+  window.navTo = (section) => {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const el = document.getElementById('sec-'+section);
+    if (el) el.classList.add('active');
+    const nav = document.querySelector(`.nav-item[data-sec="${section}"]`);
+    if (nav) nav.classList.add('active');
+    document.getElementById('sidebar').classList.remove('open');
+  };
+
+  window.toggleSidebar = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  };
+
+  // ── Acciones Maratón ──
+  window.marcarPaso = async () => {
+    const cuota_r = parseFloat(prompt('Cuota cobrada:'));
+    if (!cuota_r || isNaN(cuota_r)) return;
+    const cb = STATE.cuota;
+    const nuevo_ca = parseFloat((STATE.capital_actual * cuota_r).toFixed(2));
+    const ganancia = parseFloat((nuevo_ca - STATE.capital_actual).toFixed(2));
+    const equiv    = cb > 1 ? Math.max(1, Math.log(cuota_r)/Math.log(cb)) : 1;
+
+    STATE.capital_actual = nuevo_ca;
+    STATE.hechas_hoy     = parseFloat((STATE.hechas_hoy + equiv).toFixed(2));
+
+    // Actualizar bolsa y credito
+    if (STATE.jugadas_dia > 0) {
+      STATE.credito_bolsa = parseFloat((STATE.credito_bolsa + equiv).toFixed(2));
+      // descuentos si bolsa >= jpd (manejado en render)
+      while (STATE.credito_bolsa >= STATE.jugadas_dia) {
+        STATE.credito_bolsa = parseFloat((STATE.credito_bolsa - STATE.jugadas_dia).toFixed(2));
+      }
+    }
+
+    await addLog('log_maraton', { tipo:'GANADA', cuota: cuota_r, equiv: parseFloat(equiv.toFixed(2)), ganancia, capital: nuevo_ca });
+    await saveState();
+    renderAll();
+    toast(`+${fmt(ganancia)} USDT · Capital: ${fmt(nuevo_ca)} USDT`);
+  };
+
+  window.nuevaRacha = async () => {
+    const nci = parseFloat(prompt('Nuevo capital inicial (USDT):'));
+    if (!nci || isNaN(nci)) return;
+    STATE.capital_inicial = nci;
+    STATE.capital_actual  = nci;
+    STATE.hechas_hoy      = 0;
+    STATE.credito_bolsa   = 0;
+    await saveState();
+    renderAll();
+    toast('Nueva racha iniciada con ' + fmt(nci) + ' USDT');
+  };
+
+  window.fijarPlan = async () => {
+    const jpd = parseFloat(prompt('Jugadas por día:'));
+    if (!jpd || isNaN(jpd) || jpd <= 0) return;
+    STATE.jugadas_dia   = jpd;
+    STATE.credito_bolsa = 0;
+    await saveState();
+    renderAll();
+    toast('Plan fijado: ' + jpd + ' jugadas/día');
+  };
+
+  window.editarMaraton = async (campo) => {
+    const labels = {
+      capital_actual: 'Capital actual (USDT)',
+      capital_inicial: 'Capital inicial (USDT)',
+      meta: 'Meta (USDT)',
+      cuota: 'Cuota base (ej: 1.05)',
+      jugadas_dia: 'Jugadas por día',
+      hechas_hoy: 'Jugadas hechas hoy',
+      credito_bolsa: 'Crédito en bolsa',
+    };
+    const val = parseFloat(prompt(labels[campo] + ':', STATE[campo]));
+    if (isNaN(val)) return;
+    STATE[campo] = val;
+    await saveState();
+    renderAll();
+    toast('Actualizado');
+  };
+
+  // ── Acciones Financiero ──
+  window.registrarDeposito = async () => {
+    const monto = parseFloat(prompt('Monto a depositar (USDT):'));
+    if (!monto || isNaN(monto) || monto <= 0) return;
+    const nota = prompt('Nota (opcional):') || '';
+    STATE.depositado    = parseFloat((STATE.depositado + monto).toFixed(2));
+    STATE.saldo         = parseFloat((STATE.saldo + monto).toFixed(2));
+    await addLog('log_depositos', { monto, nota });
+    await saveState();
+    renderAll();
+    toast(`+${fmt(monto)} USDT depositado`);
+  };
+
+  window.registrarRetiro = async () => {
+    const monto = parseFloat(prompt('Monto a retirar (USDT):'));
+    if (!monto || isNaN(monto) || monto <= 0) return;
+    const nota = prompt('Nota (opcional):') || '';
+    STATE.retirado = parseFloat((STATE.retirado + monto).toFixed(2));
+    STATE.saldo    = parseFloat((STATE.saldo - monto).toFixed(2));
+    await addLog('log_retiros', { monto, nota });
+    await saveState();
+    renderAll();
+    toast(`-${fmt(monto)} USDT retirado`);
+  };
+
+  window.actualizarSaldo = async () => {
+    const val = parseFloat(prompt('Saldo real actual (USDT):', STATE.saldo));
+    if (isNaN(val)) return;
+    STATE.saldo = val;
+    await saveState();
+    renderAll();
+    toast('Saldo actualizado');
+  };
+
+  window.registrarApuestaGanada = async () => {
+    const monto = parseFloat(prompt('Monto apostado (USDT):'));
+    if (!monto || isNaN(monto)) return;
+    const cuota = parseFloat(prompt('Cuota cobrada:'));
+    if (!cuota || isNaN(cuota)) return;
+    const ganancia = parseFloat((monto * cuota - monto).toFixed(2));
+    STATE.ganancia_hist    = parseFloat((STATE.ganancia_hist + ganancia).toFixed(2));
+    STATE.total_arriesgado = parseFloat((STATE.total_arriesgado + monto).toFixed(2));
+    await addLog('log_apuestas', { tipo:'GANADA', monto, cuota, ganancia, acum: STATE.ganancia_hist });
+    await saveState();
+    renderAll();
+    toast(`GANADA +${fmt(ganancia)} USDT`);
+  };
+
+  window.registrarApuestaPerdida = async () => {
+    const monto = parseFloat(prompt('Monto apostado (USDT):'));
+    if (!monto || isNaN(monto)) return;
+    const cuota = parseFloat(prompt('Cuota (registro):')) || 0;
+    STATE.ganancia_hist    = parseFloat((STATE.ganancia_hist - monto).toFixed(2));
+    STATE.total_arriesgado = parseFloat((STATE.total_arriesgado + monto).toFixed(2));
+    await addLog('log_apuestas', { tipo:'PERDIDA', monto, cuota, ganancia: -monto, acum: STATE.ganancia_hist });
+    await saveState();
+    renderAll();
+    toast(`PERDIDA -${fmt(monto)} USDT`);
+  };
+
+  window.editarFinanciero = async (campo) => {
+    const labels = {
+      saldo: 'Saldo actual (USDT)',
+      depositado: 'Total depositado (USDT)',
+      retirado: 'Total retirado (USDT)',
+      ganancia_hist: 'Ganancia neta histórica (USDT)',
+      total_arriesgado: 'Total arriesgado (USDT)',
+    };
+    const val = parseFloat(prompt(labels[campo] + ':', STATE[campo]));
+    if (isNaN(val)) return;
+    STATE[campo] = val;
+    await saveState();
+    renderAll();
+    toast('Actualizado');
+  };
+
+  // ── Acciones Apuesta Fija ──
+  window.regFijaGanada = async () => {
+    const cuota = parseFloat(prompt('Cuota cobrada:'));
+    if (!cuota || isNaN(cuota)) return;
+    const gan = parseFloat((STATE.apuesta_fija * cuota - STATE.apuesta_fija).toFixed(2));
+    STATE.acum_fija = parseFloat((STATE.acum_fija + gan).toFixed(2));
+    await addLog('log_fija', { tipo:'GANADA', cuota, ganancia: gan, acum: STATE.acum_fija });
+    await saveState();
+    renderFija();
+    toast(`GANADA +${fmt(gan)} USDT`);
+  };
+
+  window.regFijaPerdida = async () => {
+    const cuota = parseFloat(prompt('Cuota (registro):')) || 0;
+    STATE.acum_fija = parseFloat((STATE.acum_fija - STATE.apuesta_fija).toFixed(2));
+    await addLog('log_fija', { tipo:'PERDIDA', cuota, ganancia: -STATE.apuesta_fija, acum: STATE.acum_fija });
+    await saveState();
+    renderFija();
+    toast(`PERDIDA -${fmt(STATE.apuesta_fija)} USDT`);
+  };
+
+  window.cambiarApuestaFija = async () => {
+    const val = parseFloat(prompt('Nuevo monto fijo (USDT):', STATE.apuesta_fija));
+    if (isNaN(val) || val <= 0) return;
+    STATE.apuesta_fija = val;
+    await saveState();
+    renderFija();
+    toast('Apuesta fija: ' + fmt(val) + ' USDT');
+  };
+
+  // ── Historial ──
+  window.verHistorial = async (col_) => {
+    const logs = await getLogs(col_);
+    const modal = document.getElementById('modal');
+    const body  = document.getElementById('modal-body');
+    const titles = {
+      log_maraton: 'Historial Maratón',
+      log_depositos: 'Historial Depósitos',
+      log_retiros: 'Historial Retiros',
+      log_apuestas: 'Historial Apuestas',
+      log_fija: 'Historial Apuesta Fija',
+    };
+    document.getElementById('modal-title').textContent = titles[col_] || 'Historial';
+    body.innerHTML = logs.length === 0 ? '<p class="muted">Sin registros aún.</p>' :
+      logs.map(l => `
+        <div class="log-row">
+          <span class="log-ts">${l.ts ? l.ts.slice(0,16).replace('T',' ') : ''}</span>
+          <span class="log-tipo ${l.tipo==='GANADA'?'pos':'neg'}">${l.tipo||''}</span>
+          <span class="log-val">${l.ganancia !== undefined ? fmt(l.ganancia,true)+' USDT' : (l.monto ? fmt(l.monto)+' USDT' : '')}</span>
+          <span class="log-extra">${l.cuota ? 'x'+l.cuota : ''} ${l.nota||''} ${l.acum !== undefined ? '· Acum: '+fmt(l.acum) : ''}</span>
+          <button class="btn-del" onclick="borrarLog('${col_}','${l.id}')">✕</button>
+        </div>
+      `).join('');
+    modal.classList.add('open');
+  };
+
+  window.borrarLog = async (col_, id) => {
+    if (!confirm('¿Borrar este registro?')) return;
+    await delLog(col_, id);
+    verHistorial(col_);
+    toast('Registro borrado');
+  };
+
+  window.closeModal = () => {
+    document.getElementById('modal').classList.remove('open');
+  };
+
+  // ── Toast ──
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Kunai canvas ──
+  window.addEventListener('load', () => {
+    const canvas = document.getElementById('kunai-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    const kunais = Array.from({length: 18}, () => ({
+      x: Math.random() * canvas.width,
+      y: -80 - Math.random() * 400,
+      speed: 1.5 + Math.random() * 2.5,
+      angle: Math.PI/2 + (Math.random()-0.5)*0.3,
+      rot: 0,
+      rotSpeed: (Math.random()-0.5)*0.04,
+      size: 14 + Math.random() * 12,
+      alpha: 0.12 + Math.random() * 0.18,
+    }));
+
+    function drawKunai(ctx, size) {
+      ctx.beginPath();
+      ctx.moveTo(0, -size*1.8);
+      ctx.lineTo(size*0.18, -size*0.3);
+      ctx.lineTo(size*0.5, size*0.1);
+      ctx.lineTo(0, -size*0.1);
+      ctx.lineTo(-size*0.5, size*0.1);
+      ctx.lineTo(-size*0.18, -size*0.3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.rect(-size*0.1, size*0.08, size*0.2, size*0.6);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, size*0.9, size*0.22, 0, Math.PI*2);
+      ctx.stroke();
+    }
+
+    function animate() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      kunais.forEach(k => {
+        k.y     += k.speed;
+        k.x     += Math.sin(k.angle) * 0.3;
+        k.rot   += k.rotSpeed;
+        if (k.y > canvas.height + 100) {
+          k.y = -80; k.x = Math.random() * canvas.width;
+        }
+        ctx.save();
+        ctx.translate(k.x, k.y);
+        ctx.rotate(k.rot);
+        ctx.globalAlpha = k.alpha;
+        ctx.fillStyle   = '#cc1111';
+        ctx.strokeStyle = '#ff3333';
+        ctx.lineWidth   = 1;
+        drawKunai(ctx, k.size);
+        ctx.restore();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Nubes
+    const cloudCanvas = document.getElementById('cloud-canvas');
+    if (!cloudCanvas) return;
+    const cc = cloudCanvas.getContext('2d');
+    cloudCanvas.width  = window.innerWidth;
+    cloudCanvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      cloudCanvas.width  = window.innerWidth;
+      cloudCanvas.height = window.innerHeight;
+    });
+
+    const clouds = Array.from({length: 5}, (_, i) => ({
+      x: (i / 5) * window.innerWidth,
+      y: 40 + Math.random() * 180,
+      speed: 0.15 + Math.random() * 0.2,
+      scale: 0.8 + Math.random() * 0.8,
+      alpha: 0.04 + Math.random() * 0.06,
+    }));
+
+    function drawCloud(ctx, scale) {
+      ctx.beginPath();
+      ctx.arc(0,    0,   60*scale, 0, Math.PI*2);
+      ctx.arc(55*scale, -15*scale, 45*scale, 0, Math.PI*2);
+      ctx.arc(-55*scale,-15*scale, 45*scale, 0, Math.PI*2);
+      ctx.arc(25*scale, -30*scale, 35*scale, 0, Math.PI*2);
+      ctx.arc(-25*scale,-30*scale, 35*scale, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    function animateClouds() {
+      cc.clearRect(0,0,cloudCanvas.width,cloudCanvas.height);
+      clouds.forEach(c => {
+        c.x += c.speed;
+        if (c.x > cloudCanvas.width + 200) c.x = -200;
+        cc.save();
+        cc.translate(c.x, c.y);
+        cc.globalAlpha = c.alpha;
+        cc.fillStyle = '#cc0000';
+        drawCloud(cc, c.scale);
+        cc.restore();
+      });
+      requestAnimationFrame(animateClouds);
+    }
+    animateClouds();
+  });
+</script>
+
+<style>
+:root {
+  --red:    #cc1111;
+  --red2:   #ff2222;
+  --dark:   #080808;
+  --dark2:  #111111;
+  --dark3:  #181818;
+  --border: #2a0000;
+  --text:   #e8e8e8;
+  --muted:  #666;
+  --pos:    #22c55e;
+  --neg:    #ef4444;
+  --warn:   #f59e0b;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --sidebar-w: 260px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--dark);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* ── Fondo ── */
+#kunai-canvas, #cloud-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+#cloud-canvas { z-index: 1; }
+
+/* ── Login ── */
+#login-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.95);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-box {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  width: min(360px, 90vw);
+  text-align: center;
+}
+.login-logo {
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.login-logo span { color: var(--red); }
+.login-sub { color: var(--muted); font-size: 12px; letter-spacing: 2px; margin-bottom: 32px; }
+.login-box input {
+  width: 100%; padding: 14px 16px;
+  background: var(--dark3); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-family: var(--font-body); font-size: 15px;
+  margin-bottom: 12px; outline: none;
+}
+.login-box input:focus { border-color: var(--red); }
+.btn-login {
+  width: 100%; padding: 14px;
+  background: var(--red); border: none;
+  border-radius: 10px; color: #fff;
+  font-family: var(--font-display); font-size: 20px;
+  letter-spacing: 2px; cursor: pointer;
+  transition: background .2s;
+}
+.btn-login:hover { background: var(--red2); }
+#l-err { color: var(--neg); font-size: 13px; margin-top: 10px; }
+
+/* ── Layout ── */
+#app { display: flex; min-height: 100vh; position: relative; z-index: 10; }
+
+/* ── Sidebar ── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--dark2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  z-index: 100; transition: transform .3s ease;
+}
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo h1 {
+  font-family: var(--font-display);
+  font-size: 28px; letter-spacing: 2px;
+  color: var(--text);
+}
+.sidebar-logo h1 span { color: var(--red); }
+.sidebar-logo p { color: var(--muted); font-size: 11px; letter-spacing: 2px; margin-top: 2px; }
+
+.nav-list { padding: 16px 12px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: 10px;
+  cursor: pointer; color: var(--muted);
+  font-size: 14px; font-weight: 500;
+  transition: all .2s; margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: #1a0000; color: var(--text); }
+.nav-item.active {
+  background: linear-gradient(135deg, #1a0000, #2a0000);
+  color: var(--red2); border-color: var(--border);
+}
+.nav-icon { font-size: 18px; width: 22px; text-align: center; }
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+.btn-logout {
+  width: 100%; padding: 11px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  cursor: pointer; font-size: 13px;
+  transition: all .2s;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Main ── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── Topbar ── */
+.topbar {
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,8,8,0.8);
+  backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: 2px;
+  color: var(--text);
+}
+.topbar-date { color: var(--muted); font-size: 13px; font-family: var(--font-mono); }
+.btn-menu {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 22px; cursor: pointer;
+}
+
+/* ── Content ── */
+.content { padding: 28px; flex: 1; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── Cards ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.card {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s;
+}
+.card:hover { border-color: #3a0000; }
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--red), transparent);
+}
+.card-label {
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.card-value {
+  font-family: var(--font-mono);
+  font-size: 22px; font-weight: 700;
+  color: var(--text);
+}
+.card-value.pos { color: var(--pos); }
+.card-value.neg { color: var(--neg); }
+.card-value.warn { color: var(--warn); }
+.card-sub {
+  font-size: 12px; color: var(--muted);
+  margin-top: 6px;
+}
+.card-edit {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none;
+  color: var(--muted); cursor: pointer; font-size: 14px;
+  opacity: 0; transition: opacity .2s;
+}
+.card:hover .card-edit { opacity: 1; }
+.card-edit:hover { color: var(--red); }
+
+/* ── Card destacada ── */
+.card-hero {
+  background: linear-gradient(135deg, #1a0000, #0d0d0d);
+  border-color: var(--red);
+}
+.card-hero .card-value { font-size: 32px; }
+.pos-label {
+  display: inline-block;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  margin-top: 8px;
+}
+.pos.pos-label { background: rgba(34,197,94,.15); color: var(--pos); }
+.neg.pos-label { background: rgba(239,68,68,.15); color: var(--neg); }
+
+/* ── Progreso ── */
+.progress-wrap { margin-bottom: 24px; }
+.progress-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 10px;
+}
+.progress-label { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
+.progress-pct { font-family: var(--font-mono); font-size: 13px; color: var(--red); }
+.progress-track {
+  height: 8px; background: var(--dark3);
+  border-radius: 99px; overflow: hidden;
+}
+.progress-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--red2));
+  border-radius: 99px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 12px rgba(204,17,17,.5);
+}
+
+/* ── Panel acciones ── */
+.panel {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px; margin-bottom: 20px;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 18px; letter-spacing: 2px;
+  color: var(--text); margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.btn {
+  padding: 13px 16px;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--dark3); color: var(--text);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .2s;
+  text-align: center; white-space: nowrap;
+}
+.btn:hover { background: #1a0000; border-color: var(--red); color: var(--red2); }
+.btn-primary {
+  background: var(--red); border-color: var(--red); color: #fff;
+}
+.btn-primary:hover { background: var(--red2); color: #fff; }
+.btn-outline-pos { border-color: rgba(34,197,94,.4); color: var(--pos); }
+.btn-outline-pos:hover { background: rgba(34,197,94,.1); border-color: var(--pos); }
+.btn-outline-neg { border-color: rgba(239,68,68,.4); color: var(--neg); }
+.btn-outline-neg:hover { background: rgba(239,68,68,.1); border-color: var(--neg); }
+
+/* ── Section header ── */
+.sec-header {
+  margin-bottom: 24px;
+}
+.sec-title {
+  font-family: var(--font-display);
+  font-size: 32px; letter-spacing: 3px;
+  color: var(--text);
+}
+.sec-title span { color: var(--red); }
+.sec-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* ── Dia status ── */
+.dia-status-wrap {
+  background: var(--dark3);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.dia-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+
+/* ── Modal ── */
+#modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85); z-index: 500;
+  align-items: center; justify-content: center;
+}
+#modal.open { display: flex; }
+.modal-box {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: min(600px, 94vw);
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-head {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h3 {
+  font-family: var(--font-display);
+  font-size: 20px; letter-spacing: 2px;
+}
+.modal-close {
+  background: none; border: none;
+  color: var(--muted); font-size: 20px; cursor: pointer;
+}
+.modal-close:hover { color: var(--red); }
+#modal-body {
+  padding: 20px 24px;
+  overflow-y: auto; flex: 1;
+}
+.log-row {
+  display: flex; align-items: center;
+  gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 13px; flex-wrap: wrap;
+}
+.log-ts { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.log-tipo { font-weight: 700; font-size: 11px; letter-spacing: 1px; }
+.log-val { font-family: var(--font-mono); font-weight: 600; }
+.log-extra { color: var(--muted); font-size: 12px; flex: 1; }
+.btn-del {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer; font-size: 13px;
+  margin-left: auto; padding: 4px 8px;
+}
+.btn-del:hover { color: var(--neg); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--dark2); border: 1px solid var(--border);
+  color: var(--text); padding: 13px 24px;
+  border-radius: 99px; font-size: 14px;
+  z-index: 9999; transition: transform .3s ease;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Colors ── */
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.warn { color: var(--warn); }
+.muted { color: var(--muted); }
+
+/* ── Divider ── */
+.divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+  }
+  #sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.8);
+  }
+  #main { margin-left: 0; }
+  .btn-menu { display: block; }
+  .content { padding: 16px; }
+  .topbar { padding: 14px 16px; }
+  .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card-value { font-size: 18px; }
+  .card-hero .card-value { font-size: 26px; }
+  .sec-title { font-size: 26px; }
+  .btn-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 400px) {
+  .cards-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Overlay sidebar mobile ── */
+#sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 99;
+}
+#sidebar.open ~ #sidebar-overlay { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Fondo animado -->
+<canvas id="cloud-canvas"></canvas>
+<canvas id="kunai-canvas"></canvas>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">AKATSUKI<span>CASH</span></div>
+    <div class="login-sub">PREMIUM BETTING SYSTEM · EST. 2026</div>
+    <input id="l-email" type="email" placeholder="Email">
+    <input id="l-pass"  type="password" placeholder="Contraseña"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+    <div id="l-err"></div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <h1>AKATSUKI<span>CASH</span></h1>
+      <p>PREMIUM BETTING SYSTEM</p>
+    </div>
+    <div class="nav-list">
+      <div class="nav-item" data-sec="maraton" onclick="navTo('maraton')">
+        <span class="nav-icon">🎯</span> Maratón
+      </div>
+      <div class="nav-item" data-sec="financiero" onclick="navTo('financiero')">
+        <span class="nav-icon">📊</span> Control Financiero
+      </div>
+      <div class="nav-item" data-sec="fija" onclick="navTo('fija')">
+        <span class="nav-icon">🔒</span> Apuesta Fija
+      </div>
+      <div class="nav-item" data-sec="historial" onclick="navTo('historial')">
+        <span class="nav-icon">📋</span> Historial
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">⏻ Cerrar sesión</button>
+    </div>
+  </nav>
+  <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main -->
+  <div id="main">
+    <div class="topbar">
+      <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ─── MARATÓN ─── -->
+      <div class="section" id="sec-maraton">
+        <div class="sec-header">
+          <div class="sec-title">MARAT<span>Ó</span>N</div>
+          <div class="sec-sub">Escalada reinvirtiendo todo · Meta dinámica</div>
+        </div>
+
+        <!-- Progreso -->
+        <div class="progress-wrap">
+          <div class="progress-header">
+            <span class="progress-label">PROGRESO HACIA LA META</span>
+            <span class="progress-pct" id="m-pct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="m-bar"></div>
+          </div>
+        </div>
+
+        <!-- Estado hoy -->
+        <div class="dia-status-wrap">
+          <div>
+            <div class="dia-label">HOY</div>
+            <div id="m-dia-status"><span class="muted">Sin objetivo diario</span></div>
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards-grid">
+          <div class="card card-hero">
+            <div class="card-label">Capital Actual</div>
+            <div class="card-value" id="m-ca">0.00</div>
+            <div class="card-sub">USDT</div>
+            <button class="card-edit" onclick="editarMaraton('capital_actual')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Capital Inicial</div>
+            <div class="card-value" id="m-ci">0.00</div>
+            <div class="card-sub">USDT</div>
+            <button class="card-edit" onclick="editarMaraton('capital_inicial')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Meta</div>
+            <div class="card-value" id="m-meta">1000.00</div>
+            <div class="card-sub">USDT</div>
+            <button class="card-edit" onclick="editarMaraton('meta')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Cuota Base</div>
+            <div class="card-value" id="m-cuota">x1.05</div>
+            <button class="card-edit" onclick="editarMaraton('cuota')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Pasos</div>
+            <div class="card-value" id="m-pasos">0 / 0</div>
+            <div class="card-sub">actual / total</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Faltan</div>
+            <div class="card-value neg" id="m-falta">0.00 USDT</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Días Restantes</div>
+            <div class="card-value warn" id="m-dias">—</div>
+            <div class="card-sub" id="m-jpd">Sin plan</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Bolsa</div>
+            <div class="card-value" id="m-bolsa">0/0</div>
+            <div class="card-sub">jugadas acumuladas</div>
+            <button class="card-edit" onclick="editarMaraton('credito_bolsa')">✎</button>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="panel">
+          <div class="panel-title">ACCIONES</div>
+          <div class="btn-grid">
+            <button class="btn btn-primary" onclick="marcarPaso()">✓ Marcar paso GANADO</button>
+            <button class="btn" onclick="nuevaRacha()">↺ Nueva Racha</button>
+            <button class="btn" onclick="fijarPlan()">📅 Fijar plan diario</button>
+            <button class="btn" onclick="editarMaraton('hechas_hoy')">✎ Editar jugadas hoy</button>
+            <button class="btn" onclick="editarMaraton('capital_actual')">✎ Editar capital</button>
+            <button class="btn" onclick="editarMaraton('jugadas_dia')">✎ Editar JPD</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── FINANCIERO ─── -->
+      <div class="section" id="sec-financiero">
+        <div class="sec-header">
+          <div class="sec-title">CONTROL <span>FINANCIERO</span></div>
+          <div class="sec-sub">Estado consolidado · Depósitos, retiros y rendimiento</div>
+        </div>
+
+        <!-- Posición neta hero -->
+        <div class="card card-hero" style="margin-bottom:20px">
+          <div class="card-label">POSICIÓN NETA</div>
+          <div class="card-value" id="f-pos">0.00 USDT</div>
+          <div id="f-pos-label" class="pos-label pos">▲ POSITIVO</div>
+          <div class="card-sub" style="margin-top:10px">saldo actual + retirado − depositado</div>
+          <button class="card-edit" onclick="actualizarSaldo()">✎ Saldo</button>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-label">Saldo Cuenta</div>
+            <div class="card-value" id="f-saldo">0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('saldo')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Ganancia Neta Histórica</div>
+            <div class="card-value" id="f-gan">+0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('ganancia_hist')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Yield</div>
+            <div class="card-value" id="f-yield">+0.00%</div>
+            <div class="card-sub">sobre total arriesgado</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Total Depositado</div>
+            <div class="card-value" id="f-dep">0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('depositado')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Total Retirado</div>
+            <div class="card-value" id="f-ret">0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('retirado')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Total Arriesgado</div>
+            <div class="card-value" id="f-risk">0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('total_arriesgado')">✎</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">MOVIMIENTOS</div>
+          <div class="btn-grid">
+            <button class="btn btn-outline-pos" onclick="registrarDeposito()">↓ Registrar Depósito</button>
+            <button class="btn btn-outline-neg" onclick="registrarRetiro()">↑ Registrar Retiro</button>
+            <button class="btn btn-outline-pos" onclick="registrarApuestaGanada()">✓ Apuesta Ganada</button>
+            <button class="btn btn-outline-neg" onclick="registrarApuestaPerdida()">✗ Apuesta Perdida</button>
+            <button class="btn" onclick="actualizarSaldo()">✎ Actualizar Saldo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── APUESTA FIJA ─── -->
+      <div class="section" id="sec-fija">
+        <div class="sec-header">
+          <div class="sec-title">APUESTA <span>FIJA</span></div>
+          <div class="sec-sub">Monto fijo · Cuota variable · Acumulado independiente</div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card card-hero">
+            <div class="card-label">Ganancia Acumulada</div>
+            <div class="card-value" id="af-acum">+0.00 USDT</div>
+            <button class="card-edit" onclick="editarFinanciero('acum_fija')">✎</button>
+          </div>
+          <div class="card">
+            <div class="card-label">Apuesta Fija Actual</div>
+            <div class="card-value" id="af-monto">1.00 USDT</div>
+            <button class="card-edit" onclick="cambiarApuestaFija()">✎</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">REGISTRAR</div>
+          <div class="btn-grid">
+            <button class="btn btn-outline-pos" onclick="regFijaGanada()">✓ GANADA</button>
+            <button class="btn btn-outline-neg" onclick="regFijaPerdida()">✗ PERDIDA</button>
+            <button class="btn" onclick="cambiarApuestaFija()">✎ Cambiar monto fijo</button>
+            <button class="btn" onclick="verHistorial('log_fija')">📋 Ver historial</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── HISTORIAL ─── -->
+      <div class="section" id="sec-historial">
+        <div class="sec-header">
+          <div class="sec-title">HIST<span>O</span>RIAL</div>
+          <div class="sec-sub">Registro completo de todas las operaciones</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">VER REGISTROS</div>
+          <div class="btn-grid">
+            <button class="btn" onclick="verHistorial('log_maraton')">🎯 Maratón</button>
+            <button class="btn" onclick="verHistorial('log_apuestas')">📊 Apuestas</button>
+            <button class="btn" onclick="verHistorial('log_depositos')">↓ Depósitos</button>
+            <button class="btn" onclick="verHistorial('log_retiros')">↑ Retiros</button>
+            <button class="btn" onclick="verHistorial('log_fija')">🔒 Apuesta Fija</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Modal -->
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title">Historial</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// Fecha topbar
+function updateDate() {
+  const d = new Date();
+  document.getElementById('topbar-date').textContent =
+    d.toLocaleDateString('es-ES', { weekday:'short', day:'2-digit', month:'short' }) +
+    ' · ' + d.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+}
+updateDate();
+setInterval(updateDate, 30000);
+
+// f-risk sync
+setInterval(() => {
+  const el = document.getElementById('f-risk');
+  if (el && window.STATE) el.textContent = parseFloat(window.STATE.total_arriesgado||0).toFixed(2) + ' USDT';
+}, 500);
+</script>
+</body>
+</html>
+```
