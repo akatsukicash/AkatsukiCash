@@ -83,7 +83,7 @@
     try {
       await signInWithEmailAndPassword(auth, email, pass);
     } catch(e) {
-      err.textContent = 'Credenciales incorrectas';
+      err.textContent = e.code || e.message;
     }
   };
 
