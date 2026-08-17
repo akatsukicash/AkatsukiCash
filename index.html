@@ -14,14 +14,13 @@
 
   // ─── REEMPLAZA CON TU CONFIG DE FIREBASE ───
   const firebaseConfig = {
-  apiKey: "AIzaSyD...",
-  authDomain: "tu-proyecto.firebaseapp.com",
-  projectId: "tu-proyecto",
-  storageBucket: "tu-proyecto.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef..."
-};
-  
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROJECT.firebaseapp.com",
+    projectId: "TU_PROJECT_ID",
+    storageBucket: "TU_PROJECT.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+  };
   // ────────────────────────────────────────────
 
   const app  = initializeApp(firebaseConfig);
@@ -29,7 +28,6 @@
   const auth = getAuth(app);
 
   // ── Estado global ──
-  let CURRENT_USER = null;
   let STATE = {
     // Financiero
     saldo: 0, depositado: 0, retirado: 0,
@@ -42,7 +40,6 @@
     // Apuesta fija
     apuesta_fija: 1, acum_fija: 0,
   };
-  window.STATE = STATE;
 
   // ── Helpers ──
   const fmt  = (n, sign=false) => {
@@ -52,55 +49,36 @@
   const pct  = n => `${fmt(n,true)}%`;
   const col  = n => parseFloat(n) >= 0 ? 'pos' : 'neg';
 
-  // ── Firebase helpers aislados por usuario ──
+  // ── Firebase helpers ──
   async function loadState() {
-    if (!CURRENT_USER) return;
-    const snap = await getDoc(doc(db, 'usuarios', CURRENT_USER.uid, 'config', 'state'));
-    if (snap.exists()) {
-      STATE = { ...STATE, ...snap.data() };
-      window.STATE = STATE;
-    }
+    const snap = await getDoc(doc(db, 'config', 'state'));
+    if (snap.exists()) STATE = { ...STATE, ...snap.data() };
   }
-
   async function saveState() {
-    if (!CURRENT_USER) return;
-    await setDoc(doc(db, 'usuarios', CURRENT_USER.uid, 'config', 'state'), STATE);
+    await setDoc(doc(db, 'config', 'state'), STATE);
   }
-
   async function addLog(col_, data) {
-    if (!CURRENT_USER) return;
-    await addDoc(collection(db, 'usuarios', CURRENT_USER.uid, col_), { ...data, ts: new Date().toISOString() });
+    await addDoc(collection(db, col_), { ...data, ts: new Date().toISOString() });
   }
-
   async function getLogs(col_, lim=50) {
-    if (!CURRENT_USER) return [];
-    const q = query(collection(db, 'usuarios', CURRENT_USER.uid, col_), orderBy('ts','desc'));
+    const q = query(collection(db, col_), orderBy('ts','desc'));
     const s = await getDocs(q);
     return s.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, lim);
   }
-
   async function delLog(col_, id) {
-    if (!CURRENT_USER) return;
-    await deleteDoc(doc(db, 'usuarios', CURRENT_USER.uid, col_, id));
+    await deleteDoc(doc(db, col_, id));
   }
 
   // ── Auth ──
   onAuthStateChanged(auth, user => {
-    if (user) {
-      CURRENT_USER = user;
-      document.getElementById('login-screen').style.display='none';
-      initDashboard();
-    } else {
-      CURRENT_USER = null;
-      document.getElementById('login-screen').style.display='flex';
-    }
+    if (user) { document.getElementById('login-screen').style.display='none'; initDashboard(); }
+    else       { document.getElementById('login-screen').style.display='flex'; }
   });
 
   window.doLogin = async () => {
     const email = document.getElementById('l-email').value;
     const pass  = document.getElementById('l-pass').value;
     const err   = document.getElementById('l-err');
-    err.textContent = '';
     try {
       await signInWithEmailAndPassword(auth, email, pass);
     } catch(e) {
@@ -135,6 +113,7 @@
     const pasos_tot = (ci>0 && cuota>1) ? Math.floor(Math.log(meta/ci)/Math.log(cuota)) : 0;
     const pct_prog  = pasos_tot > 0 ? Math.min(100, Math.floor((paso_act/pasos_tot)*100)) : 0;
     const falta     = meta - ca;
+    const pasos_rest = Math.max(0, pasos_tot - paso_act);
 
     // Dias restantes
     let dias_rest = 0;
@@ -240,8 +219,10 @@
     STATE.capital_actual = nuevo_ca;
     STATE.hechas_hoy     = parseFloat((STATE.hechas_hoy + equiv).toFixed(2));
 
+    // Actualizar bolsa y credito
     if (STATE.jugadas_dia > 0) {
       STATE.credito_bolsa = parseFloat((STATE.credito_bolsa + equiv).toFixed(2));
+      // descuentos si bolsa >= jpd (manejado en render)
       while (STATE.credito_bolsa >= STATE.jugadas_dia) {
         STATE.credito_bolsa = parseFloat((STATE.credito_bolsa - STATE.jugadas_dia).toFixed(2));
       }
@@ -1259,3 +1240,4 @@ setInterval(() => {
 </script>
 </body>
 </html>
+```
