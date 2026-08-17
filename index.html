@@ -12,34 +12,32 @@
   import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // ─── REEMPLAZA CON TU CONFIG DE FIREBASE ───
+  // ─── CONFIG DE FIREBASE ───
   const firebaseConfig = {
-  apiKey: "AIzaSyAnYTMW20hwIdmkXcR6XPO8Pd7VLOQaips",
-  authDomain: "akatsukicash-dd6fc.firebaseapp.com",
-  projectId: "akatsukicash-dd6fc",
-  storageBucket: "akatsukicash-dd6fc.firebasestorage.app",
-  messagingSenderId: "374907344596",
-  appId: "1:374907344596:web:1df0157492b3a2e0a20d41",
-  measurementId: "G-03SP9L6YCG"
-};
-
-  // ────────────────────────────────────────────
+    apiKey: "AIzaSyAnYTMW20hwIdmkXcR6XPO8Pd7VLOQaips",
+    authDomain: "akatsukicash-dd6fc.firebaseapp.com",
+    projectId: "akatsukicash-dd6fc",
+    storageBucket: "akatsukicash-dd6fc.firebasestorage.app",
+    messagingSenderId: "374907344596",
+    appId: "1:374907344596:web:1df0157492b3a2e0a20d41",
+    measurementId: "G-03SP9L6YCG"
+  };
 
   const app  = initializeApp(firebaseConfig);
   const db   = getFirestore(app);
   const auth = getAuth(app);
 
+  // Variable global para el ID del usuario
+  let CURRENT_UID = null;
+
   // ── Estado global ──
   let STATE = {
-    // Financiero
     saldo: 0, depositado: 0, retirado: 0,
     ganancia_hist: 0, total_arriesgado: 0,
-    // Maratón
     capital_inicial: 0, capital_actual: 0,
     meta: 1000, cuota: 1.05,
     jugadas_dia: 0, hechas_hoy: 0,
     credito_bolsa: 0,
-    // Apuesta fija
     apuesta_fija: 1, acum_fija: 0,
   };
 
@@ -51,30 +49,46 @@
   const pct  = n => `${fmt(n,true)}%`;
   const col  = n => parseFloat(n) >= 0 ? 'pos' : 'neg';
 
-  // ── Firebase helpers ──
+  // ── Firebase Helpers Multiusuario ──
   async function loadState() {
-    const snap = await getDoc(doc(db, 'config', 'state'));
+    if (!CURRENT_UID) return;
+    const snap = await getDoc(doc(db, 'usuarios', CURRENT_UID, 'config', 'state'));
     if (snap.exists()) STATE = { ...STATE, ...snap.data() };
   }
+
   async function saveState() {
-    await setDoc(doc(db, 'config', 'state'), STATE);
+    if (!CURRENT_UID) return;
+    await setDoc(doc(db, 'usuarios', CURRENT_UID, 'config', 'state'), STATE);
   }
+
   async function addLog(col_, data) {
-    await addDoc(collection(db, col_), { ...data, ts: new Date().toISOString() });
+    if (!CURRENT_UID) return;
+    await addDoc(collection(db, 'usuarios', CURRENT_UID, col_), { ...data, ts: new Date().toISOString() });
   }
+
   async function getLogs(col_, lim=50) {
-    const q = query(collection(db, col_), orderBy('ts','desc'));
+    if (!CURRENT_UID) return [];
+    const q = query(collection(db, 'usuarios', CURRENT_UID, col_), orderBy('ts','desc'));
     const s = await getDocs(q);
     return s.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, lim);
   }
+
   async function delLog(col_, id) {
-    await deleteDoc(doc(db, col_, id));
+    if (!CURRENT_UID) return;
+    await deleteDoc(doc(db, 'usuarios', CURRENT_UID, col_, id));
   }
 
-  // ── Auth ──
-  onAuthStateChanged(auth, user => {
-    if (user) { document.getElementById('login-screen').style.display='none'; initDashboard(); }
-    else       { document.getElementById('login-screen').style.display='flex'; }
+  // ── Auth Listener ──
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      CURRENT_UID = user.uid;
+      await loadState();
+      document.getElementById('login-modal').style.display = 'none';
+      if (typeof renderApp === 'function') renderApp();
+    } else {
+      CURRENT_UID = null;
+      document.getElementById('login-modal').style.display = 'flex';
+    }
   });
 
   window.doLogin = async () => {
