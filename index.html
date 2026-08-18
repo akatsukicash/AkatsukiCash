@@ -3,1241 +3,1390 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>AkatsukiCash · Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>AkatsukiCash · Pro Dashboard</title>
+<meta name="theme-color" content="#cc1111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23cc1111'/><circle cx='50' cy='50' r='18' fill='%23000'/><circle cx='50' cy='50' r='8' fill='%23cc1111'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(0 50 50)'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(60 50 50)'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(120 50 50)'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(180 50 50)'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(240 50 50)'/><ellipse cx='50' cy='22' rx='5' ry='13' fill='%23000' transform='rotate(300 50 50)'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- Firebase SDKs -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,query,orderBy,deleteDoc,updateDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // ─── REEMPLAZA CON TU CONFIG DE FIREBASE ───
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_PROJECT.firebaseapp.com",
-    projectId: "TU_PROJECT_ID",
-    storageBucket: "TU_PROJECT.appspot.com",
-    messagingSenderId: "TU_SENDER_ID",
-    appId: "TU_APP_ID"
-  };
-  // ────────────────────────────────────────────
+const FC = {
+  apiKey: "AIzaSyAnYTMW20hwIdmkXcR6XPO8Pd7VLOQaips",
+  authDomain: "akatsukicash-dd6fc.firebaseapp.com",
+  projectId: "akatsukicash-dd6fc",
+  storageBucket: "akatsukicash-dd6fc.firebasestorage.app",
+  messagingSenderId: "374907344596",
+  appId: "1:374907344596:web:db28188dd8692682a20d41",
+  measurementId: "G-RX1JB7V3QG"
+};
+const app=initializeApp(FC);
+const db=getFirestore(app);
+const auth=getAuth(app);
+let UID=null;
 
-  const app  = initializeApp(firebaseConfig);
-  const db   = getFirestore(app);
-  const auth = getAuth(app);
+// ─── DEFAULT STATE ───
+const DS=()=>({
+  // Maratón
+  m_ci:0,m_ca:0,m_meta:1000,m_cuota:1.05,
+  m_jpd:0,m_hechas:0,m_bolsa:0,
+  // Financiero
+  f_saldo:0,f_dep:0,f_ret:0,f_gan:0,f_risk:0,
+  // Apuesta Fija
+  af_monto:1,af_acum:0,
+  // Gestión banca
+  bk_inicial:100,bk_ref:100,bk_modo:'media',
+  bk_base:2,bk_cap:9,bk_umbral:5,bk_locked:false,
+});
 
-  // ── Estado global ──
-  let STATE = {
-    // Financiero
-    saldo: 0, depositado: 0, retirado: 0,
-    ganancia_hist: 0, total_arriesgado: 0,
-    // Maratón
-    capital_inicial: 0, capital_actual: 0,
-    meta: 1000, cuota: 1.05,
-    jugadas_dia: 0, hechas_hoy: 0,
-    credito_bolsa: 0,
-    // Apuesta fija
-    apuesta_fija: 1, acum_fija: 0,
-  };
+let ST=DS();
+let BETS=[];// apuestas pendientes/cerradas
+let JOURNAL=[];
+let ADJUSTMENTS=[];
 
-  // ── Helpers ──
-  const fmt  = (n, sign=false) => {
-    const v = parseFloat(n||0).toFixed(2);
-    return sign ? (n>=0 ? `+${v}` : v) : v;
-  };
-  const pct  = n => `${fmt(n,true)}%`;
-  const col  = n => parseFloat(n) >= 0 ? 'pos' : 'neg';
+// ─── FIREBASE HELPERS ───
+const sRef=()=>doc(db,'users',UID,'data','state');
+const bRef=()=>collection(db,'users',UID,'bets');
+const jRef=()=>collection(db,'users',UID,'journal');
+const aRef=()=>collection(db,'users',UID,'adjustments');
 
-  // ── Firebase helpers ──
-  async function loadState() {
-    const snap = await getDoc(doc(db, 'config', 'state'));
-    if (snap.exists()) STATE = { ...STATE, ...snap.data() };
+async function loadAll(){
+  const s=await getDoc(sRef());
+  if(s.exists()) ST={...DS(),...s.data()};
+  const bSnap=await getDocs(query(bRef(),orderBy('ts','desc')));
+  BETS=bSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const jSnap=await getDocs(query(jRef(),orderBy('ts','desc')));
+  JOURNAL=jSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const aSnap=await getDocs(query(aRef(),orderBy('ts','desc')));
+  ADJUSTMENTS=aSnap.docs.map(d=>({id:d.id,...d.data()}));
+}
+async function saveST(){await setDoc(sRef(),ST);}
+async function addBet(data){const r=await addDoc(bRef(),{...data,ts:new Date().toISOString()});BETS.unshift({id:r.id,...data,ts:new Date().toISOString()});}
+async function updateBet(id,data){await updateDoc(doc(db,'users',UID,'bets',id),data);const i=BETS.findIndex(b=>b.id===id);if(i>=0)BETS[i]={...BETS[i],...data};}
+async function deleteBet(id){await deleteDoc(doc(db,'users',UID,'bets',id));BETS=BETS.filter(b=>b.id!==id);}
+async function addJournal(text){const d={text,ts:new Date().toISOString(),date:today()};const r=await addDoc(jRef(),d);JOURNAL.unshift({id:r.id,...d});}
+async function addAdj(amount,note){const d={amount,note,ts:new Date().toISOString(),date:today()};const r=await addDoc(aRef(),d);ADJUSTMENTS.unshift({id:r.id,...d});}
+
+// ─── AUTH ───
+onAuthStateChanged(auth,user=>{
+  if(user){UID=user.uid;g('login-screen').style.display='none';g('app').style.display='flex';bootstrap();}
+  else{UID=null;g('login-screen').style.display='flex';g('app').style.display='none';}
+});
+window.doLogin=async()=>{
+  const e=g('l-email').value.trim(),p=g('l-pass').value,er=g('l-err');
+  er.textContent='';
+  try{await signInWithEmailAndPassword(auth,e,p);}
+  catch{er.textContent='Credenciales incorrectas';}
+};
+window.doLogout=async()=>await signOut(auth);
+
+async function bootstrap(){await loadAll();renderAll();navTo('dashboard');}
+
+// ─── UTILS ───
+const g=id=>document.getElementById(id);
+const fmt=(n,s=false)=>{const v=parseFloat(n||0).toFixed(2);return s?(parseFloat(n)>=0?'+'+v:v):v;};
+const fmtP=n=>(parseFloat(n)>=0?'+':'')+parseFloat(n||0).toFixed(2)+'%';
+const today=()=>new Date().toISOString().slice(0,10);
+const set=(id,v)=>{const e=g(id);if(e)e.textContent=v;};
+const setV=(id,n,t)=>{const e=g(id);if(!e)return;e.textContent=t;e.className='cv '+(parseFloat(n)>=0?'pos':'neg');};
+const cls=(n)=>parseFloat(n)>=0?'pos':'neg';
+
+// ─── BANKROLL CALC ───
+function bkCurrent(){
+  let b=ST.bk_inicial;
+  BETS.forEach(bet=>{
+    if(bet.status==='ganada') b+=calcReturn(bet)-bet.stake;
+    else if(bet.status==='perdida') b-=bet.stake;
+    else if(bet.status==='push') b+=0;
+    else if(bet.status==='medio_ganada') b+=(bet.stake*(bet.odds-1)/2);
+    else if(bet.status==='medio_perdida') b-=bet.stake/2;
+  });
+  ADJUSTMENTS.forEach(a=>b+=a.amount);
+  return b;
+}
+function calcReturn(bet){
+  if(bet.status==='ganada') return bet.stake*bet.odds;
+  if(bet.status==='perdida') return 0;
+  if(bet.status==='push') return bet.stake;
+  if(bet.status==='medio_ganada') return bet.stake+(bet.stake*(bet.odds-1)/2);
+  if(bet.status==='medio_perdida') return bet.stake/2;
+  return bet.stake;
+}
+function calcProfit(bet){
+  if(bet.status==='ganada') return bet.stake*(bet.odds-1);
+  if(bet.status==='perdida') return -bet.stake;
+  if(bet.status==='push') return 0;
+  if(bet.status==='medio_ganada') return bet.stake*(bet.odds-1)/2;
+  if(bet.status==='medio_perdida') return -bet.stake/2;
+  return 0;
+}
+function getStats(){
+  const closed=BETS.filter(b=>b.status&&b.status!=='pendiente');
+  const won=closed.filter(b=>b.status==='ganada').length;
+  const lost=closed.filter(b=>b.status==='perdida').length;
+  const push=closed.filter(b=>b.status==='push').length;
+  const mw=closed.filter(b=>b.status==='medio_ganada').length;
+  const ml=closed.filter(b=>b.status==='medio_perdida').length;
+  const staked=closed.reduce((a,b)=>a+b.stake,0);
+  const profit=closed.reduce((a,b)=>a+calcProfit(b),0);
+  const roi=staked>0?profit/staked*100:0;
+  const winrate=(won+mw*0.5)/(won+lost+push+mw+ml||1)*100;
+  // cuota media ponderada
+  const oddsSum=closed.reduce((a,b)=>a+b.odds*b.stake,0);
+  const avgOdds=staked>0?oddsSum/staked:0;
+  const breakeven=avgOdds>0?1/avgOdds*100:0;
+  // drawdown
+  let bal=ST.bk_inicial,peak=bal,dd=0;
+  [...BETS].reverse().forEach(b=>{
+    if(b.status&&b.status!=='pendiente'){bal+=calcProfit(b);if(bal>peak)peak=bal;const cur=peak-bal;if(cur>dd)dd=cur;}
+  });
+  // rachas
+  let streak=0,stType=null,maxW=0,maxL=0,curW=0,curL=0;
+  [...closed].reverse().forEach(b=>{
+    const w=b.status==='ganada'||b.status==='medio_ganada';
+    const l=b.status==='perdida'||b.status==='medio_perdida';
+    if(w){curW++;curL=0;if(curW>maxW)maxW=curW;}
+    else if(l){curL++;curW=0;if(curL>maxL)maxL=curL;}
+  });
+  if(closed.length){
+    const last=closed[closed.length-1];
+    const w=last.status==='ganada'||last.status==='medio_ganada';
+    stType=w?'W':'L';streak=0;
+    for(let i=closed.length-1;i>=0;i--){
+      const b=closed[i];const bw=b.status==='ganada'||b.status==='medio_ganada';
+      if((w&&bw)||(!w&&!bw&&b.status!=='push'))streak++;else break;
+    }
   }
-  async function saveState() {
-    await setDoc(doc(db, 'config', 'state'), STATE);
-  }
-  async function addLog(col_, data) {
-    await addDoc(collection(db, col_), { ...data, ts: new Date().toISOString() });
-  }
-  async function getLogs(col_, lim=50) {
-    const q = query(collection(db, col_), orderBy('ts','desc'));
-    const s = await getDocs(q);
-    return s.docs.map(d => ({ id: d.id, ...d.data() })).slice(0, lim);
-  }
-  async function delLog(col_, id) {
-    await deleteDoc(doc(db, col_, id));
-  }
+  return{won,lost,push,mw,ml,staked,profit,roi,winrate,avgOdds,breakeven,dd,streak,stType,maxW,maxL,total:BETS.length,closed:closed.length};
+}
 
-  // ── Auth ──
-  onAuthStateChanged(auth, user => {
-    if (user) { document.getElementById('login-screen').style.display='none'; initDashboard(); }
-    else       { document.getElementById('login-screen').style.display='flex'; }
+// ─── MANAGEMENT PRESETS ───
+const PRESETS={
+  conservadora:{bk_base:1,bk_cap:5,bk_umbral:10},
+  media:{bk_base:2,bk_cap:9,bk_umbral:5},
+  agresiva:{bk_base:3.5,bk_cap:15,bk_umbral:3},
+};
+function stakeLevels(){
+  const r=ST.bk_ref||ST.bk_inicial;
+  return{low:r*Math.max(0.5,ST.bk_base/2)/100,med:r*ST.bk_base/100,high:r*ST.bk_base*1.5/100};
+}
+
+// ─── NAVIGATION ───
+window.navTo=sec=>{
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=g('sec-'+sec);if(el)el.classList.add('active');
+  const nav=document.querySelector(`.nav-item[data-sec="${sec}"]`);if(nav)nav.classList.add('active');
+  g('sidebar').classList.remove('open');
+  const T={dashboard:'DASHBOARD',registro:'REGISTRAR APUESTA',historial:'HISTORIAL',analisis:'ANÁLISIS',gestion:'GESTIÓN DE BANCA',maraton:'MARATÓN',financiero:'CONTROL FINANCIERO',fija:'APUESTA FIJA',diario:'DIARIO'};
+  set('topbar-title',T[sec]||'DASHBOARD');
+};
+window.toggleSidebar=()=>g('sidebar').classList.toggle('open');
+
+// ─── RENDER ALL ───
+function renderAll(){renderDashboard();renderGestion();renderRegistro();renderHistorial();renderAnalisis();renderMaraton();renderFinanciero();renderFija();renderDiario();renderCalendar();}
+
+// ─── DASHBOARD ───
+function renderDashboard(){
+  const st=getStats();
+  const bk=bkCurrent();
+  const netPnl=bk-ST.bk_inicial;
+  const adjSum=ADJUSTMENTS.reduce((a,x)=>a+x.amount,0);
+  set('d-bk',fmt(bk)+' USDT');
+  g('d-bk').className='d-big '+(netPnl>=0?'pos':'neg');
+  setV('d-pnl',netPnl,fmt(netPnl,true)+' USDT');
+  set('d-total',st.total);
+  set('d-closed',st.closed);
+  set('d-won',st.won+(st.mw?'+'+st.mw+'½':''));
+  set('d-lost',st.lost+(st.ml?'+'+st.ml+'½':''));
+  set('d-push',st.push);
+  setV('d-roi',st.roi,fmtP(st.roi));
+  set('d-wr',st.closed?st.winrate.toFixed(1)+'%':'—');
+  setV('d-profit',st.profit,fmt(st.profit,true)+' USDT');
+  set('d-staked',fmt(st.staked)+' USDT');
+  set('d-avgodds',st.avgOdds?st.avgOdds.toFixed(3):'—');
+  set('d-be',st.breakeven?st.breakeven.toFixed(1)+'%':'—');
+  setV('d-dd',-st.dd,'-'+fmt(st.dd)+' USDT');
+  set('d-streak',st.streak?(st.streak+(st.stType==='W'?' ✓ ganadas':' ✗ perdidas')):'—');
+  set('d-maxw',st.maxW?st.maxW+' ganadas seguidas':'—');
+  set('d-maxl',st.maxL?st.maxL+' perdidas seguidas':'—');
+  // pending
+  const pend=BETS.filter(b=>b.status==='pendiente');
+  set('d-pend',pend.length);
+  set('d-pend-risk',fmt(pend.reduce((a,b)=>a+b.stake,0))+' USDT');
+  // stamp
+  const ratio=bk/(ST.bk_inicial||1);
+  const stamp=g('d-stamp');
+  if(ratio<0.6){stamp.textContent='⚠ PAUSA RECOMENDADA';stamp.className='stamp stop';}
+  else if(ratio<0.85){stamp.textContent='⚡ REDUCIR RIESGO';stamp.className='stamp warn';}
+  else{stamp.textContent='✓ DISCIPLINADO';stamp.className='stamp ok';}
+}
+
+// ─── GESTIÓN BANCA ───
+function renderGestion(){
+  const bk=bkCurrent();
+  const r=ST.bk_ref||ST.bk_inicial;
+  const sl=stakeLevels();
+  const threshold=ST.bk_umbral/100;
+  set('bk-ref',fmt(r)+' USDT');
+  set('bk-actual',fmt(bk)+' USDT');
+  set('bk-low',fmt(sl.low)+'  ('+Math.max(0.5,ST.bk_base/2).toFixed(1)+'%)');
+  set('bk-med',fmt(sl.med)+'  ('+ST.bk_base+'%)');
+  set('bk-high',fmt(sl.high)+'  ('+(ST.bk_base*1.5).toFixed(1)+'%)');
+  const targetUp=r*(1+threshold),targetDown=r*(1-threshold);
+  set('bk-up',bk<targetUp?'Faltan '+fmt(targetUp-bk)+' USDT':'↑ Recalculando…');
+  set('bk-down',bk>targetDown?'Faltan '+fmt(bk-targetDown)+' USDT':'↓ Recalculando…');
+  g('bk-base-in').value=ST.bk_base;
+  g('bk-cap-in').value=ST.bk_cap;
+  g('bk-umbral-in').value=ST.bk_umbral;
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.toggle('active',b.dataset.preset===ST.bk_modo));
+  const locked=ST.bk_locked;
+  ['bk-base-in','bk-cap-in','bk-umbral-in'].forEach(id=>{g(id).disabled=locked;});
+  document.querySelectorAll('.preset-btn').forEach(b=>b.style.pointerEvents=locked?'none':'auto');
+  g('bk-lock-btn').textContent=locked?'🔓 Modificar gestión':'🔒 Fijar gestión';
+}
+
+// ─── REGISTRO ───
+let pendingPhoto=null;
+let selectedStake='med';
+
+function renderRegistro(){
+  const sl=stakeLevels();
+  const labels={low:'Baja',med:'Media',high:'Alta'};
+  const pcts={low:Math.max(0.5,ST.bk_base/2),med:ST.bk_base,high:ST.bk_base*1.5};
+  document.querySelectorAll('.stake-tier').forEach(b=>{
+    const t=b.dataset.tier;
+    b.textContent=labels[t]+' · '+pcts[t].toFixed(1)+'%  ('+fmt(sl[t])+' USDT)';
+    b.classList.toggle('active',t===selectedStake);
+  });
+  const stake=sl[selectedStake];
+  set('reg-preview',fmt(stake)+' USDT ('+pcts[selectedStake].toFixed(1)+'% de banca ref)');
+  // exposure hoy
+  const fDate=g('reg-date')?.value||today();
+  const dayBets=BETS.filter(b=>b.date===fDate);
+  const dayPct=dayBets.reduce((a,b)=>a+(b.stakePct||0),0);
+  set('exp-count',dayBets.length+'/5');
+  set('exp-pct',dayPct.toFixed(1)+'% / '+ST.bk_cap+'%');
+  const bar=g('exp-bar');
+  if(bar){bar.style.width=Math.min(100,dayPct/ST.bk_cap*100)+'%';bar.style.background=dayPct>=ST.bk_cap?'var(--neg)':dayPct>=ST.bk_cap*0.75?'var(--warn)':'var(--red)';}
+}
+
+// ─── HISTORIAL ───
+let hFilter={sport:'',status:'',dateFrom:'',dateTo:'',oddsMin:'',oddsMax:''};
+
+function renderHistorial(){
+  let bets=[...BETS];
+  if(hFilter.sport) bets=bets.filter(b=>(b.sport||'').toLowerCase().includes(hFilter.sport.toLowerCase()));
+  if(hFilter.status) bets=bets.filter(b=>b.status===hFilter.status);
+  if(hFilter.dateFrom) bets=bets.filter(b=>b.date>=hFilter.dateFrom);
+  if(hFilter.dateTo) bets=bets.filter(b=>b.date<=hFilter.dateTo);
+  if(hFilter.oddsMin) bets=bets.filter(b=>b.odds>=parseFloat(hFilter.oddsMin));
+  if(hFilter.oddsMax) bets=bets.filter(b=>b.odds<=parseFloat(hFilter.oddsMax));
+
+  const body=g('hist-body');
+  body.innerHTML='';
+  g('hist-empty').style.display=bets.length?'none':'block';
+
+  const statusMap={pendiente:'⏳ Pendiente',ganada:'✓ Ganada',perdida:'✗ Perdida',push:'— Push',medio_ganada:'½✓ M.Ganada',medio_perdida:'½✗ M.Perdida'};
+  const statusCls={ganada:'pos',perdida:'neg',push:'',medio_ganada:'pos',medio_perdida:'neg',pendiente:'muted'};
+
+  bets.forEach(b=>{
+    const profit=b.status&&b.status!=='pendiente'?calcProfit(b):null;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${b.date||'—'}</td>
+      <td>${b.sport||'—'}<br><span class="muted" style="font-size:11px">${b.country||''}</span></td>
+      <td><b>${b.match||'—'}</b><br><span class="muted" style="font-size:11px">${b.market||''}</span>${b.note?`<br><span class="muted" style="font-size:10px">${b.note}</span>`:''}</td>
+      <td style="font-family:var(--fm)">${b.odds?.toFixed(3)||'—'}</td>
+      <td style="font-family:var(--fm)">${fmt(b.stake)}<br><span class="muted" style="font-size:11px">${b.stakePct?.toFixed(1)||''}%</span></td>
+      <td>
+        <select class="status-sel" data-id="${b.id}">
+          <option value="pendiente" ${b.status==='pendiente'?'selected':''}>⏳ Pendiente</option>
+          <option value="ganada" ${b.status==='ganada'?'selected':''}>✓ Ganada</option>
+          <option value="perdida" ${b.status==='perdida'?'selected':''}>✗ Perdida</option>
+          <option value="push" ${b.status==='push'?'selected':''}>— Push</option>
+          <option value="medio_ganada" ${b.status==='medio_ganada'?'selected':''}>½✓ M.Ganada</option>
+          <option value="medio_perdida" ${b.status==='medio_perdida'?'selected':''}>½✗ M.Perdida</option>
+        </select>
+      </td>
+      <td class="${profit!==null?cls(profit):''}" style="font-family:var(--fm)">${profit!==null?fmt(profit,true)+' USDT':'—'}</td>
+      <td>${b.photo?`<img src="${b.photo}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid var(--border)" onclick="openPhoto('${b.id}')">`:''}</td>
+      <td><button onclick="deleteBetUI('${b.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px">✕</button></td>
+    `;
+    body.appendChild(tr);
   });
 
-  window.doLogin = async () => {
-    const email = document.getElementById('l-email').value;
-    const pass  = document.getElementById('l-pass').value;
-    const err   = document.getElementById('l-err');
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch(e) {
-      err.textContent = 'Credenciales incorrectas';
-    }
-  };
-
-  window.doLogout = async () => {
-    await signOut(auth);
-    document.getElementById('login-screen').style.display='flex';
-  };
-
-  // ── Init ──
-  async function initDashboard() {
-    await loadState();
-    renderAll();
-    navTo('maraton');
-  }
-
-  // ── Render ──
-  function renderAll() {
-    renderMaraton();
-    renderFinanciero();
-    renderFija();
-  }
-
-  function renderMaraton() {
-    const { capital_inicial: ci, capital_actual: ca, meta, cuota,
-            jugadas_dia: jpd, hechas_hoy, credito_bolsa } = STATE;
-
-    const paso_act  = (ca>0 && ci>0 && cuota>1) ? Math.floor(Math.log(ca/ci)/Math.log(cuota)) : 0;
-    const pasos_tot = (ci>0 && cuota>1) ? Math.floor(Math.log(meta/ci)/Math.log(cuota)) : 0;
-    const pct_prog  = pasos_tot > 0 ? Math.min(100, Math.floor((paso_act/pasos_tot)*100)) : 0;
-    const falta     = meta - ca;
-    const pasos_rest = Math.max(0, pasos_tot - paso_act);
-
-    // Dias restantes
-    let dias_rest = 0;
-    if (jpd > 0 && ca > 0 && cuota > 1 && ca < meta) {
-      const pr_aj = Math.max(0, Math.log(meta/ca)/Math.log(cuota) - credito_bolsa);
-      dias_rest = Math.ceil(pr_aj / jpd);
-    }
-
-    // Objetivo hoy
-    const obj_hoy = Math.max(0, jpd).toFixed(1);
-    const diff_hoy = hechas_hoy - parseFloat(obj_hoy);
-
-    set('m-ci', fmt(ci));
-    set('m-ca', fmt(ca));
-    set('m-meta', fmt(meta));
-    set('m-cuota', `x${cuota}`);
-    set('m-pasos', `${paso_act} / ${pasos_tot}`);
-    set('m-falta', `${fmt(falta)} USDT`);
-    set('m-dias', dias_rest > 0 ? `${dias_rest} días` : '—');
-    set('m-jpd', jpd > 0 ? `${jpd}/día` : 'Sin plan');
-    set('m-bolsa', `${fmt(credito_bolsa)}/${jpd}`);
-
-    // Barra progreso
-    const bar = document.getElementById('m-bar');
-    if (bar) { bar.style.width = pct_prog + '%'; }
-    set('m-pct', pct_prog + '%');
-
-    // Estado día
-    const elDia = document.getElementById('m-dia-status');
-    if (elDia) {
-      if (jpd <= 0) {
-        elDia.innerHTML = `<span class="muted">${hechas_hoy} jugadas hoy (sin objetivo)</span>`;
-      } else if (diff_hoy > 0.05) {
-        elDia.innerHTML = `<span class="pos">${fmt(hechas_hoy)}/${obj_hoy} +${fmt(diff_hoy)} adelantado</span>`;
-      } else if (diff_hoy < -0.05) {
-        elDia.innerHTML = `<span class="warn">${fmt(hechas_hoy)}/${obj_hoy} faltan ${fmt(-diff_hoy)}</span>`;
-      } else {
-        elDia.innerHTML = `<span class="pos">${fmt(hechas_hoy)}/${obj_hoy} EXACTO ✓</span>`;
-      }
-    }
-  }
-
-  function renderFinanciero() {
-    const { saldo, depositado, retirado, ganancia_hist, total_arriesgado } = STATE;
-    const yield_   = total_arriesgado > 0 ? (ganancia_hist / total_arriesgado) * 100 : 0;
-    const pos_neta = saldo + retirado - depositado;
-
-    set('f-saldo',   fmt(saldo) + ' USDT');
-    set('f-dep',     fmt(depositado) + ' USDT');
-    set('f-ret',     fmt(retirado) + ' USDT');
-
-    const gEl = document.getElementById('f-gan');
-    if (gEl) { gEl.textContent = fmt(ganancia_hist,true) + ' USDT'; gEl.className = col(ganancia_hist); }
-
-    const yEl = document.getElementById('f-yield');
-    if (yEl) { yEl.textContent = pct(yield_); yEl.className = col(yield_); }
-
-    const pEl = document.getElementById('f-pos');
-    if (pEl) {
-      pEl.textContent = fmt(pos_neta,true) + ' USDT';
-      pEl.className   = col(pos_neta);
-      const lEl = document.getElementById('f-pos-label');
-      if (lEl) { lEl.textContent = pos_neta >= 0 ? '▲ POSITIVO' : '▼ NEGATIVO'; lEl.className = col(pos_neta); }
-    }
-  }
-
-  function renderFija() {
-    const { apuesta_fija, acum_fija } = STATE;
-    set('af-monto', fmt(apuesta_fija) + ' USDT');
-    const aEl = document.getElementById('af-acum');
-    if (aEl) { aEl.textContent = fmt(acum_fija,true) + ' USDT'; aEl.className = col(acum_fija); }
-  }
-
-  function set(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  }
-
-  // ── Navegación ──
-  window.navTo = (section) => {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const el = document.getElementById('sec-'+section);
-    if (el) el.classList.add('active');
-    const nav = document.querySelector(`.nav-item[data-sec="${section}"]`);
-    if (nav) nav.classList.add('active');
-    document.getElementById('sidebar').classList.remove('open');
-  };
-
-  window.toggleSidebar = () => {
-    document.getElementById('sidebar').classList.toggle('open');
-  };
-
-  // ── Acciones Maratón ──
-  window.marcarPaso = async () => {
-    const cuota_r = parseFloat(prompt('Cuota cobrada:'));
-    if (!cuota_r || isNaN(cuota_r)) return;
-    const cb = STATE.cuota;
-    const nuevo_ca = parseFloat((STATE.capital_actual * cuota_r).toFixed(2));
-    const ganancia = parseFloat((nuevo_ca - STATE.capital_actual).toFixed(2));
-    const equiv    = cb > 1 ? Math.max(1, Math.log(cuota_r)/Math.log(cb)) : 1;
-
-    STATE.capital_actual = nuevo_ca;
-    STATE.hechas_hoy     = parseFloat((STATE.hechas_hoy + equiv).toFixed(2));
-
-    // Actualizar bolsa y credito
-    if (STATE.jugadas_dia > 0) {
-      STATE.credito_bolsa = parseFloat((STATE.credito_bolsa + equiv).toFixed(2));
-      // descuentos si bolsa >= jpd (manejado en render)
-      while (STATE.credito_bolsa >= STATE.jugadas_dia) {
-        STATE.credito_bolsa = parseFloat((STATE.credito_bolsa - STATE.jugadas_dia).toFixed(2));
-      }
-    }
-
-    await addLog('log_maraton', { tipo:'GANADA', cuota: cuota_r, equiv: parseFloat(equiv.toFixed(2)), ganancia, capital: nuevo_ca });
-    await saveState();
-    renderAll();
-    toast(`+${fmt(ganancia)} USDT · Capital: ${fmt(nuevo_ca)} USDT`);
-  };
-
-  window.nuevaRacha = async () => {
-    const nci = parseFloat(prompt('Nuevo capital inicial (USDT):'));
-    if (!nci || isNaN(nci)) return;
-    STATE.capital_inicial = nci;
-    STATE.capital_actual  = nci;
-    STATE.hechas_hoy      = 0;
-    STATE.credito_bolsa   = 0;
-    await saveState();
-    renderAll();
-    toast('Nueva racha iniciada con ' + fmt(nci) + ' USDT');
-  };
-
-  window.fijarPlan = async () => {
-    const jpd = parseFloat(prompt('Jugadas por día:'));
-    if (!jpd || isNaN(jpd) || jpd <= 0) return;
-    STATE.jugadas_dia   = jpd;
-    STATE.credito_bolsa = 0;
-    await saveState();
-    renderAll();
-    toast('Plan fijado: ' + jpd + ' jugadas/día');
-  };
-
-  window.editarMaraton = async (campo) => {
-    const labels = {
-      capital_actual: 'Capital actual (USDT)',
-      capital_inicial: 'Capital inicial (USDT)',
-      meta: 'Meta (USDT)',
-      cuota: 'Cuota base (ej: 1.05)',
-      jugadas_dia: 'Jugadas por día',
-      hechas_hoy: 'Jugadas hechas hoy',
-      credito_bolsa: 'Crédito en bolsa',
-    };
-    const val = parseFloat(prompt(labels[campo] + ':', STATE[campo]));
-    if (isNaN(val)) return;
-    STATE[campo] = val;
-    await saveState();
-    renderAll();
-    toast('Actualizado');
-  };
-
-  // ── Acciones Financiero ──
-  window.registrarDeposito = async () => {
-    const monto = parseFloat(prompt('Monto a depositar (USDT):'));
-    if (!monto || isNaN(monto) || monto <= 0) return;
-    const nota = prompt('Nota (opcional):') || '';
-    STATE.depositado    = parseFloat((STATE.depositado + monto).toFixed(2));
-    STATE.saldo         = parseFloat((STATE.saldo + monto).toFixed(2));
-    await addLog('log_depositos', { monto, nota });
-    await saveState();
-    renderAll();
-    toast(`+${fmt(monto)} USDT depositado`);
-  };
-
-  window.registrarRetiro = async () => {
-    const monto = parseFloat(prompt('Monto a retirar (USDT):'));
-    if (!monto || isNaN(monto) || monto <= 0) return;
-    const nota = prompt('Nota (opcional):') || '';
-    STATE.retirado = parseFloat((STATE.retirado + monto).toFixed(2));
-    STATE.saldo    = parseFloat((STATE.saldo - monto).toFixed(2));
-    await addLog('log_retiros', { monto, nota });
-    await saveState();
-    renderAll();
-    toast(`-${fmt(monto)} USDT retirado`);
-  };
-
-  window.actualizarSaldo = async () => {
-    const val = parseFloat(prompt('Saldo real actual (USDT):', STATE.saldo));
-    if (isNaN(val)) return;
-    STATE.saldo = val;
-    await saveState();
-    renderAll();
-    toast('Saldo actualizado');
-  };
-
-  window.registrarApuestaGanada = async () => {
-    const monto = parseFloat(prompt('Monto apostado (USDT):'));
-    if (!monto || isNaN(monto)) return;
-    const cuota = parseFloat(prompt('Cuota cobrada:'));
-    if (!cuota || isNaN(cuota)) return;
-    const ganancia = parseFloat((monto * cuota - monto).toFixed(2));
-    STATE.ganancia_hist    = parseFloat((STATE.ganancia_hist + ganancia).toFixed(2));
-    STATE.total_arriesgado = parseFloat((STATE.total_arriesgado + monto).toFixed(2));
-    await addLog('log_apuestas', { tipo:'GANADA', monto, cuota, ganancia, acum: STATE.ganancia_hist });
-    await saveState();
-    renderAll();
-    toast(`GANADA +${fmt(ganancia)} USDT`);
-  };
-
-  window.registrarApuestaPerdida = async () => {
-    const monto = parseFloat(prompt('Monto apostado (USDT):'));
-    if (!monto || isNaN(monto)) return;
-    const cuota = parseFloat(prompt('Cuota (registro):')) || 0;
-    STATE.ganancia_hist    = parseFloat((STATE.ganancia_hist - monto).toFixed(2));
-    STATE.total_arriesgado = parseFloat((STATE.total_arriesgado + monto).toFixed(2));
-    await addLog('log_apuestas', { tipo:'PERDIDA', monto, cuota, ganancia: -monto, acum: STATE.ganancia_hist });
-    await saveState();
-    renderAll();
-    toast(`PERDIDA -${fmt(monto)} USDT`);
-  };
-
-  window.editarFinanciero = async (campo) => {
-    const labels = {
-      saldo: 'Saldo actual (USDT)',
-      depositado: 'Total depositado (USDT)',
-      retirado: 'Total retirado (USDT)',
-      ganancia_hist: 'Ganancia neta histórica (USDT)',
-      total_arriesgado: 'Total arriesgado (USDT)',
-    };
-    const val = parseFloat(prompt(labels[campo] + ':', STATE[campo]));
-    if (isNaN(val)) return;
-    STATE[campo] = val;
-    await saveState();
-    renderAll();
-    toast('Actualizado');
-  };
-
-  // ── Acciones Apuesta Fija ──
-  window.regFijaGanada = async () => {
-    const cuota = parseFloat(prompt('Cuota cobrada:'));
-    if (!cuota || isNaN(cuota)) return;
-    const gan = parseFloat((STATE.apuesta_fija * cuota - STATE.apuesta_fija).toFixed(2));
-    STATE.acum_fija = parseFloat((STATE.acum_fija + gan).toFixed(2));
-    await addLog('log_fija', { tipo:'GANADA', cuota, ganancia: gan, acum: STATE.acum_fija });
-    await saveState();
-    renderFija();
-    toast(`GANADA +${fmt(gan)} USDT`);
-  };
-
-  window.regFijaPerdida = async () => {
-    const cuota = parseFloat(prompt('Cuota (registro):')) || 0;
-    STATE.acum_fija = parseFloat((STATE.acum_fija - STATE.apuesta_fija).toFixed(2));
-    await addLog('log_fija', { tipo:'PERDIDA', cuota, ganancia: -STATE.apuesta_fija, acum: STATE.acum_fija });
-    await saveState();
-    renderFija();
-    toast(`PERDIDA -${fmt(STATE.apuesta_fija)} USDT`);
-  };
-
-  window.cambiarApuestaFija = async () => {
-    const val = parseFloat(prompt('Nuevo monto fijo (USDT):', STATE.apuesta_fija));
-    if (isNaN(val) || val <= 0) return;
-    STATE.apuesta_fija = val;
-    await saveState();
-    renderFija();
-    toast('Apuesta fija: ' + fmt(val) + ' USDT');
-  };
-
-  // ── Historial ──
-  window.verHistorial = async (col_) => {
-    const logs = await getLogs(col_);
-    const modal = document.getElementById('modal');
-    const body  = document.getElementById('modal-body');
-    const titles = {
-      log_maraton: 'Historial Maratón',
-      log_depositos: 'Historial Depósitos',
-      log_retiros: 'Historial Retiros',
-      log_apuestas: 'Historial Apuestas',
-      log_fija: 'Historial Apuesta Fija',
-    };
-    document.getElementById('modal-title').textContent = titles[col_] || 'Historial';
-    body.innerHTML = logs.length === 0 ? '<p class="muted">Sin registros aún.</p>' :
-      logs.map(l => `
-        <div class="log-row">
-          <span class="log-ts">${l.ts ? l.ts.slice(0,16).replace('T',' ') : ''}</span>
-          <span class="log-tipo ${l.tipo==='GANADA'?'pos':'neg'}">${l.tipo||''}</span>
-          <span class="log-val">${l.ganancia !== undefined ? fmt(l.ganancia,true)+' USDT' : (l.monto ? fmt(l.monto)+' USDT' : '')}</span>
-          <span class="log-extra">${l.cuota ? 'x'+l.cuota : ''} ${l.nota||''} ${l.acum !== undefined ? '· Acum: '+fmt(l.acum) : ''}</span>
-          <button class="btn-del" onclick="borrarLog('${col_}','${l.id}')">✕</button>
-        </div>
-      `).join('');
-    modal.classList.add('open');
-  };
-
-  window.borrarLog = async (col_, id) => {
-    if (!confirm('¿Borrar este registro?')) return;
-    await delLog(col_, id);
-    verHistorial(col_);
-    toast('Registro borrado');
-  };
-
-  window.closeModal = () => {
-    document.getElementById('modal').classList.remove('open');
-  };
-
-  // ── Toast ──
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-  }
-
-  // ── Kunai canvas ──
-  window.addEventListener('load', () => {
-    const canvas = document.getElementById('kunai-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+  body.querySelectorAll('.status-sel').forEach(sel=>{
+    sel.addEventListener('change',async e=>{
+      const id=e.target.dataset.id;
+      const status=e.target.value;
+      await updateBet(id,{status});
+      // actualizar banca ref si necesario
+      const bk=bkCurrent();
+      const diff=Math.abs(bk-ST.bk_ref)/Math.abs(ST.bk_ref||1)*100;
+      if(diff>=ST.bk_umbral){ST.bk_ref=bk;await saveST();}
+      renderAll();
+      toast('Estado actualizado');
     });
-
-    const kunais = Array.from({length: 18}, () => ({
-      x: Math.random() * canvas.width,
-      y: -80 - Math.random() * 400,
-      speed: 1.5 + Math.random() * 2.5,
-      angle: Math.PI/2 + (Math.random()-0.5)*0.3,
-      rot: 0,
-      rotSpeed: (Math.random()-0.5)*0.04,
-      size: 14 + Math.random() * 12,
-      alpha: 0.12 + Math.random() * 0.18,
-    }));
-
-    function drawKunai(ctx, size) {
-      ctx.beginPath();
-      ctx.moveTo(0, -size*1.8);
-      ctx.lineTo(size*0.18, -size*0.3);
-      ctx.lineTo(size*0.5, size*0.1);
-      ctx.lineTo(0, -size*0.1);
-      ctx.lineTo(-size*0.5, size*0.1);
-      ctx.lineTo(-size*0.18, -size*0.3);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.rect(-size*0.1, size*0.08, size*0.2, size*0.6);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(0, size*0.9, size*0.22, 0, Math.PI*2);
-      ctx.stroke();
-    }
-
-    function animate() {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      kunais.forEach(k => {
-        k.y     += k.speed;
-        k.x     += Math.sin(k.angle) * 0.3;
-        k.rot   += k.rotSpeed;
-        if (k.y > canvas.height + 100) {
-          k.y = -80; k.x = Math.random() * canvas.width;
-        }
-        ctx.save();
-        ctx.translate(k.x, k.y);
-        ctx.rotate(k.rot);
-        ctx.globalAlpha = k.alpha;
-        ctx.fillStyle   = '#cc1111';
-        ctx.strokeStyle = '#ff3333';
-        ctx.lineWidth   = 1;
-        drawKunai(ctx, k.size);
-        ctx.restore();
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
-
-    // Nubes
-    const cloudCanvas = document.getElementById('cloud-canvas');
-    if (!cloudCanvas) return;
-    const cc = cloudCanvas.getContext('2d');
-    cloudCanvas.width  = window.innerWidth;
-    cloudCanvas.height = window.innerHeight;
-    window.addEventListener('resize', () => {
-      cloudCanvas.width  = window.innerWidth;
-      cloudCanvas.height = window.innerHeight;
-    });
-
-    const clouds = Array.from({length: 5}, (_, i) => ({
-      x: (i / 5) * window.innerWidth,
-      y: 40 + Math.random() * 180,
-      speed: 0.15 + Math.random() * 0.2,
-      scale: 0.8 + Math.random() * 0.8,
-      alpha: 0.04 + Math.random() * 0.06,
-    }));
-
-    function drawCloud(ctx, scale) {
-      ctx.beginPath();
-      ctx.arc(0,    0,   60*scale, 0, Math.PI*2);
-      ctx.arc(55*scale, -15*scale, 45*scale, 0, Math.PI*2);
-      ctx.arc(-55*scale,-15*scale, 45*scale, 0, Math.PI*2);
-      ctx.arc(25*scale, -30*scale, 35*scale, 0, Math.PI*2);
-      ctx.arc(-25*scale,-30*scale, 35*scale, 0, Math.PI*2);
-      ctx.fill();
-    }
-
-    function animateClouds() {
-      cc.clearRect(0,0,cloudCanvas.width,cloudCanvas.height);
-      clouds.forEach(c => {
-        c.x += c.speed;
-        if (c.x > cloudCanvas.width + 200) c.x = -200;
-        cc.save();
-        cc.translate(c.x, c.y);
-        cc.globalAlpha = c.alpha;
-        cc.fillStyle = '#cc0000';
-        drawCloud(cc, c.scale);
-        cc.restore();
-      });
-      requestAnimationFrame(animateClouds);
-    }
-    animateClouds();
   });
+}
+
+window.deleteBetUI=async id=>{
+  if(!confirm('¿Borrar esta apuesta?'))return;
+  await deleteBet(id);renderAll();toast('Apuesta eliminada');
+};
+
+let lightboxPhoto='';
+window.openPhoto=id=>{
+  const b=BETS.find(x=>x.id===id);
+  if(b?.photo){lightboxPhoto=b.photo;g('lb-img').src=b.photo;g('lightbox').classList.add('open');}
+};
+window.closeLightbox=()=>g('lightbox').classList.remove('open');
+window.saveLightboxPhoto=()=>{
+  const a=document.createElement('a');a.href=lightboxPhoto;a.download='ticket-'+today()+'.jpg';a.click();
+};
+
+// ─── ANÁLISIS ───
+function renderAnalisis(){
+  const st=getStats();
+  const bk=bkCurrent();
+  // equity curve
+  drawEquity();
+  // weekly/monthly
+  renderPeriodTable('week');
+  renderPeriodTable('month');
+  // projection
+  updateProjection();
+}
+
+function drawEquity(){
+  const svg=g('equity-svg');
+  if(!svg)return;
+  const W=600,H=200,pL=8,pR=8,pT=16,pB=16;
+  // build series
+  let bal=ST.bk_inicial;
+  const pts=[{bal}];
+  [...BETS].reverse().forEach(b=>{if(b.status&&b.status!=='pendiente'){bal+=calcProfit(b);pts.push({bal});}});
+  ADJUSTMENTS.forEach(a=>{bal+=a.amount;pts.push({bal});});
+  if(pts.length<2){svg.innerHTML='<text x="300" y="110" text-anchor="middle" fill="#555" font-size="13">Sin datos suficientes</text>';return;}
+  const vals=pts.map(p=>p.bal);
+  let mn=Math.min(...vals),mx=Math.max(...vals);
+  if(mn===mx){mn-=1;mx+=1;}
+  const pad=(mx-mn)*.1;mn-=pad;mx+=pad;
+  const xAt=i=>pL+(W-pL-pR)*i/(pts.length-1);
+  const yAt=v=>pT+(H-pT-pB)*(1-(v-mn)/(mx-mn));
+  const line=pts.map((p,i)=>(i===0?'M':'L')+xAt(i).toFixed(1)+','+yAt(p.bal).toFixed(1)).join(' ');
+  const last=pts[pts.length-1];
+  const area=line+` L${xAt(pts.length-1).toFixed(1)},${(H-pB).toFixed(1)} L${xAt(0).toFixed(1)},${(H-pB).toFixed(1)} Z`;
+  const color=last.bal>=ST.bk_inicial?'var(--pos)':'var(--neg)';
+  const initY=yAt(ST.bk_inicial).toFixed(1);
+  svg.innerHTML=`
+    <line x1="${pL}" y1="${initY}" x2="${W-pR}" y2="${initY}" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,3"/>
+    <path d="${area}" fill="${color}" opacity=".12"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2"/>
+    <circle cx="${xAt(pts.length-1).toFixed(1)}" cy="${yAt(last.bal).toFixed(1)}" r="4" fill="${color}"/>
+  `;
+  // stats
+  const netV=last.bal-ST.bk_inicial;
+  setV('eq-net',netV,fmt(netV,true)+' USDT ('+fmtP(netV/(ST.bk_inicial||1)*100)+')');
+  set('eq-max',fmt(Math.max(...vals))+' USDT');
+  set('eq-min',fmt(Math.min(...vals))+' USDT');
+  // drawdown
+  let peak2=vals[0],dd2=0;
+  vals.forEach(v=>{if(v>peak2)peak2=v;const d=peak2-v;if(d>dd2)dd2=d;});
+  setV('eq-dd',-dd2,dd2>0?'-'+fmt(dd2)+' USDT':'—');
+}
+
+function weekStart(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  const dow=(d.getDay()+6)%7;d.setDate(d.getDate()-dow);
+  return d.toISOString().slice(0,10);
+}
+function renderPeriodTable(unit){
+  const map={};
+  BETS.filter(b=>b.status&&b.status!=='pendiente'&&b.date).forEach(b=>{
+    const key=unit==='week'?weekStart(b.date):b.date.slice(0,7);
+    if(!map[key])map[key]={staked:0,profit:0,count:0};
+    map[key].count++;map[key].staked+=b.stake;map[key].profit+=calcProfit(b);
+  });
+  const body=g(unit+'-body');
+  body.innerHTML='';
+  const empty=g(unit+'-empty');
+  const keys=Object.keys(map).sort().reverse();
+  if(empty)empty.style.display=keys.length?'none':'block';
+  keys.forEach(k=>{
+    const p=map[k];const y=p.staked>0?p.profit/p.staked*100:0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${k}</td><td>${p.count}</td><td>${fmt(p.staked)}</td>
+      <td class="${p.profit>=0?'pos':'neg'}" style="font-family:var(--fm)">${fmt(p.profit,true)}</td>
+      <td class="${y>=0?'pos':'neg'}" style="font-family:var(--fm)">${p.staked?fmtP(y):'—'}</td>`;
+    body.appendChild(tr);
+  });
+  // averages
+  if(keys.length){
+    const ay=keys.reduce((a,k)=>a+(map[k].staked?map[k].profit/map[k].staked*100:0),0)/keys.length;
+    const ap=keys.reduce((a,k)=>a+map[k].profit,0)/keys.length;
+    set(unit+'-avg-y',fmtP(ay));set(unit+'-avg-p',fmt(ap,true)+' USDT');
+  }
+}
+
+let projCompound=false;
+function updateProjection(){
+  const unit=g('proj-unit')?.value||'week';
+  const qty=parseInt(g('proj-qty')?.value)||4;
+  const map={};
+  BETS.filter(b=>b.status&&b.status!=='pendiente'&&b.date).forEach(b=>{
+    const k=unit==='week'?weekStart(b.date):b.date.slice(0,7);
+    if(!map[k])map[k]={staked:0,profit:0};
+    map[k].staked+=b.stake;map[k].profit+=calcProfit(b);
+  });
+  const keys=Object.keys(map).filter(k=>map[k].staked>0);
+  const el=g('proj-result');
+  if(!keys.length){if(el)el.textContent='Sin suficiente historial aún.';return;}
+  const avgY=keys.reduce((a,k)=>a+map[k].profit/map[k].staked,0)/keys.length;
+  const bk=bkCurrent();
+  let gain,finalBal;
+  if(projCompound){finalBal=bk*Math.pow(1+avgY,qty);gain=finalBal-bk;}
+  else{gain=bk*avgY*qty;finalBal=bk+gain;}
+  if(el)el.innerHTML=`Con rendimiento promedio de <b>${fmtP(avgY*100)}</b> por ${unit==='week'?'semana':'mes'}, en <b>${qty}</b> ${unit==='week'?'semanas':'meses'}: ganancia estimada <b>${fmt(gain,true)} USDT</b> → banca aprox. <b>${fmt(finalBal)} USDT</b>`;
+}
+
+// ─── MARATÓN ───
+function renderMaraton(){
+  const{m_ci:ci,m_ca:ca,m_meta:meta,m_cuota:cuota,m_jpd:jpd,m_hechas:hechas,m_bolsa:bolsa}=ST;
+  const pasos_act=ca>0&&ci>0&&cuota>1?Math.floor(Math.log(ca/ci)/Math.log(cuota)):0;
+  const pasos_tot=ci>0&&cuota>1?Math.floor(Math.log(meta/ci)/Math.log(cuota)):0;
+  const pct=pasos_tot>0?Math.min(100,Math.floor(pasos_act/pasos_tot*100)):0;
+  const falta=Math.max(0,meta-ca);
+  let dias=0;
+  if(jpd>0&&ca>0&&cuota>1&&ca<meta){dias=Math.ceil(Math.max(0,Math.log(meta/ca)/Math.log(cuota)-bolsa)/jpd);}
+  set('m-ca',fmt(ca));set('m-ci',fmt(ci));set('m-meta',fmt(meta));
+  set('m-cuota','x'+cuota);set('m-pasos',pasos_act+' / '+pasos_tot);
+  set('m-falta',fmt(falta)+' USDT');set('m-dias',dias>0?dias+' días':'—');
+  set('m-jpd',jpd>0?jpd+' jug/día':'Sin plan');set('m-bolsa',fmt(bolsa)+'/'+jpd);
+  set('m-pct',pct+'%');
+  const bar=g('m-bar');if(bar)bar.style.width=pct+'%';
+  const diff=hechas-Math.max(0,jpd);
+  const el=g('m-dia');
+  if(el){
+    if(jpd<=0)el.innerHTML=`<span class="muted">${fmt(hechas)} jugadas hoy</span>`;
+    else if(diff>0.05)el.innerHTML=`<span class="pos">${fmt(hechas)}/${fmt(jpd)} +${fmt(diff)} adelantado ✓</span>`;
+    else if(diff<-0.05)el.innerHTML=`<span class="warn">${fmt(hechas)}/${fmt(jpd)} faltan ${fmt(-diff)}</span>`;
+    else el.innerHTML=`<span class="pos">${fmt(hechas)}/${fmt(jpd)} EXACTO ✓</span>`;
+  }
+}
+
+// ─── FINANCIERO ───
+function renderFinanciero(){
+  const bk=bkCurrent();
+  const adjSum=ADJUSTMENTS.reduce((a,x)=>a+x.amount,0);
+  const pos=ST.f_saldo+ST.f_ret-ST.f_dep;
+  const yield_=ST.f_risk>0?ST.f_gan/ST.f_risk*100:0;
+  set('f-saldo',fmt(ST.f_saldo)+' USDT');
+  set('f-dep',fmt(ST.f_dep)+' USDT');
+  set('f-ret',fmt(ST.f_ret)+' USDT');
+  set('f-risk',fmt(ST.f_risk)+' USDT');
+  setV('f-gan',ST.f_gan,fmt(ST.f_gan,true)+' USDT');
+  setV('f-yield',yield_,fmtP(yield_));
+  setV('f-pos',pos,fmt(pos,true)+' USDT');
+  const badge=g('f-badge');
+  if(badge){badge.textContent=pos>=0?'▲ POSITIVO':'▼ NEGATIVO';badge.className='badge '+(pos>=0?'pos':'neg');}
+  set('f-adj',fmt(adjSum,true)+' USDT');
+}
+
+// ─── FIJA ───
+function renderFija(){
+  set('af-monto',fmt(ST.af_monto)+' USDT');
+  setV('af-acum',ST.af_acum,fmt(ST.af_acum,true)+' USDT');
+}
+
+// ─── DIARIO ───
+function renderDiario(){
+  const list=g('diario-list');
+  list.innerHTML='';
+  JOURNAL.forEach(j=>{
+    const d=document.createElement('div');
+    d.className='diario-entry';
+    d.innerHTML=`<div class="diario-meta">${j.date}</div><div>${j.text}</div>`;
+    list.appendChild(d);
+  });
+}
+
+// ─── CALENDARIO ───
+let calDate=new Date();
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function renderCalendar(){
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  set('cal-title',MESES[m]+' '+y);
+  const stats={};
+  BETS.filter(b=>b.status&&b.status!=='pendiente'&&b.date).forEach(b=>{
+    if(!stats[b.date])stats[b.date]={count:0,profit:0};
+    stats[b.date].count++;stats[b.date].profit+=calcProfit(b);
+  });
+  const grid=g('cal-grid');grid.innerHTML='';
+  const first=new Date(y,m,1);
+  const offset=(first.getDay()+6)%7;
+  const days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<offset;i++){const d=document.createElement('div');d.className='cal-cell empty';grid.appendChild(d);}
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const cell=document.createElement('div');
+    cell.className='cal-cell';
+    let html=`<div class="cal-day">${d}</div>`;
+    if(stats[ds]){
+      const n=stats[ds].profit;
+      html+=`<div class="cal-net ${cls(n)}">${fmt(n,true)}</div><div class="cal-cnt">${stats[ds].count}</div>`;
+    }
+    cell.innerHTML=html;grid.appendChild(cell);
+  }
+}
+window.calPrev=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendar();};
+window.calNext=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendar();};
+
+// ─── ACTIONS ───
+window.marcarPaso=async()=>{
+  const cr=parseFloat(prompt('Cuota cobrada:'));if(!cr||isNaN(cr))return;
+  const cb=ST.m_cuota;
+  const nuevo=parseFloat((ST.m_ca*cr).toFixed(2));
+  const gan=parseFloat((nuevo-ST.m_ca).toFixed(2));
+  const equiv=cb>1?Math.max(1,Math.log(cr)/Math.log(cb)):1;
+  ST.m_ca=nuevo;ST.m_hechas=parseFloat((ST.m_hechas+equiv).toFixed(2));
+  if(ST.m_jpd>0){ST.m_bolsa=parseFloat((ST.m_bolsa+equiv).toFixed(2));while(ST.m_bolsa>=ST.m_jpd)ST.m_bolsa=parseFloat((ST.m_bolsa-ST.m_jpd).toFixed(2));}
+  await saveST();renderAll();toast('+'+fmt(gan)+' USDT · Capital: '+fmt(nuevo));
+};
+window.nuevaRacha=async()=>{
+  const n=parseFloat(prompt('Capital inicial:'));if(!n||isNaN(n))return;
+  ST.m_ci=n;ST.m_ca=n;ST.m_hechas=0;ST.m_bolsa=0;await saveST();renderAll();toast('Nueva racha: '+fmt(n)+' USDT');
+};
+window.fijarPlan=async()=>{
+  const j=parseFloat(prompt('Jugadas por día:'));if(!j||isNaN(j)||j<=0)return;
+  ST.m_jpd=j;ST.m_bolsa=0;await saveST();renderAll();toast('Plan: '+j+' jug/día');
+};
+window.editM=async campo=>{
+  const L={m_ca:'Capital actual',m_ci:'Capital inicial',m_meta:'Meta',m_cuota:'Cuota base',m_jpd:'Jug/día',m_hechas:'Hechas hoy',m_bolsa:'Bolsa'};
+  const v=parseFloat(prompt(L[campo]+':',ST[campo]));if(isNaN(v))return;
+  ST[campo]=v;await saveST();renderAll();toast('Actualizado');
+};
+
+window.accionFin=async tipo=>{
+  if(tipo==='dep'){
+    const m=parseFloat(prompt('Monto a depositar (USDT):'));if(!m||isNaN(m)||m<=0)return;
+    const n=prompt('Nota:')||'';
+    ST.f_dep=parseFloat((ST.f_dep+m).toFixed(2));ST.f_saldo=parseFloat((ST.f_saldo+m).toFixed(2));
+    await addAdj(m,n);await saveST();renderAll();toast('+'+fmt(m)+' USDT depositado');
+  }else if(tipo==='ret'){
+    const m=parseFloat(prompt('Monto a retirar (USDT):'));if(!m||isNaN(m)||m<=0)return;
+    const n=prompt('Nota:')||'';
+    ST.f_ret=parseFloat((ST.f_ret+m).toFixed(2));ST.f_saldo=parseFloat((ST.f_saldo-m).toFixed(2));
+    await addAdj(-m,n);await saveST();renderAll();toast('-'+fmt(m)+' USDT retirado');
+  }else if(tipo==='ganada'){
+    const m=parseFloat(prompt('Monto apostado:'));if(!m||isNaN(m))return;
+    const c=parseFloat(prompt('Cuota:'));if(!c||isNaN(c))return;
+    const g2=parseFloat((m*c-m).toFixed(2));
+    ST.f_gan=parseFloat((ST.f_gan+g2).toFixed(2));ST.f_risk=parseFloat((ST.f_risk+m).toFixed(2));
+    await saveST();renderAll();toast('GANADA +'+fmt(g2)+' USDT');
+  }else if(tipo==='perdida'){
+    const m=parseFloat(prompt('Monto apostado:'));if(!m||isNaN(m))return;
+    ST.f_gan=parseFloat((ST.f_gan-m).toFixed(2));ST.f_risk=parseFloat((ST.f_risk+m).toFixed(2));
+    await saveST();renderAll();toast('PERDIDA -'+fmt(m)+' USDT');
+  }else if(tipo==='saldo'){
+    const v=parseFloat(prompt('Saldo real (USDT):',ST.f_saldo));if(isNaN(v))return;
+    ST.f_saldo=v;await saveST();renderAll();toast('Saldo actualizado');
+  }
+};
+window.editF=async campo=>{
+  const L={f_saldo:'Saldo',f_dep:'Total dep',f_ret:'Total ret',f_gan:'Ganancia hist',f_risk:'Total arriesgado'};
+  const v=parseFloat(prompt(L[campo]+':',ST[campo]));if(isNaN(v))return;
+  ST[campo]=v;await saveST();renderAll();toast('Actualizado');
+};
+
+window.regFija=async tipo=>{
+  if(tipo==='ganada'){
+    const c=parseFloat(prompt('Cuota:'));if(!c||isNaN(c))return;
+    const g2=parseFloat((ST.af_monto*c-ST.af_monto).toFixed(2));
+    ST.af_acum=parseFloat((ST.af_acum+g2).toFixed(2));await saveST();renderFija();toast('GANADA +'+fmt(g2)+' USDT');
+  }else{
+    ST.af_acum=parseFloat((ST.af_acum-ST.af_monto).toFixed(2));await saveST();renderFija();toast('PERDIDA -'+fmt(ST.af_monto)+' USDT');
+  }
+};
+window.editAF=async campo=>{
+  const v=parseFloat(prompt(campo==='af_monto'?'Monto fijo:':'Acumulado:',ST[campo]));if(isNaN(v))return;
+  ST[campo]=v;await saveST();renderFija();toast('Actualizado');
+};
+
+// GESTIÓN
+window.setPreset=async modo=>{
+  if(ST.bk_locked)return;
+  ST.bk_modo=modo;
+  if(PRESETS[modo]){ST.bk_base=PRESETS[modo].bk_base;ST.bk_cap=PRESETS[modo].bk_cap;ST.bk_umbral=PRESETS[modo].bk_umbral;}
+  await saveST();renderAll();toast('Modo: '+modo);
+};
+window.setBkField=async(campo,val)=>{
+  if(ST.bk_locked)return;
+  const v=parseFloat(val);if(isNaN(v))return;
+  ST[campo]=v;ST.bk_modo='personalizada';await saveST();renderAll();
+};
+window.toggleLock=async()=>{ST.bk_locked=!ST.bk_locked;await saveST();renderAll();toast(ST.bk_locked?'Gestión fijada':'Gestión desbloqueada');};
+window.ajustarBanca=async(sign)=>{
+  const m=parseFloat(prompt('Monto (USDT):'));if(!m||isNaN(m)||m<=0)return;
+  const n=prompt('Motivo:')||'';
+  await addAdj(m*sign,n);renderAll();toast((sign>0?'+':'-')+fmt(m)+' USDT');
+};
+window.setBkInicial=async()=>{
+  const v=parseFloat(prompt('Banca inicial (USDT):',ST.bk_inicial));if(isNaN(v))return;
+  ST.bk_inicial=v;ST.bk_ref=v;await saveST();renderAll();toast('Banca inicial: '+fmt(v));
+};
+
+// REGISTRO APUESTA
+function compressImg(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();r.onload=ev=>{
+      const img=new Image();img.onload=()=>{
+        let w=img.width,h=img.height,mx=1100;
+        if(w>mx||h>mx){if(w>=h){h=Math.round(h*mx/w);w=mx;}else{w=Math.round(w*mx/h);h=mx;}}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',.78));
+      };img.onerror=()=>rej();img.src=ev.target.result;
+    };r.onerror=()=>rej();r.readAsDataURL(file);
+  });
+}
+
+g('reg-photo')?.addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{pendingPhoto=await compressImg(f);g('photo-preview').src=pendingPhoto;g('photo-wrap').style.display='flex';}
+  catch{pendingPhoto=null;e.target.value='';}
+});
+g('photo-remove')?.addEventListener('click',()=>{pendingPhoto=null;g('reg-photo').value='';g('photo-wrap').style.display='none';});
+
+document.querySelectorAll('.stake-tier').forEach(b=>{
+  b.addEventListener('click',()=>{selectedStake=b.dataset.tier;renderRegistro();});
+});
+
+g('reg-add')?.addEventListener('click',async()=>{
+  const date=g('reg-date').value||today();
+  const sport=g('reg-sport').value.trim();
+  const country=g('reg-country').value.trim();
+  const match=g('reg-match').value.trim();
+  const market=g('reg-market').value.trim();
+  const odds=parseFloat(g('reg-odds').value);
+  const tipo=g('reg-tipo').value;
+  const note=g('reg-note').value.trim();
+  if(!match||!market||!odds||odds<=1){toast('Completá partido, mercado y cuota válida');return;}
+  const sl=stakeLevels();
+  const pcts={low:Math.max(0.5,ST.bk_base/2),med:ST.bk_base,high:ST.bk_base*1.5};
+  const stake=sl[selectedStake];
+  const stakePct=pcts[selectedStake];
+  await addBet({date,sport,country,match,market,odds,tipo,note,stake,stakePct,status:'pendiente',photo:pendingPhoto||null});
+  // reset form
+  g('reg-match').value='';g('reg-market').value='';g('reg-odds').value='';g('reg-note').value='';
+  pendingPhoto=null;g('reg-photo').value='';g('photo-wrap').style.display='none';
+  renderAll();toast('Apuesta registrada como pendiente');
+});
+
+// Diario
+g('diario-add')?.addEventListener('click',async()=>{
+  const t=g('diario-text').value.trim();if(!t)return;
+  await addJournal(t);g('diario-text').value='';renderDiario();toast('Anotación guardada');
+});
+
+// Proyección
+g('proj-qty')?.addEventListener('input',updateProjection);
+g('proj-unit')?.addEventListener('change',updateProjection);
+document.querySelectorAll('.proj-mode').forEach(b=>{
+  b.addEventListener('click',()=>{
+    projCompound=b.dataset.mode==='compound';
+    document.querySelectorAll('.proj-mode').forEach(x=>x.classList.toggle('active',x===b));
+    updateProjection();
+  });
+});
+
+// Toast
+function toast(msg){
+  const t=g('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Date
+function updateDate(){
+  const d=new Date();
+  set('topbar-date',d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));
+}
+updateDate();setInterval(updateDate,30000);
+
+// Init date input
+if(g('reg-date'))g('reg-date').value=today();
 </script>
 
 <style>
-:root {
-  --red:    #cc1111;
-  --red2:   #ff2222;
-  --dark:   #080808;
-  --dark2:  #111111;
-  --dark3:  #181818;
-  --border: #2a0000;
-  --text:   #e8e8e8;
-  --muted:  #666;
-  --pos:    #22c55e;
-  --neg:    #ef4444;
-  --warn:   #f59e0b;
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body:    'Inter', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
-  --sidebar-w: 260px;
+:root{
+  --red:#cc1111;--red2:#ff2222;
+  --dark:#050505;--dark2:#0c0c0c;--dark3:#141414;
+  --border:#250000;--border2:#3a0000;
+  --text:#ebebeb;--muted:#555;
+  --pos:#22c55e;--neg:#ef4444;--warn:#f59e0b;
+  --fd:'Bebas Neue',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+  --sw:260px;
 }
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--dark);color:var(--text);font-family:var(--fb);overflow-x:hidden;}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+#app{display:none;flex-direction:row;min-height:100vh;position:relative;z-index:10;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;}
+.lbox{background:var(--dark2);border:1px solid var(--border2);border-radius:20px;padding:48px 36px;width:min(380px,92vw);text-align:center;box-shadow:0 0 80px rgba(204,17,17,.12);}
+.llogo{font-family:var(--fd);font-size:48px;letter-spacing:4px;margin-bottom:4px;}
+.llogo span{color:var(--red);}
+.lsub{color:var(--muted);font-size:11px;letter-spacing:3px;margin-bottom:36px;text-transform:uppercase;}
+.lbox input{width:100%;padding:15px 18px;background:var(--dark3);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;margin-bottom:12px;outline:none;transition:border-color .2s;}
+.lbox input:focus{border-color:var(--red);}
+.lbtn{width:100%;padding:16px;background:linear-gradient(135deg,var(--red),#a00);border:none;border-radius:12px;color:#fff;font-family:var(--fd);font-size:22px;letter-spacing:3px;cursor:pointer;box-shadow:0 4px 24px rgba(204,17,17,.4);}
+.lbtn:hover{background:linear-gradient(135deg,var(--red2),var(--red));}
+#l-err{color:var(--neg);font-size:13px;margin-top:10px;min-height:18px;}
 
-html, body {
-  height: 100%;
-  background: var(--dark);
-  color: var(--text);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-}
+/* SIDEBAR */
+#sidebar{width:var(--sw);background:rgba(5,0,0,.94);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s;backdrop-filter:blur(20px);}
+.slogo{padding:24px 24px 18px;border-bottom:1px solid var(--border);}
+.slogo h1{font-family:var(--fd);font-size:28px;letter-spacing:3px;}
+.slogo h1 span{color:var(--red);}
+.slogo p{color:var(--muted);font-size:10px;letter-spacing:3px;margin-top:2px;text-transform:uppercase;}
+.nav-list{padding:14px 10px;flex:1;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .2s;margin-bottom:4px;border:1px solid transparent;}
+.nav-item:hover{background:rgba(204,17,17,.08);color:var(--text);border-color:var(--border);}
+.nav-item.active{background:linear-gradient(135deg,rgba(204,17,17,.2),rgba(100,0,0,.1));color:var(--red2);border-color:var(--border2);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.sfooter{padding:14px 10px;border-top:1px solid var(--border);}
+.logout-btn{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer;font-size:13px;transition:all .2s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;}
+#sidebar.open~#sidebar-overlay{display:block;}
 
-/* ── Fondo ── */
-#kunai-canvas, #cloud-canvas {
-  position: fixed; top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none; z-index: 0;
-}
-#cloud-canvas { z-index: 1; }
+/* MAIN */
+#main{margin-left:var(--sw);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{padding:0 24px;height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(5,0,0,.92);backdrop-filter:blur(20px);position:sticky;top:0;z-index:50;border-top:3px solid var(--red);}
+.topbar-title{font-family:var(--fd);font-size:19px;letter-spacing:3px;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.topbar-date{color:var(--muted);font-size:11px;font-family:var(--fm);}
+.btn-menu{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;}
 
-/* ── Login ── */
-#login-screen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,0.95);
-  display: flex; align-items: center; justify-content: center;
-}
-.login-box {
-  background: var(--dark2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 40px 32px;
-  width: min(360px, 90vw);
-  text-align: center;
-}
-.login-logo {
-  font-family: var(--font-display);
-  font-size: 42px;
-  letter-spacing: 3px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.login-logo span { color: var(--red); }
-.login-sub { color: var(--muted); font-size: 12px; letter-spacing: 2px; margin-bottom: 32px; }
-.login-box input {
-  width: 100%; padding: 14px 16px;
-  background: var(--dark3); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text);
-  font-family: var(--font-body); font-size: 15px;
-  margin-bottom: 12px; outline: none;
-}
-.login-box input:focus { border-color: var(--red); }
-.btn-login {
-  width: 100%; padding: 14px;
-  background: var(--red); border: none;
-  border-radius: 10px; color: #fff;
-  font-family: var(--font-display); font-size: 20px;
-  letter-spacing: 2px; cursor: pointer;
-  transition: background .2s;
-}
-.btn-login:hover { background: var(--red2); }
-#l-err { color: var(--neg); font-size: 13px; margin-top: 10px; }
+/* CONTENT */
+.content{padding:24px;flex:1;}
+.section{display:none;}
+.section.active{display:block;}
+.sec-header{margin-bottom:22px;}
+.sec-title{font-family:var(--fd);font-size:34px;letter-spacing:4px;text-shadow:0 0 30px rgba(204,17,17,.25);}
+.sec-title span{color:var(--red);}
+.sec-sub{color:var(--muted);font-size:13px;margin-top:3px;}
 
-/* ── Layout ── */
-#app { display: flex; min-height: 100vh; position: relative; z-index: 10; }
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+.card{background:rgba(12,0,0,.75);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:all .2s;backdrop-filter:blur(10px);}
+.card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(204,17,17,.08);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),transparent);}
+.card.hero{background:linear-gradient(135deg,rgba(70,0,0,.5),rgba(15,0,0,.8));border-color:var(--red);}
+.card.hero .cv{font-size:28px;}
+.cl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.cv{font-family:var(--fm);font-size:20px;font-weight:700;color:var(--text);}
+.cv.pos{color:var(--pos);}
+.cv.neg{color:var(--neg);}
+.cv.warn{color:var(--warn);}
+.csub{font-size:11px;color:var(--muted);margin-top:4px;}
+.cedit{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;opacity:0;transition:opacity .2s;}
+.card:hover .cedit{opacity:1;}
+.cedit:hover{color:var(--red);}
 
-/* ── Sidebar ── */
-#sidebar {
-  width: var(--sidebar-w);
-  background: var(--dark2);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: fixed; top: 0; left: 0; height: 100vh;
-  z-index: 100; transition: transform .3s ease;
-}
-.sidebar-logo {
-  padding: 28px 24px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.sidebar-logo h1 {
-  font-family: var(--font-display);
-  font-size: 28px; letter-spacing: 2px;
-  color: var(--text);
-}
-.sidebar-logo h1 span { color: var(--red); }
-.sidebar-logo p { color: var(--muted); font-size: 11px; letter-spacing: 2px; margin-top: 2px; }
+/* PANEL */
+.panel{background:rgba(12,0,0,.75);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:18px;backdrop-filter:blur(10px);}
+.ptitle{font-family:var(--fd);font-size:17px;letter-spacing:2px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.btn{padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(18,0,0,.5);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+.btn:hover{background:rgba(204,17,17,.12);border-color:var(--red);color:var(--red2);}
+.btn.primary{background:linear-gradient(135deg,var(--red),#900);border-color:var(--red);color:#fff;box-shadow:0 4px 14px rgba(204,17,17,.3);}
+.btn.primary:hover{background:linear-gradient(135deg,var(--red2),var(--red));box-shadow:0 4px 20px rgba(204,17,17,.5);}
+.btn.pos-btn{border-color:rgba(34,197,94,.3);color:var(--pos);}
+.btn.pos-btn:hover{background:rgba(34,197,94,.08);border-color:var(--pos);}
+.btn.neg-btn{border-color:rgba(239,68,68,.3);color:var(--neg);}
+.btn.neg-btn:hover{background:rgba(239,68,68,.08);border-color:var(--neg);}
+.btn.active{border-color:var(--red);color:var(--red2);background:rgba(204,17,17,.12);}
 
-.nav-list { padding: 16px 12px; flex: 1; }
-.nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 13px 16px; border-radius: 10px;
-  cursor: pointer; color: var(--muted);
-  font-size: 14px; font-weight: 500;
-  transition: all .2s; margin-bottom: 4px;
-  border: 1px solid transparent;
-}
-.nav-item:hover { background: #1a0000; color: var(--text); }
-.nav-item.active {
-  background: linear-gradient(135deg, #1a0000, #2a0000);
-  color: var(--red2); border-color: var(--border);
-}
-.nav-icon { font-size: 18px; width: 22px; text-align: center; }
+/* STATS ROWS */
+.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(37,0,0,.6);font-size:13px;}
+.srow:last-child{border-bottom:none;}
+.srow span:first-child{color:var(--muted);}
+.sval{font-family:var(--fm);font-weight:600;}
+.sval.pos{color:var(--pos);}
+.sval.neg{color:var(--neg);}
 
-.sidebar-footer {
-  padding: 16px 12px;
-  border-top: 1px solid var(--border);
-}
-.btn-logout {
-  width: 100%; padding: 11px;
-  background: transparent; border: 1px solid var(--border);
-  border-radius: 8px; color: var(--muted);
-  cursor: pointer; font-size: 13px;
-  transition: all .2s;
-}
-.btn-logout:hover { border-color: var(--red); color: var(--red); }
+/* STAMP */
+.stamp{font-family:var(--fm);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid currentColor;letter-spacing:1px;display:inline-block;margin-bottom:16px;}
+.stamp.ok{color:var(--pos);border-color:var(--pos);}
+.stamp.warn{color:var(--warn);border-color:var(--warn);}
+.stamp.stop{color:var(--neg);border-color:var(--neg);}
 
-/* ── Main ── */
-#main {
-  margin-left: var(--sidebar-w);
-  flex: 1; min-height: 100vh;
-  display: flex; flex-direction: column;
-}
+/* BADGE */
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-top:8px;}
+.badge.pos{background:rgba(34,197,94,.1);color:var(--pos);border:1px solid rgba(34,197,94,.3);}
+.badge.neg{background:rgba(239,68,68,.1);color:var(--neg);border:1px solid rgba(239,68,68,.3);}
 
-/* ── Topbar ── */
-.topbar {
-  padding: 18px 28px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(8,8,8,0.8);
-  backdrop-filter: blur(10px);
-  position: sticky; top: 0; z-index: 50;
-}
-.topbar-title {
-  font-family: var(--font-display);
-  font-size: 22px; letter-spacing: 2px;
-  color: var(--text);
-}
-.topbar-date { color: var(--muted); font-size: 13px; font-family: var(--font-mono); }
-.btn-menu {
-  display: none; background: none; border: none;
-  color: var(--text); font-size: 22px; cursor: pointer;
-}
+/* PROGRESS */
+.prog-wrap{margin-bottom:20px;}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:8px;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.prog-track{height:7px;background:rgba(255,255,255,.04);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+.prog-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--red),var(--red2));border-radius:99px;transition:width .8s;box-shadow:0 0 14px rgba(204,17,17,.5);}
 
-/* ── Content ── */
-.content { padding: 28px; flex: 1; }
+/* DIA STATUS */
+.dia-wrap{background:rgba(18,0,0,.6);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px;}
+.dia-lbl{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase;}
 
-.section { display: none; }
-.section.active { display: block; }
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:11px 14px;background:var(--dark3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:var(--fb);}
+.form-input:focus{border-color:var(--red);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.stake-wrap{display:flex;gap:8px;flex-wrap:wrap;}
+.stake-tier{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(18,0,0,.5);color:var(--muted);font-size:12px;cursor:pointer;text-align:center;transition:all .2s;}
+.stake-tier.active{border-color:var(--red);color:var(--red2);background:rgba(204,17,17,.1);}
+.preview-txt{font-size:12px;color:var(--muted);margin-top:8px;}
+.preview-txt b{color:var(--text);}
+.photo-wrap{display:none;align-items:center;gap:10px;margin-top:8px;}
+.photo-thumb{width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--border);}
 
-/* ── Cards ── */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px; margin-bottom: 24px;
-}
-.card {
-  background: var(--dark2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
-  position: relative; overflow: hidden;
-  transition: border-color .2s;
-}
-.card:hover { border-color: #3a0000; }
-.card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--red), transparent);
-}
-.card-label {
-  font-size: 11px; letter-spacing: 2px;
-  color: var(--muted); text-transform: uppercase;
-  margin-bottom: 10px;
-}
-.card-value {
-  font-family: var(--font-mono);
-  font-size: 22px; font-weight: 700;
-  color: var(--text);
-}
-.card-value.pos { color: var(--pos); }
-.card-value.neg { color: var(--neg); }
-.card-value.warn { color: var(--warn); }
-.card-sub {
-  font-size: 12px; color: var(--muted);
-  margin-top: 6px;
-}
-.card-edit {
-  position: absolute; top: 14px; right: 14px;
-  background: none; border: none;
-  color: var(--muted); cursor: pointer; font-size: 14px;
-  opacity: 0; transition: opacity .2s;
-}
-.card:hover .card-edit { opacity: 1; }
-.card-edit:hover { color: var(--red); }
+/* EXPOSURE */
+.exp-box{background:rgba(18,0,0,.7);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.exp-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;}
+.exp-track{height:6px;background:rgba(255,255,255,.04);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+#exp-bar{height:100%;width:0%;border-radius:99px;transition:width .3s;background:var(--red);}
 
-/* ── Card destacada ── */
-.card-hero {
-  background: linear-gradient(135deg, #1a0000, #0d0d0d);
-  border-color: var(--red);
-}
-.card-hero .card-value { font-size: 32px; }
-.pos-label {
-  display: inline-block;
-  padding: 3px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  margin-top: 8px;
-}
-.pos.pos-label { background: rgba(34,197,94,.15); color: var(--pos); }
-.neg.pos-label { background: rgba(239,68,68,.15); color: var(--neg); }
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{text-align:left;font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--border);}
+tbody td{padding:9px 6px;border-bottom:1px solid rgba(37,0,0,.5);vertical-align:top;}
+tbody tr:nth-child(odd){background:rgba(10,0,0,.3);}
+tbody td.pos{color:var(--pos);font-family:var(--fm);}
+tbody td.neg{color:var(--neg);font-family:var(--fm);}
+.status-sel{padding:5px 7px;font-size:11px;background:var(--dark3);border:1px solid var(--border);border-radius:6px;color:var(--text);}
 
-/* ── Progreso ── */
-.progress-wrap { margin-bottom: 24px; }
-.progress-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 10px;
-}
-.progress-label { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
-.progress-pct { font-family: var(--font-mono); font-size: 13px; color: var(--red); }
-.progress-track {
-  height: 8px; background: var(--dark3);
-  border-radius: 99px; overflow: hidden;
-}
-.progress-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--red), var(--red2));
-  border-radius: 99px;
-  transition: width .6s cubic-bezier(.4,0,.2,1);
-  box-shadow: 0 0 12px rgba(204,17,17,.5);
-}
+/* FILTERS */
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;}
+.filters input,.filters select{padding:8px 10px;background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;width:100%;}
 
-/* ── Panel acciones ── */
-.panel {
-  background: var(--dark2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px; margin-bottom: 20px;
-}
-.panel-title {
-  font-family: var(--font-display);
-  font-size: 18px; letter-spacing: 2px;
-  color: var(--text); margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.btn-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-}
-.btn {
-  padding: 13px 16px;
-  border-radius: 10px; border: 1px solid var(--border);
-  background: var(--dark3); color: var(--text);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all .2s;
-  text-align: center; white-space: nowrap;
-}
-.btn:hover { background: #1a0000; border-color: var(--red); color: var(--red2); }
-.btn-primary {
-  background: var(--red); border-color: var(--red); color: #fff;
-}
-.btn-primary:hover { background: var(--red2); color: #fff; }
-.btn-outline-pos { border-color: rgba(34,197,94,.4); color: var(--pos); }
-.btn-outline-pos:hover { background: rgba(34,197,94,.1); border-color: var(--pos); }
-.btn-outline-neg { border-color: rgba(239,68,68,.4); color: var(--neg); }
-.btn-outline-neg:hover { background: rgba(239,68,68,.1); border-color: var(--neg); }
+/* EQUITY */
+#equity-svg{width:100%;height:auto;display:block;}
 
-/* ── Section header ── */
-.sec-header {
-  margin-bottom: 24px;
-}
-.sec-title {
-  font-family: var(--font-display);
-  font-size: 32px; letter-spacing: 3px;
-  color: var(--text);
-}
-.sec-title span { color: var(--red); }
-.sec-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+/* CALENDAR */
+.cal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cal-title{font-family:var(--fm);font-size:13px;}
+.cal-nav{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;}
+.cal-dows{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;}
+.cal-dow{font-family:var(--fm);font-size:9px;color:var(--muted);text-align:center;padding:3px 0;text-transform:uppercase;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-cell{min-height:52px;background:rgba(10,0,0,.5);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:10px;}
+.cal-cell.empty{background:transparent;border-color:transparent;}
+.cal-day{color:var(--muted);font-family:var(--fm);font-size:9px;}
+.cal-net{font-family:var(--fm);font-weight:700;font-size:11px;margin-top:2px;}
+.cal-net.pos{color:var(--pos);}
+.cal-net.neg{color:var(--neg);}
+.cal-cnt{color:var(--muted);font-size:9px;}
 
-/* ── Dia status ── */
-.dia-status-wrap {
-  background: var(--dark3);
-  border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 18px;
-  margin-bottom: 20px;
-  display: flex; align-items: center; gap: 12px;
-}
-.dia-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+/* DIARIO */
+.diario-entry{border-left:2px solid var(--border2);padding:4px 0 4px 12px;margin-bottom:10px;font-size:13px;}
+.diario-meta{font-family:var(--fm);font-size:10px;color:var(--muted);margin-bottom:2px;}
 
-/* ── Modal ── */
-#modal {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85); z-index: 500;
-  align-items: center; justify-content: center;
-}
-#modal.open { display: flex; }
-.modal-box {
-  background: var(--dark2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  width: min(600px, 94vw);
-  max-height: 80vh;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.modal-head {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.modal-head h3 {
-  font-family: var(--font-display);
-  font-size: 20px; letter-spacing: 2px;
-}
-.modal-close {
-  background: none; border: none;
-  color: var(--muted); font-size: 20px; cursor: pointer;
-}
-.modal-close:hover { color: var(--red); }
-#modal-body {
-  padding: 20px 24px;
-  overflow-y: auto; flex: 1;
-}
-.log-row {
-  display: flex; align-items: center;
-  gap: 10px; padding: 10px 0;
-  border-bottom: 1px solid #1a1a1a;
-  font-size: 13px; flex-wrap: wrap;
-}
-.log-ts { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
-.log-tipo { font-weight: 700; font-size: 11px; letter-spacing: 1px; }
-.log-val { font-family: var(--font-mono); font-weight: 600; }
-.log-extra { color: var(--muted); font-size: 12px; flex: 1; }
-.btn-del {
-  background: none; border: none;
-  color: var(--muted); cursor: pointer; font-size: 13px;
-  margin-left: auto; padding: 4px 8px;
-}
-.btn-del:hover { color: var(--neg); }
+/* MANAGEMENT */
+.preset-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.preset-btn{padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(18,0,0,.5);color:var(--muted);font-size:12px;cursor:pointer;text-align:center;transition:all .2s;}
+.preset-btn.active{border-color:var(--red);color:var(--red2);background:rgba(204,17,17,.1);}
+.ruler-track{height:10px;border-radius:99px;background:linear-gradient(to right,var(--pos) 0%,var(--pos) 60%,var(--warn) 60%,var(--warn) 85%,var(--neg) 85%,var(--neg) 100%);opacity:.3;margin:12px 0 4px;}
+.ruler-ticks{display:flex;justify-content:space-between;font-family:var(--fm);font-size:9px;color:var(--muted);}
 
-/* ── Toast ── */
-#toast {
-  position: fixed; bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--dark2); border: 1px solid var(--border);
-  color: var(--text); padding: 13px 24px;
-  border-radius: 99px; font-size: 14px;
-  z-index: 9999; transition: transform .3s ease;
-  pointer-events: none;
-}
-#toast.show { transform: translateX(-50%) translateY(0); }
+/* LIGHTBOX */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;align-items:center;justify-content:center;}
+#lightbox.open{display:flex;}
+.lb-inner{text-align:center;max-width:94vw;}
+#lb-img{max-width:100%;max-height:70vh;border-radius:8px;border:1px solid var(--border);}
+.lb-actions{margin-top:12px;display:flex;gap:10px;justify-content:center;}
 
-/* ── Colors ── */
-.pos { color: var(--pos); }
-.neg { color: var(--neg); }
-.warn { color: var(--warn); }
-.muted { color: var(--muted); }
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;align-items:center;justify-content:center;}
+#modal.open{display:flex;}
+.mbox{background:var(--dark2);border:1px solid var(--border2);border-radius:18px;width:min(620px,95vw);max-height:84vh;display:flex;flex-direction:column;overflow:hidden;}
+.mhead{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-top:3px solid var(--red);}
+.mhead h3{font-family:var(--fd);font-size:20px;letter-spacing:2px;}
+.mclose{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+.mclose:hover{color:var(--red);}
+.mbody{padding:20px 24px;overflow-y:auto;flex:1;}
 
-/* ── Divider ── */
-.divider {
-  border: none; border-top: 1px solid var(--border);
-  margin: 20px 0;
-}
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark2);border:1px solid var(--border2);color:var(--text);padding:12px 24px;border-radius:99px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  #sidebar {
-    transform: translateX(-100%);
-  }
-  #sidebar.open {
-    transform: translateX(0);
-    box-shadow: 4px 0 40px rgba(0,0,0,0.8);
-  }
-  #main { margin-left: 0; }
-  .btn-menu { display: block; }
-  .content { padding: 16px; }
-  .topbar { padding: 14px 16px; }
-  .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .card-value { font-size: 18px; }
-  .card-hero .card-value { font-size: 26px; }
-  .sec-title { font-size: 26px; }
-  .btn-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 400px) {
-  .cards-grid { grid-template-columns: 1fr; }
-}
+.pos{color:var(--pos);}
+.neg{color:var(--neg);}
+.warn{color:var(--warn);}
+.muted{color:var(--muted);}
+.d-big{font-family:var(--fm);font-size:36px;font-weight:700;margin-bottom:4px;}
+.d-big.pos{color:var(--pos);}
+.d-big.neg{color:var(--neg);}
 
-/* ── Overlay sidebar mobile ── */
-#sidebar-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5); z-index: 99;
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);box-shadow:4px 0 60px rgba(0,0,0,.9);}
+  #main{margin-left:0;}
+  .btn-menu{display:block;}
+  .content{padding:12px;}
+  .topbar{padding:0 12px;}
+  .cards{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .cv{font-size:16px;}
+  .card.hero .cv{font-size:22px;}
+  .sec-title{font-size:28px;}
+  .btns{grid-template-columns:1fr 1fr;}
+  .topbar-date{display:none;}
+  .preset-btns{grid-template-columns:repeat(2,1fr);}
+  .form-row{grid-template-columns:1fr;}
+  .stake-wrap{flex-direction:column;}
 }
-#sidebar.open ~ #sidebar-overlay { display: block; }
+@media(max-width:380px){
+  .cards{grid-template-columns:1fr;}
+  .btns{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
-<!-- Fondo animado -->
-<canvas id="cloud-canvas"></canvas>
-<canvas id="kunai-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
 
-<!-- Login -->
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">AKATSUKI<span>CASH</span></div>
-    <div class="login-sub">PREMIUM BETTING SYSTEM · EST. 2026</div>
-    <input id="l-email" type="email" placeholder="Email">
-    <input id="l-pass"  type="password" placeholder="Contraseña"
-           onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+  <div class="lbox">
+    <div class="llogo">AKATSUKI<span>CASH</span></div>
+    <div class="lsub">Pro Betting Dashboard · Est. 2026</div>
+    <input id="l-email" type="email" placeholder="Email" autocomplete="email">
+    <input id="l-pass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="lbtn" onclick="doLogin()">ENTRAR</button>
     <div id="l-err"></div>
   </div>
 </div>
 
-<!-- App -->
+<!-- APP -->
 <div id="app">
+<nav id="sidebar">
+  <div class="slogo"><h1>AKATSUKI<span>CASH</span></h1><p>Pro Betting Dashboard</p></div>
+  <div class="nav-list">
+    <div class="nav-item active" data-sec="dashboard" onclick="navTo('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+    <div class="nav-item" data-sec="registro" onclick="navTo('registro')"><span class="nav-icon">✏️</span>Registrar Apuesta</div>
+    <div class="nav-item" data-sec="historial" onclick="navTo('historial')"><span class="nav-icon">📋</span>Historial</div>
+    <div class="nav-item" data-sec="analisis" onclick="navTo('analisis')"><span class="nav-icon">📈</span>Análisis</div>
+    <div class="nav-item" data-sec="gestion" onclick="navTo('gestion')"><span class="nav-icon">⚖️</span>Gestión de Banca</div>
+    <div class="nav-item" data-sec="maraton" onclick="navTo('maraton')"><span class="nav-icon">🎯</span>Maratón</div>
+    <div class="nav-item" data-sec="financiero" onclick="navTo('financiero')"><span class="nav-icon">💰</span>Control Financiero</div>
+    <div class="nav-item" data-sec="fija" onclick="navTo('fija')"><span class="nav-icon">🔒</span>Apuesta Fija</div>
+    <div class="nav-item" data-sec="diario" onclick="navTo('diario')"><span class="nav-icon">📔</span>Diario</div>
+  </div>
+  <div class="sfooter"><button class="logout-btn" onclick="doLogout()">⏻ Cerrar sesión</button></div>
+</nav>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar -->
-  <nav id="sidebar">
-    <div class="sidebar-logo">
-      <h1>AKATSUKI<span>CASH</span></h1>
-      <p>PREMIUM BETTING SYSTEM</p>
+<div id="main">
+<div class="topbar">
+  <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-title" id="topbar-title">DASHBOARD</div>
+  <div class="topbar-right"><div class="topbar-date" id="topbar-date"></div></div>
+</div>
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="section active" id="sec-dashboard">
+  <div class="sec-header"><div class="sec-title">DASH<span>BOARD</span></div><div class="sec-sub">Resumen completo · Tiempo real</div></div>
+  <div id="d-stamp" class="stamp ok">✓ DISCIPLINADO</div>
+  <div class="cards">
+    <div class="card hero">
+      <div class="cl">Banca Actual</div>
+      <div id="d-bk" class="d-big pos">0.00 USDT</div>
+      <div class="csub">capital disponible</div>
     </div>
-    <div class="nav-list">
-      <div class="nav-item" data-sec="maraton" onclick="navTo('maraton')">
-        <span class="nav-icon">🎯</span> Maratón
-      </div>
-      <div class="nav-item" data-sec="financiero" onclick="navTo('financiero')">
-        <span class="nav-icon">📊</span> Control Financiero
-      </div>
-      <div class="nav-item" data-sec="fija" onclick="navTo('fija')">
-        <span class="nav-icon">🔒</span> Apuesta Fija
-      </div>
-      <div class="nav-item" data-sec="historial" onclick="navTo('historial')">
-        <span class="nav-icon">📋</span> Historial
-      </div>
+    <div class="card">
+      <div class="cl">P&L Neto</div>
+      <div id="d-pnl" class="cv">+0.00 USDT</div>
     </div>
-    <div class="sidebar-footer">
-      <button class="btn-logout" onclick="doLogout()">⏻ Cerrar sesión</button>
+    <div class="card">
+      <div class="cl">ROI</div>
+      <div id="d-roi" class="cv">—</div>
+      <div class="csub">sobre monto apostado</div>
     </div>
-  </nav>
-  <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-  <!-- Main -->
-  <div id="main">
-    <div class="topbar">
-      <button class="btn-menu" onclick="toggleSidebar()">☰</button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <div class="topbar-date" id="topbar-date"></div>
+    <div class="card">
+      <div class="cl">Yield</div>
+      <div id="d-profit" class="cv">—</div>
+      <div class="csub" id="d-staked">arriesgado: 0.00</div>
     </div>
-
-    <div class="content">
-
-      <!-- ─── MARATÓN ─── -->
-      <div class="section" id="sec-maraton">
-        <div class="sec-header">
-          <div class="sec-title">MARAT<span>Ó</span>N</div>
-          <div class="sec-sub">Escalada reinvirtiendo todo · Meta dinámica</div>
-        </div>
-
-        <!-- Progreso -->
-        <div class="progress-wrap">
-          <div class="progress-header">
-            <span class="progress-label">PROGRESO HACIA LA META</span>
-            <span class="progress-pct" id="m-pct">0%</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-bar" id="m-bar"></div>
-          </div>
-        </div>
-
-        <!-- Estado hoy -->
-        <div class="dia-status-wrap">
-          <div>
-            <div class="dia-label">HOY</div>
-            <div id="m-dia-status"><span class="muted">Sin objetivo diario</span></div>
-          </div>
-        </div>
-
-        <!-- Cards -->
-        <div class="cards-grid">
-          <div class="card card-hero">
-            <div class="card-label">Capital Actual</div>
-            <div class="card-value" id="m-ca">0.00</div>
-            <div class="card-sub">USDT</div>
-            <button class="card-edit" onclick="editarMaraton('capital_actual')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Capital Inicial</div>
-            <div class="card-value" id="m-ci">0.00</div>
-            <div class="card-sub">USDT</div>
-            <button class="card-edit" onclick="editarMaraton('capital_inicial')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Meta</div>
-            <div class="card-value" id="m-meta">1000.00</div>
-            <div class="card-sub">USDT</div>
-            <button class="card-edit" onclick="editarMaraton('meta')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Cuota Base</div>
-            <div class="card-value" id="m-cuota">x1.05</div>
-            <button class="card-edit" onclick="editarMaraton('cuota')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Pasos</div>
-            <div class="card-value" id="m-pasos">0 / 0</div>
-            <div class="card-sub">actual / total</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Faltan</div>
-            <div class="card-value neg" id="m-falta">0.00 USDT</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Días Restantes</div>
-            <div class="card-value warn" id="m-dias">—</div>
-            <div class="card-sub" id="m-jpd">Sin plan</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Bolsa</div>
-            <div class="card-value" id="m-bolsa">0/0</div>
-            <div class="card-sub">jugadas acumuladas</div>
-            <button class="card-edit" onclick="editarMaraton('credito_bolsa')">✎</button>
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="panel">
-          <div class="panel-title">ACCIONES</div>
-          <div class="btn-grid">
-            <button class="btn btn-primary" onclick="marcarPaso()">✓ Marcar paso GANADO</button>
-            <button class="btn" onclick="nuevaRacha()">↺ Nueva Racha</button>
-            <button class="btn" onclick="fijarPlan()">📅 Fijar plan diario</button>
-            <button class="btn" onclick="editarMaraton('hechas_hoy')">✎ Editar jugadas hoy</button>
-            <button class="btn" onclick="editarMaraton('capital_actual')">✎ Editar capital</button>
-            <button class="btn" onclick="editarMaraton('jugadas_dia')">✎ Editar JPD</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── FINANCIERO ─── -->
-      <div class="section" id="sec-financiero">
-        <div class="sec-header">
-          <div class="sec-title">CONTROL <span>FINANCIERO</span></div>
-          <div class="sec-sub">Estado consolidado · Depósitos, retiros y rendimiento</div>
-        </div>
-
-        <!-- Posición neta hero -->
-        <div class="card card-hero" style="margin-bottom:20px">
-          <div class="card-label">POSICIÓN NETA</div>
-          <div class="card-value" id="f-pos">0.00 USDT</div>
-          <div id="f-pos-label" class="pos-label pos">▲ POSITIVO</div>
-          <div class="card-sub" style="margin-top:10px">saldo actual + retirado − depositado</div>
-          <button class="card-edit" onclick="actualizarSaldo()">✎ Saldo</button>
-        </div>
-
-        <div class="cards-grid">
-          <div class="card">
-            <div class="card-label">Saldo Cuenta</div>
-            <div class="card-value" id="f-saldo">0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('saldo')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Ganancia Neta Histórica</div>
-            <div class="card-value" id="f-gan">+0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('ganancia_hist')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Yield</div>
-            <div class="card-value" id="f-yield">+0.00%</div>
-            <div class="card-sub">sobre total arriesgado</div>
-          </div>
-          <div class="card">
-            <div class="card-label">Total Depositado</div>
-            <div class="card-value" id="f-dep">0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('depositado')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Total Retirado</div>
-            <div class="card-value" id="f-ret">0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('retirado')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Total Arriesgado</div>
-            <div class="card-value" id="f-risk">0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('total_arriesgado')">✎</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">MOVIMIENTOS</div>
-          <div class="btn-grid">
-            <button class="btn btn-outline-pos" onclick="registrarDeposito()">↓ Registrar Depósito</button>
-            <button class="btn btn-outline-neg" onclick="registrarRetiro()">↑ Registrar Retiro</button>
-            <button class="btn btn-outline-pos" onclick="registrarApuestaGanada()">✓ Apuesta Ganada</button>
-            <button class="btn btn-outline-neg" onclick="registrarApuestaPerdida()">✗ Apuesta Perdida</button>
-            <button class="btn" onclick="actualizarSaldo()">✎ Actualizar Saldo</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── APUESTA FIJA ─── -->
-      <div class="section" id="sec-fija">
-        <div class="sec-header">
-          <div class="sec-title">APUESTA <span>FIJA</span></div>
-          <div class="sec-sub">Monto fijo · Cuota variable · Acumulado independiente</div>
-        </div>
-
-        <div class="cards-grid">
-          <div class="card card-hero">
-            <div class="card-label">Ganancia Acumulada</div>
-            <div class="card-value" id="af-acum">+0.00 USDT</div>
-            <button class="card-edit" onclick="editarFinanciero('acum_fija')">✎</button>
-          </div>
-          <div class="card">
-            <div class="card-label">Apuesta Fija Actual</div>
-            <div class="card-value" id="af-monto">1.00 USDT</div>
-            <button class="card-edit" onclick="cambiarApuestaFija()">✎</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">REGISTRAR</div>
-          <div class="btn-grid">
-            <button class="btn btn-outline-pos" onclick="regFijaGanada()">✓ GANADA</button>
-            <button class="btn btn-outline-neg" onclick="regFijaPerdida()">✗ PERDIDA</button>
-            <button class="btn" onclick="cambiarApuestaFija()">✎ Cambiar monto fijo</button>
-            <button class="btn" onclick="verHistorial('log_fija')">📋 Ver historial</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── HISTORIAL ─── -->
-      <div class="section" id="sec-historial">
-        <div class="sec-header">
-          <div class="sec-title">HIST<span>O</span>RIAL</div>
-          <div class="sec-sub">Registro completo de todas las operaciones</div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">VER REGISTROS</div>
-          <div class="btn-grid">
-            <button class="btn" onclick="verHistorial('log_maraton')">🎯 Maratón</button>
-            <button class="btn" onclick="verHistorial('log_apuestas')">📊 Apuestas</button>
-            <button class="btn" onclick="verHistorial('log_depositos')">↓ Depósitos</button>
-            <button class="btn" onclick="verHistorial('log_retiros')">↑ Retiros</button>
-            <button class="btn" onclick="verHistorial('log_fija')">🔒 Apuesta Fija</button>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /app -->
-
-<!-- Modal -->
-<div id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="modal-title">Historial</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="card">
+      <div class="cl">% Acierto</div>
+      <div id="d-wr" class="cv">—</div>
     </div>
-    <div id="modal-body"></div>
+    <div class="card">
+      <div class="cl">Cuota Media</div>
+      <div id="d-avgodds" class="cv">—</div>
+      <div class="csub">breakeven: <span id="d-be">—</span></div>
+    </div>
+    <div class="card">
+      <div class="cl">Max Drawdown</div>
+      <div id="d-dd" class="cv neg">—</div>
+    </div>
+    <div class="card">
+      <div class="cl">Racha Actual</div>
+      <div id="d-streak" class="cv">—</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">ESTADÍSTICAS DETALLADAS</div>
+    <div class="srow"><span>Apuestas totales</span><span class="sval" id="d-total">0</span></div>
+    <div class="srow"><span>Apuestas cerradas</span><span class="sval" id="d-closed">0</span></div>
+    <div class="srow"><span>Ganadas</span><span class="sval pos" id="d-won">0</span></div>
+    <div class="srow"><span>Perdidas</span><span class="sval neg" id="d-lost">0</span></div>
+    <div class="srow"><span>Push</span><span class="sval" id="d-push">0</span></div>
+    <div class="srow"><span>Mayor racha ganadora</span><span class="sval pos" id="d-maxw">—</span></div>
+    <div class="srow"><span>Mayor racha perdedora</span><span class="sval neg" id="d-maxl">—</span></div>
+    <div class="srow"><span>Apuestas pendientes</span><span class="sval warn" id="d-pend">0</span></div>
+    <div class="srow"><span>Riesgo en pendientes</span><span class="sval warn" id="d-pend-risk">0.00 USDT</span></div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- REGISTRO -->
+<div class="section" id="sec-registro">
+  <div class="sec-header"><div class="sec-title">REGISTRAR <span>APUESTA</span></div><div class="sec-sub">Pendiente primero · El resultado lo marcás después</div></div>
+  <div class="exp-box">
+    <div class="exp-row"><span style="color:var(--muted);font-size:12px">Exposición del día</span></div>
+    <div class="exp-row"><span>Apuestas: <b id="exp-count" style="font-family:var(--fm)">0/5</b></span><span>Riesgo: <b id="exp-pct" style="font-family:var(--fm)">0%</b></span></div>
+    <div class="exp-track"><div id="exp-bar"></div></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">DATOS DEL EVENTO</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha</label><input id="reg-date" type="date" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Deporte</label><input id="reg-sport" type="text" class="form-input" placeholder="Fútbol, Tenis, MMA..."></div>
+    </div>
+    <div class="form-group"><label class="form-label">País / Liga</label><input id="reg-country" type="text" class="form-input" placeholder="España · La Liga"></div>
+    <div class="form-group"><label class="form-label">Partido</label><input id="reg-match" type="text" class="form-input" placeholder="Real Madrid vs Barcelona"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mercado</label><input id="reg-market" type="text" class="form-input" placeholder="1X2, BTTS, +2.5..."></div>
+      <div class="form-group"><label class="form-label">Cuota</label><input id="reg-odds" type="number" class="form-input" min="1.01" step="0.001" placeholder="1.850"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo de apuesta</label>
+      <select id="reg-tipo" class="form-input">
+        <option value="simple">Simple</option>
+        <option value="combi">Combinada / Parley</option>
+        <option value="asiatica">Línea Asiática (handicap)</option>
+        <option value="over_under">Over/Under asiático</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confianza / Stake</label>
+      <div class="stake-wrap">
+        <div class="stake-tier active" data-tier="low">Baja</div>
+        <div class="stake-tier" data-tier="med">Media</div>
+        <div class="stake-tier" data-tier="high">Alta</div>
+      </div>
+      <div class="preview-txt">Vas a arriesgar: <b id="reg-preview">0.00 USDT</b></div>
+    </div>
+    <div class="form-group"><label class="form-label">Nota / fundamento</label><textarea id="reg-note" class="form-input" rows="2" placeholder="Por qué tomás esta apuesta"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Foto del ticket (opcional)</label>
+      <input id="reg-photo" type="file" accept="image/*" class="form-input">
+      <div class="photo-wrap" id="photo-wrap">
+        <img id="photo-preview" class="photo-thumb" src="">
+        <button id="photo-remove" class="btn">✕ Quitar</button>
+      </div>
+    </div>
+    <button id="reg-add" class="btn primary" style="width:100%;margin-top:6px">⏳ Registrar como Pendiente</button>
+  </div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="section" id="sec-historial">
+  <div class="sec-header"><div class="sec-title">HIST<span>ORIAL</span></div><div class="sec-sub">Filtrá · Actualizá resultado · Borrá</div></div>
+  <div class="filters">
+    <input placeholder="Deporte..." oninput="hFilter.sport=this.value;renderHistorial()">
+    <select onchange="hFilter.status=this.value;renderHistorial()">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="ganada">Ganada</option>
+      <option value="perdida">Perdida</option>
+      <option value="push">Push</option>
+      <option value="medio_ganada">Medio Ganada</option>
+      <option value="medio_perdida">Medio Perdida</option>
+    </select>
+    <input type="date" placeholder="Desde..." oninput="hFilter.dateFrom=this.value;renderHistorial()">
+    <input type="date" placeholder="Hasta..." oninput="hFilter.dateTo=this.value;renderHistorial()">
+    <input type="number" placeholder="Cuota mín..." step="0.01" oninput="hFilter.oddsMin=this.value;renderHistorial()">
+    <input type="number" placeholder="Cuota máx..." step="0.01" oninput="hFilter.oddsMax=this.value;renderHistorial()">
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Fecha</th><th>Deporte / País</th><th>Partido / Mercado</th><th>Cuota</th><th>Stake</th><th>Estado</th><th>Resultado</th><th>Ticket</th><th></th></tr></thead>
+      <tbody id="hist-body"></tbody>
+    </table>
+    <div id="hist-empty" class="muted" style="padding:24px;text-align:center">Sin apuestas aún.</div>
+  </div>
+</div>
+
+<!-- ANÁLISIS -->
+<div class="section" id="sec-analisis">
+  <div class="sec-header"><div class="sec-title">ANÁL<span>ISIS</span></div><div class="sec-sub">Curva de banca · Rendimiento · Proyección</div></div>
+  <div class="panel">
+    <div class="ptitle">CURVA DE BANCA (EQUITY)</div>
+    <svg id="equity-svg" viewBox="0 0 600 200" style="width:100%;height:auto"></svg>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><div class="cl">Variación Neta</div><div id="eq-net" class="cv">—</div></div>
+      <div class="card"><div class="cl">Máximo</div><div id="eq-max" class="cv">—</div></div>
+      <div class="card"><div class="cl">Mínimo</div><div id="eq-min" class="cv">—</div></div>
+      <div class="card"><div class="cl">Max Drawdown</div><div id="eq-dd" class="cv neg">—</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">RENDIMIENTO SEMANAL</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Semana</th><th>Apuestas</th><th>Arriesgado</th><th>Resultado</th><th>Yield</th></tr></thead><tbody id="week-body"></tbody></table></div>
+    <div id="week-empty" class="muted" style="padding:14px;text-align:center">Sin datos.</div>
+    <div class="srow" style="margin-top:10px"><span>Promedio semanal yield</span><span class="sval" id="week-avg-y">—</span></div>
+    <div class="srow"><span>Ganancia promedio/semana</span><span class="sval" id="week-avg-p">—</span></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">RENDIMIENTO MENSUAL</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Mes</th><th>Apuestas</th><th>Arriesgado</th><th>Resultado</th><th>Yield</th></tr></thead><tbody id="month-body"></tbody></table></div>
+    <div id="month-empty" class="muted" style="padding:14px;text-align:center">Sin datos.</div>
+    <div class="srow" style="margin-top:10px"><span>Promedio mensual yield</span><span class="sval" id="month-avg-y">—</span></div>
+    <div class="srow"><span>Ganancia promedio/mes</span><span class="sval" id="month-avg-p">—</span></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">PROYECCIÓN</div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div><label class="form-label">Cantidad</label><input id="proj-qty" type="number" class="form-input" value="4" min="1" max="260"></div>
+      <div><label class="form-label">Período</label>
+        <select id="proj-unit" class="form-input"><option value="week">Semanas</option><option value="month">Meses</option></select>
+      </div>
+    </div>
+    <div class="btns" style="margin-bottom:10px">
+      <button class="btn proj-mode active" data-mode="simple">Simple</button>
+      <button class="btn proj-mode" data-mode="compound">Compuesto</button>
+    </div>
+    <div id="proj-result" class="muted" style="font-size:13px;line-height:1.6">Sin historial suficiente aún.</div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">CALENDARIO</div>
+    <div class="cal-hdr">
+      <button class="cal-nav" onclick="calPrev()">‹</button>
+      <span class="cal-title" id="cal-title">—</span>
+      <button class="cal-nav" onclick="calNext()">›</button>
+    </div>
+    <div class="cal-dows"><div class="cal-dow">Lun</div><div class="cal-dow">Mar</div><div class="cal-dow">Mié</div><div class="cal-dow">Jue</div><div class="cal-dow">Vie</div><div class="cal-dow">Sáb</div><div class="cal-dow">Dom</div></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- GESTIÓN BANCA -->
+<div class="section" id="sec-gestion">
+  <div class="sec-header"><div class="sec-title">GESTIÓN <span>DE BANCA</span></div><div class="sec-sub">Regla de referencia · Stakes por nivel de confianza</div></div>
+  <div class="panel">
+    <div class="ptitle">MODALIDAD</div>
+    <div class="preset-btns">
+      <button class="preset-btn" data-preset="conservadora" onclick="setPreset('conservadora')">Conservadora</button>
+      <button class="preset-btn active" data-preset="media" onclick="setPreset('media')">Media</button>
+      <button class="preset-btn" data-preset="agresiva" onclick="setPreset('agresiva')">Agresiva</button>
+      <button class="preset-btn" data-preset="personalizada">Personalizada</button>
+    </div>
+    <div class="ruler-track"></div>
+    <div class="ruler-ticks"><span>0%</span><span>1%</span><span>2%</span><span>3%</span><span>4%</span><span>5%+</span></div>
+    <div class="srow" style="margin-top:14px"><span>Banca de referencia</span><span class="sval" id="bk-ref">—</span></div>
+    <div class="srow"><span>Banca actual</span><span class="sval" id="bk-actual">—</span></div>
+    <div class="srow"><span>Stake Baja confianza</span><span class="sval" id="bk-low">—</span></div>
+    <div class="srow"><span>Stake Media confianza</span><span class="sval" id="bk-med">—</span></div>
+    <div class="srow"><span>Stake Alta confianza</span><span class="sval" id="bk-high">—</span></div>
+    <div class="srow"><span>Para recalibrar al alza</span><span class="sval pos" id="bk-up">—</span></div>
+    <div class="srow"><span>Para recalibrar a la baja</span><span class="sval neg" id="bk-down">—</span></div>
+    <div class="form-row" style="margin-top:14px">
+      <div><label class="form-label">Unidad base (%)</label><input id="bk-base-in" type="number" class="form-input" min="0.5" max="8" step="0.5" onchange="setBkField('bk_base',this.value)"></div>
+      <div><label class="form-label">Tope diario (%)</label><input id="bk-cap-in" type="number" class="form-input" min="3" max="20" step="0.5" onchange="setBkField('bk_cap',this.value)"></div>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div><label class="form-label">Umbral recalibrar (%)</label><input id="bk-umbral-in" type="number" class="form-input" min="1" max="30" step="0.5" onchange="setBkField('bk_umbral',this.value)"></div>
+      <div><label class="form-label">Banca inicial (USDT)</label><button class="btn" style="margin-top:5px;width:100%" onclick="setBkInicial()">Cambiar banca inicial</button></div>
+    </div>
+    <button id="bk-lock-btn" class="btn" style="width:100%;margin-top:14px" onclick="toggleLock()">🔒 Fijar gestión</button>
+  </div>
+  <div class="panel">
+    <div class="ptitle">AJUSTE DE BANCA</div>
+    <div class="btns">
+      <button class="btn pos-btn" onclick="ajustarBanca(1)">↓ Depósito (+)</button>
+      <button class="btn neg-btn" onclick="ajustarBanca(-1)">↑ Retiro (−)</button>
+    </div>
+  </div>
+</div>
+
+<!-- MARATÓN -->
+<div class="section" id="sec-maraton">
+  <div class="sec-header"><div class="sec-title">MARAT<span>ÓN</span></div><div class="sec-sub">Escalada reinvirtiendo todo · Meta dinámica</div></div>
+  <div class="prog-wrap">
+    <div class="prog-hdr"><span>Progreso hacia la meta</span><span id="m-pct" style="color:var(--red)">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="m-bar"></div></div>
+  </div>
+  <div class="dia-wrap"><div class="dia-lbl">Hoy · Objetivo diario</div><div id="m-dia" style="font-size:14px;font-weight:600"><span class="muted">Sin objetivo</span></div></div>
+  <div class="cards">
+    <div class="card hero"><div class="cl">Capital Actual</div><div id="m-ca" class="cv">0.00</div><div class="csub">USDT</div><button class="cedit" onclick="editM('m_ca')">✎</button></div>
+    <div class="card"><div class="cl">Capital Inicial</div><div id="m-ci" class="cv">0.00</div><div class="csub">USDT</div><button class="cedit" onclick="editM('m_ci')">✎</button></div>
+    <div class="card"><div class="cl">Meta</div><div id="m-meta" class="cv">1000.00</div><div class="csub">USDT</div><button class="cedit" onclick="editM('m_meta')">✎</button></div>
+    <div class="card"><div class="cl">Cuota Base</div><div id="m-cuota" class="cv">x1.05</div><button class="cedit" onclick="editM('m_cuota')">✎</button></div>
+    <div class="card"><div class="cl">Pasos</div><div id="m-pasos" class="cv">0 / 0</div><div class="csub">actual / total</div></div>
+    <div class="card"><div class="cl">Faltan</div><div id="m-falta" class="cv neg">0.00 USDT</div></div>
+    <div class="card"><div class="cl">Días Restantes</div><div id="m-dias" class="cv warn">—</div><div class="csub" id="m-jpd">Sin plan</div></div>
+    <div class="card"><div class="cl">Bolsa</div><div id="m-bolsa" class="cv">0/0</div><div class="csub">jugadas acumuladas</div><button class="cedit" onclick="editM('m_bolsa')">✎</button></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">ACCIONES</div>
+    <div class="btns">
+      <button class="btn primary" onclick="marcarPaso()">✓ Marcar paso GANADO</button>
+      <button class="btn" onclick="nuevaRacha()">↺ Nueva Racha</button>
+      <button class="btn" onclick="fijarPlan()">📅 Fijar plan diario</button>
+      <button class="btn" onclick="editM('m_hechas')">✎ Jugadas hoy</button>
+      <button class="btn" onclick="editM('m_ca')">✎ Ajustar capital</button>
+      <button class="btn" onclick="editM('m_jpd')">✎ Cambiar JPD</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCIERO -->
+<div class="section" id="sec-financiero">
+  <div class="sec-header"><div class="sec-title">CONTROL <span>FINANCIERO</span></div><div class="sec-sub">Depósitos · Retiros · Rendimiento real</div></div>
+  <div class="card hero" style="margin-bottom:18px">
+    <div class="cl">Posición Neta</div>
+    <div id="f-pos" class="cv">+0.00 USDT</div>
+    <div id="f-badge" class="badge pos">▲ POSITIVO</div>
+    <div class="csub" style="margin-top:8px;font-size:11px">saldo actual + retirado − depositado</div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="cl">Saldo Cuenta</div><div id="f-saldo" class="cv">0.00 USDT</div><button class="cedit" onclick="editF('f_saldo')">✎</button></div>
+    <div class="card"><div class="cl">Ganancia Neta Hist.</div><div id="f-gan" class="cv">+0.00 USDT</div><button class="cedit" onclick="editF('f_gan')">✎</button></div>
+    <div class="card"><div class="cl">Yield</div><div id="f-yield" class="cv">+0.00%</div><div class="csub">sobre arriesgado</div></div>
+    <div class="card"><div class="cl">Total Depositado</div><div id="f-dep" class="cv">0.00 USDT</div><button class="cedit" onclick="editF('f_dep')">✎</button></div>
+    <div class="card"><div class="cl">Total Retirado</div><div id="f-ret" class="cv">0.00 USDT</div><button class="cedit" onclick="editF('f_ret')">✎</button></div>
+    <div class="card"><div class="cl">Total Arriesgado</div><div id="f-risk" class="cv">0.00 USDT</div><button class="cedit" onclick="editF('f_risk')">✎</button></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">MOVIMIENTOS</div>
+    <div class="btns">
+      <button class="btn pos-btn" onclick="accionFin('dep')">↓ Registrar Depósito</button>
+      <button class="btn neg-btn" onclick="accionFin('ret')">↑ Registrar Retiro</button>
+      <button class="btn pos-btn" onclick="accionFin('ganada')">✓ Apuesta Ganada</button>
+      <button class="btn neg-btn" onclick="accionFin('perdida')">✗ Apuesta Perdida</button>
+      <button class="btn" onclick="accionFin('saldo')">✎ Actualizar saldo</button>
+    </div>
+  </div>
+</div>
+
+<!-- APUESTA FIJA -->
+<div class="section" id="sec-fija">
+  <div class="sec-header"><div class="sec-title">APUESTA <span>FIJA</span></div><div class="sec-sub">Monto fijo · Cuota variable · Acumulado independiente</div></div>
+  <div class="cards">
+    <div class="card hero"><div class="cl">Ganancia Acumulada</div><div id="af-acum" class="cv">+0.00 USDT</div><button class="cedit" onclick="editAF('af_acum')">✎</button></div>
+    <div class="card"><div class="cl">Apuesta Fija Actual</div><div id="af-monto" class="cv">1.00 USDT</div><div class="csub">por jugada</div><button class="cedit" onclick="editAF('af_monto')">✎</button></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">REGISTRAR</div>
+    <div class="btns">
+      <button class="btn pos-btn" onclick="regFija('ganada')">✓ GANADA</button>
+      <button class="btn neg-btn" onclick="regFija('perdida')">✗ PERDIDA</button>
+      <button class="btn" onclick="editAF('af_monto')">✎ Cambiar monto</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIARIO -->
+<div class="section" id="sec-diario">
+  <div class="sec-header"><div class="sec-title">DIARI<span>O</span></div><div class="sec-sub">Anotaciones libres · Registro mental</div></div>
+  <div class="panel">
+    <div class="ptitle">NUEVA ANOTACIÓN</div>
+    <textarea id="diario-text" class="form-input" rows="3" placeholder="¿Qué aprendiste hoy? ¿Cometiste algún error? ¿Seguiste el plan?"></textarea>
+    <button id="diario-add" class="btn primary" style="width:100%;margin-top:10px">+ Agregar anotación</button>
+  </div>
+  <div class="panel"><div class="ptitle">HISTORIAL DE ANOTACIONES</div><div id="diario-list"></div></div>
+</div>
+
+</div><!-- content -->
+</div><!-- main -->
+</div><!-- app -->
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <div class="lb-inner">
+    <img id="lb-img" src="" alt="Ticket">
+    <div class="lb-actions">
+      <button class="btn" onclick="closeLightbox()">✕ Cerrar</button>
+      <button class="btn primary" onclick="saveLightboxPhoto()">↓ Guardar foto</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// Fecha topbar
-function updateDate() {
-  const d = new Date();
-  document.getElementById('topbar-date').textContent =
-    d.toLocaleDateString('es-ES', { weekday:'short', day:'2-digit', month:'short' }) +
-    ' · ' + d.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
-}
-updateDate();
-setInterval(updateDate, 30000);
+// ══════════════════════════════════════════
+//   CANVAS — Kunai + Nubes + Sharingan + Brasas + Relámpagos
+// ══════════════════════════════════════════
+const cv=document.getElementById('bg-canvas');
+const cx=cv.getContext('2d');
+let W,H;
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+rsz();addEventListener('resize',rsz);
 
-// f-risk sync
-setInterval(() => {
-  const el = document.getElementById('f-risk');
-  if (el && window.STATE) el.textContent = parseFloat(window.STATE.total_arriesgado||0).toFixed(2) + ' USDT';
-}, 500);
+// Nubes
+const clouds=Array.from({length:7},(_,i)=>({x:(i/7)*innerWidth*1.4-100,y:20+Math.random()*220,speed:.08+Math.random()*.14,scale:.6+Math.random()*1.1,alpha:.04+Math.random()*.07}));
+function drawCloud(x,y,sc,al){
+  cx.save();cx.globalAlpha=al;cx.fillStyle='#bb0000';cx.shadowBlur=28;cx.shadowColor='#cc0000';
+  cx.beginPath();cx.arc(x,y,55*sc,0,Math.PI*2);cx.arc(x+50*sc,y-12*sc,42*sc,0,Math.PI*2);cx.arc(x-50*sc,y-12*sc,42*sc,0,Math.PI*2);cx.arc(x+22*sc,y-28*sc,32*sc,0,Math.PI*2);cx.arc(x-22*sc,y-28*sc,32*sc,0,Math.PI*2);cx.fill();cx.restore();
+}
+
+// Sharingan
+const sgs=Array.from({length:5},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:22+Math.random()*52,rot:0,speed:.003+Math.random()*.008,al:.04+Math.random()*.08,type:Math.floor(Math.random()*3),dx:(Math.random()-.5)*.14,dy:(Math.random()-.5)*.1}));
+function drawSharingan(x,y,r,rot,al,type){
+  cx.save();cx.globalAlpha=al;cx.translate(x,y);cx.rotate(rot);cx.shadowBlur=18;cx.shadowColor='#cc0000';
+  cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.fillStyle='#cc1111';cx.fill();
+  cx.beginPath();cx.arc(0,0,r*.32,0,Math.PI*2);cx.fillStyle='#000';cx.fill();
+  if(type===0){const tx=Math.cos(Math.PI/2)*r*.55,ty=Math.sin(Math.PI/2)*r*.55;cx.beginPath();cx.arc(tx,ty,r*.17,0,Math.PI*2);cx.fillStyle='#000';cx.fill();}
+  else if(type===1){for(let i=0;i<3;i++){const a=(i/3)*Math.PI*2+Math.PI/2,tx=Math.cos(a)*r*.55,ty=Math.sin(a)*r*.55;cx.beginPath();cx.arc(tx,ty,r*.15,0,Math.PI*2);cx.fillStyle='#000';cx.fill();}}
+  else{cx.strokeStyle='#000';cx.lineWidth=r*.11;for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;cx.beginPath();cx.moveTo(0,0);cx.bezierCurveTo(Math.cos(a-.5)*r*.7,Math.sin(a-.5)*r*.7,Math.cos(a+.5)*r*.7,Math.sin(a+.5)*r*.7,Math.cos(a)*r*.85,Math.sin(a)*r*.85);cx.stroke();}cx.beginPath();cx.arc(0,0,r*.27,0,Math.PI*2);cx.fillStyle='#000';cx.fill();}
+  cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.strokeStyle='rgba(200,0,0,.35)';cx.lineWidth=r*.06;cx.stroke();cx.restore();
+}
+
+// Kunai
+const kunais=Array.from({length:22},()=>({x:Math.random()*innerWidth,y:-80-Math.random()*600,speed:1+Math.random()*2,rot:0,rs:(Math.random()-.5)*.06,size:10+Math.random()*16,al:.06+Math.random()*.14}));
+function drawKunai(x,y,rot,sz,al){
+  cx.save();cx.globalAlpha=al;cx.translate(x,y);cx.rotate(rot);cx.fillStyle='#cc1111';cx.strokeStyle='#ff3333';cx.lineWidth=1;cx.shadowBlur=8;cx.shadowColor='#cc0000';
+  cx.beginPath();cx.moveTo(0,-sz*1.9);cx.lineTo(sz*.2,-sz*.4);cx.lineTo(sz*.5,sz*.1);cx.lineTo(0,-sz*.1);cx.lineTo(-sz*.5,sz*.1);cx.lineTo(-sz*.2,-sz*.4);cx.closePath();cx.fill();
+  cx.fillRect(-sz*.1,sz*.05,sz*.2,sz*.65);cx.beginPath();cx.arc(0,sz*.9,sz*.22,0,Math.PI*2);cx.stroke();cx.restore();
+}
+
+// Brasas
+const embers=Array.from({length:55},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:.5+Math.random()*1.5,vx:(Math.random()-.5)*.3,vy:-.2-Math.random()*.5,life:Math.random()}));
+
+// Relámpago
+let ltimer=0,lactive=false,lalpha=0,lpts=[];
+function genL(){const p=[{x:Math.random()*W,y:0}];let cx2=p[0].x,cy=0;while(cy<H*.6){cx2+=(Math.random()-.5)*80;cy+=30+Math.random()*40;p.push({x:cx2,y:cy});}return p;}
+
+function animate(){
+  cx.clearRect(0,0,W,H);
+  const g=cx.createRadialGradient(W*.5,H*.3,0,W*.5,H*.5,H);g.addColorStop(0,'rgba(35,0,0,.14)');g.addColorStop(1,'rgba(0,0,0,0)');cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  clouds.forEach(c=>{c.x+=c.speed;if(c.x>W+200)c.x=-200;drawCloud(c.x,c.y,c.scale,c.alpha);});
+  sgs.forEach(s=>{s.rot+=s.speed;s.x+=s.dx;s.y+=s.dy;if(s.x<-s.r*2)s.x=W+s.r;if(s.x>W+s.r*2)s.x=-s.r;if(s.y<-s.r*2)s.y=H+s.r;if(s.y>H+s.r*2)s.y=-s.r;drawSharingan(s.x,s.y,s.r,s.rot,s.al,s.type);});
+  kunais.forEach(k=>{k.y+=k.speed;k.rot+=k.rs;if(k.y>H+100){k.y=-80;k.x=Math.random()*W;}drawKunai(k.x,k.y,k.rot,k.size,k.al);});
+  embers.forEach(e=>{e.x+=e.vx;e.y+=e.vy;e.life+=.008;if(e.life>1){e.life=0;e.x=Math.random()*W;e.y=H;}const a=Math.sin(e.life*Math.PI)*.65;cx.save();cx.globalAlpha=a;cx.fillStyle='#ff4400';cx.shadowBlur=5;cx.shadowColor='#ff2200';cx.beginPath();cx.arc(e.x,e.y,e.r,0,Math.PI*2);cx.fill();cx.restore();});
+  ltimer++;if(ltimer>280&&!lactive){if(Math.random()<.012){lactive=true;lalpha=1;lpts=genL();ltimer=0;}}
+  if(lactive){cx.save();cx.globalAlpha=lalpha*.55;cx.strokeStyle='rgba(255,80,80,1)';cx.lineWidth=2;cx.shadowBlur=18;cx.shadowColor='#ff0000';cx.beginPath();lpts.forEach((p,i)=>i===0?cx.moveTo(p.x,p.y):cx.lineTo(p.x,p.y));cx.stroke();cx.restore();lalpha-=.06;if(lalpha<=0)lactive=false;}
+  requestAnimationFrame(animate);
+}
+animate();
 </script>
 </body>
-</html>
-```
+  </html>
